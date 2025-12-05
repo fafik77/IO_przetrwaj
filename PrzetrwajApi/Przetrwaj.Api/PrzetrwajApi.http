@@ -1,2 +1,9 @@
-@PrzetrwajApi_HostAddress = http://localhost:5230
+@PrzetrwajApi_HostAddress = https://localhost:7072
 
+
+POST {{PrzetrwajApi_HostAddress}}/Register/email
+Content-Type: application/json
+Body: {"name":"test"}
+{
+
+}

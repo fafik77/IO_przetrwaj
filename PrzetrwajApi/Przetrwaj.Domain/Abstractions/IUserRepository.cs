@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Przetrwaj.Domain.Entities;
 
 namespace Przetrwaj.Domain.Abstractions;
 
 public interface IUserRepository
 {
+	Task<AppUser> RegisterUserByEmailAsync(string email, string password, string name, string surname);
+
 }

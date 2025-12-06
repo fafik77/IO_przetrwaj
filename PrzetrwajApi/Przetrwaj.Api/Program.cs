@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using Przetrwaj.Application;
+using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture;
+using Przetrwaj.Infrastucture.Context;
 using Przetrwaj.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +34,22 @@ builder.Services.AddAuthentication("cookie")
 #endregion
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// 2. Add Identity services (This is the crucial step)
+// It registers UserManager<AppUser>, SignInManager<AppUser>, and other core Identity services.
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+{
+	// You can customize password, lockout, and other requirements here
+	options.SignIn.RequireConfirmedAccount = false;
+	options.Password.RequireDigit = true;
+	options.Password.RequireLowercase = true;
+	options.Password.RequireNonAlphanumeric = false;
+	options.Password.RequireUppercase = true;
+	options.Password.RequiredLength = 8;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>() // Specifies that Identity should use EF Core and your DbContext
+.AddDefaultTokenProviders(); // Required for generating tokens (e.g., password reset)
+
 builder.Services.AddApplication();
 builder.Services.AddPresentation();
 

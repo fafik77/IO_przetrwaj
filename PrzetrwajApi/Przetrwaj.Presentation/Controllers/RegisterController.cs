@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 using Przetrwaj.Application.Commands.Register;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
 
@@ -21,15 +21,5 @@ public partial class RegisterController : Controller
 	{
 		var result = await _mediator.Send(model);
 		return Created("", result);
-		//if (!ModelState.IsValid || string.IsNullOrEmpty(model.Password))
-		//	return BadRequest("Invalid registration details.");
-
-		//var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-		//var result = await _userManager.CreateAsync(user, model.Password);
-
-		//if (!result.Succeeded)
-		//	return BadRequest(result.Errors);
-
-		//return Ok("User registered successfully.");
 	}
 }

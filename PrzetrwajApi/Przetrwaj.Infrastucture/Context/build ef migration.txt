@@ -1,0 +1,4 @@
+dotnet ef migrations add Init -c ApplicationDbContext --startup-project Przetrwaj.Api --project Przetrwaj.Infrastucture
+
+
+dotnet ef database update --startup-project Przetrwaj.Api --project Przetrwaj.Infrastucture

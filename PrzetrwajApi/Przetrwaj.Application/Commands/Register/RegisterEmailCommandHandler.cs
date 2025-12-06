@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
-using Przetrwaj.Application.Configuration.Commands;
+﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
-using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.Register;
 
@@ -19,18 +17,10 @@ internal class RegisterEmailCommandHandler : ICommandHandler<RegisterEmailComman
 
 	public async Task<RegisteredUserDto> Handle(RegisterEmailCommand request, CancellationToken cancellationToken)
 	{
-		var res = new RegisteredUserDto();
-		return res;
-		//throw new NotImplementedException();
-		//if (!request.IsValid || string.IsNullOrEmpty(request.Password))
-		//	throw new ValidationException("Invalid registration details.");
-
-		//var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-		//var result = await _userManager.CreateAsync(user, model.Password);
-
-		//if (!result.Succeeded)
-		//	return BadRequest(result.Errors);
-
-		//return Ok("User registered successfully.");
+		// The repository method now handles creating the AppUser, hashing the password, and saving it.
+		// After this line, userToAdd is a tracked entity with a generated PasswordHash.
+		var userToAdd = await _userRepository.RegisterUserByEmailAsync(request.Email, request.Password, request.Name, request.Surname);
+		var dto = (RegisteredUserDto)userToAdd;
+		return dto;
 	}
 }

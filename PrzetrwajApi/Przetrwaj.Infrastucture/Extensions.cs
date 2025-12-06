@@ -13,8 +13,8 @@ namespace Przetrwaj.Infrastucture
 		{
 			services.AddScoped<IUnitOfWork, UnitOfWork>();
 			services.AddScoped<IUserRepository, UserRepository>();
-			var conStr = configuration.GetConnectionString("Database");
-			services.AddDbContext<ApplicationDbContext>(ctx => ctx.UseNpgsql(conStr));
+			var connectionString = configuration.GetConnectionString("Database");
+			services.AddDbContext<ApplicationDbContext>(ctx => ctx.UseNpgsql(connectionString));
 
 			return services;
 		}

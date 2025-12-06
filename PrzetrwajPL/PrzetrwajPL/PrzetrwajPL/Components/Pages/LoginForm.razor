@@ -1,0 +1,25 @@
+﻿@page "/login"
+<h2 style="text-align=center">Login</h2>
+
+
+<form>
+	<div style="margin: auto; width: 300px;">
+		<label for="email">E-mail:</label><br />
+		<input type="email" id="email" name="email" placeholder="Podaj email" required/><br /><br />
+
+		<label for="password">Hasło:</label><br />
+		<input type="password" id="password" name="password" placeholder="Podaj hasło" required /><br /><br />
+
+		<button type="submit">Zaloguj się</button>
+
+		@* <input style="margin: auto;" type="submit" value="Zaloguj się" /> *@
+	</div>
+	<div>
+		<p>Nie masz konta? <a href="/register">Zarejestruj się</a></p>
+	</div>
+</form>
+
+
+@code {
+
+}

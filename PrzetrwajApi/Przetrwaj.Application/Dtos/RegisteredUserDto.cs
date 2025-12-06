@@ -16,7 +16,7 @@ public class RegisteredUserDto
 		{
 			Email = registeredUser.Email,
 			Name = registeredUser.Name ?? "",
-			Role = string.Join(", ", registeredUser.Roles.ToList()),
+			//Role = string.Join(", ", registeredUser.clai.ToList()),
 			Surname = registeredUser.Surname ?? "",
 		};
 	}

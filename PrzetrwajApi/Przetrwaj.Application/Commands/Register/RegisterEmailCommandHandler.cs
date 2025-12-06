@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
-using Przetrwaj.Application.Configuration.Commands;
+﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
-using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.Register;
 

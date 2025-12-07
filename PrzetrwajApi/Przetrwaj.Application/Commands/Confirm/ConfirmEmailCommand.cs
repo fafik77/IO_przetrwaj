@@ -2,9 +2,9 @@
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Models;
 
-namespace Przetrwaj.Application.Commands.Register
+namespace Przetrwaj.Application.Commands.Confirm
 {
-	public class RegisterEmailCommand : RegisterEmailInfo, ICommand<RegisteredUserDto>
+	public class ConfirmEmailCommand : ConfirmEmailInfo, ICommand<RegisteredUserDto>
 	{
 	}
 }

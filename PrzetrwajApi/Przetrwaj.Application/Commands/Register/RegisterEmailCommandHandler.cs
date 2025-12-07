@@ -19,7 +19,7 @@ internal class RegisterEmailCommandHandler : ICommandHandler<RegisterEmailComman
 	{
 		// The repository method now handles creating the AppUser, hashing the password, and saving it.
 		// After this line, userToAdd is a tracked entity with a generated PasswordHash.
-		var userToAdd = await _userRepository.RegisterUserByEmailAsync(request.Email, request.Password, request.Name, request.Surname);
+		var userToAdd = await _userRepository.RegisterUserByEmailAsync(request);
 		var dto = (RegisteredUserDto)userToAdd;
 		return dto;
 	}

@@ -1,4 +1,9 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Przetrwaj.Api;
 using Przetrwaj.Application;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture;
@@ -7,12 +12,10 @@ using Przetrwaj.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.Configure<EmailSettings>(
+	builder.Configuration.GetSection("Email"));
 
-//builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-//builder.Services.AddOpenApi();
-//builder.Services.AddSwaggerGen();
+
 
 #region CORS Access-Control-Allow-Origin
 var AllowAllOrigins = "_AllowAllOrigins";
@@ -39,40 +42,52 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // It registers UserManager<AppUser>, SignInManager<AppUser>, and other core Identity services.
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
-	// You can customize password, lockout, and other requirements here
-	options.SignIn.RequireConfirmedAccount = false;
+	// Password settings. 
 	options.Password.RequireDigit = true;
 	options.Password.RequireLowercase = true;
 	options.Password.RequireNonAlphanumeric = false;
 	options.Password.RequireUppercase = true;
 	options.Password.RequiredLength = 8;
+	// Lockout settings.
+	options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+	options.Lockout.MaxFailedAccessAttempts = 7;
+	options.Lockout.AllowedForNewUsers = true;
+	//Other settings:
+	options.User.RequireUniqueEmail = true;
+	options.SignIn.RequireConfirmedAccount = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>() // Specifies that Identity should use EF Core and your DbContext
 .AddDefaultTokenProviders(); // Required for generating tokens (e.g., password reset)
+builder.Services.ConfigureApplicationCookie(options =>
+{
+	// Cookie settings
+	options.Cookie.HttpOnly = true;
+	options.ExpireTimeSpan = TimeSpan.FromHours(1);
+
+	options.LoginPath = "/Identity/Account/Login";
+	options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+	options.SlidingExpiration = true;
+});
+
+builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+builder.Services.AddScoped<IUrlHelper>(x =>
+{
+	var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
+	var factory = x.GetRequiredService<IUrlHelperFactory>();
+	return factory.GetUrlHelper(actionContext!);
+});
+// You almost certainly already have this for accessing HttpContext anywhere:
+builder.Services.AddHttpContextAccessor();
+
 
 builder.Services.AddApplication();
 builder.Services.AddPresentation();
+builder.Services.AddTransient<IEmailSender, EmailAzureService>();
 
 
-
-//builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//	app.MapOpenApi();
-//	app.MapSwagger();
-//	app.UseSwagger();
-//	app.UseSwaggerUI();
-//}
-
-//app.UseHttpsRedirection();
-
-//the order matters
-//app.UseAuthentication();
-//app.UseAuthorization();
 
 app.UsePresentation();
 
@@ -81,6 +96,5 @@ app.UsePresentation();
 
 //app.MapPost("register/email", () => "register email");
 
-//app.MapControllers();
 
 app.Run();

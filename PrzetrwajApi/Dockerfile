@@ -12,19 +12,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["PrzetrwajApi/PrzetrwajApi.csproj", "PrzetrwajApi/"]
-RUN dotnet restore "./PrzetrwajApi/PrzetrwajApi.csproj"
+COPY ["Przetrwaj.Api/Przetrwaj.Api.csproj", "Przetrwaj.Api/"]
+RUN dotnet restore "./Przetrwaj.Api/Przetrwaj.Api.csproj"
 COPY . .
-WORKDIR "/src/PrzetrwajApi"
-RUN dotnet build "./PrzetrwajApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Przetrwaj.Api"
+RUN dotnet build "./Przetrwaj.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./PrzetrwajApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Przetrwaj.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "PrzetrwajApi.dll"]
+ENTRYPOINT ["dotnet", "Przetrwaj.Api.dll"]

@@ -15,11 +15,13 @@ public partial class RegisterController : Controller
 	{
 		_mediator = mediator;
 	}
+
+
 	[HttpPost("email")]
 	[SwaggerOperation("Register using email")]
 	public async Task<IActionResult> RegisterWithEmail([FromBody] RegisterEmailCommand model)
 	{
 		var result = await _mediator.Send(model);
-		return Created("", result);
+		return Ok(result);
 	}
 }

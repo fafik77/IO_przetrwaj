@@ -11,10 +11,12 @@ namespace Przetrwaj.Infrastucture
 	{
 		public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
 		{
-			services.AddScoped<IUnitOfWork, UnitOfWork>();
-			services.AddScoped<IUserRepository, UserRepository>();
 			var connectionString = configuration.GetConnectionString("Database");
 			services.AddDbContext<ApplicationDbContext>(ctx => ctx.UseNpgsql(connectionString));
+
+			services.AddScoped<IUnitOfWork, UnitOfWork>();
+			services.AddScoped<IUserRepository, UserRepository>();
+			services.AddScoped<IRegionRepository, RegionRepository>();
 
 			return services;
 		}

@@ -8,18 +8,20 @@ internal class RegisterEmailCommandHandler : ICommandHandler<RegisterEmailComman
 {
 	private readonly IUserRepository _userRepository;
 	private readonly IUnitOfWork _unitOfWork;
+	private readonly IAuthService _authService;
 
-	public RegisterEmailCommandHandler(IUnitOfWork unitOfWork, IUserRepository userRepository)
+	public RegisterEmailCommandHandler(IUnitOfWork unitOfWork, IUserRepository userRepository, IAuthService authService)
 	{
 		_unitOfWork = unitOfWork;
 		_userRepository = userRepository;
+		_authService = authService;
 	}
 
 	public async Task<RegisteredUserDto> Handle(RegisterEmailCommand request, CancellationToken cancellationToken)
 	{
 		// The repository method now handles creating the AppUser, hashing the password, and saving it.
 		// After this line, userToAdd is a tracked entity with a generated PasswordHash.
-		var userToAdd = await _userRepository.RegisterUserByEmailAsync(request.Email, request.Password, request.Name, request.Surname);
+		var userToAdd = await _authService.RegisterUserByEmailAsync(request);
 		var dto = (RegisteredUserDto)userToAdd;
 		return dto;
 	}

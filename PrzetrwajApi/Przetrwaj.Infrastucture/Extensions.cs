@@ -17,6 +17,7 @@ namespace Przetrwaj.Infrastucture
 			services.AddScoped<IUnitOfWork, UnitOfWork>();
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IRegionRepository, RegionRepository>();
+			services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 			return services;
 		}

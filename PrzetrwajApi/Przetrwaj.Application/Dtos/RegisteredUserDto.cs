@@ -11,8 +11,8 @@ public class RegisteredUserDto
 	public string Name { get; set; }
 	public string Surname { get; set; }
 	public int IdRegion { get; set; }
-	public string RegionName { get; set; }
-	public string Role { get; set; }
+	public string? RegionName { get; set; }
+	public string? Role { get; set; }
 	public bool Banned { get; set; }
 	public bool TwoFactorEnabled { get; set; }
 
@@ -27,7 +27,7 @@ public class RegisteredUserDto
 			//Role = string.Join(", ", registeredUser.clai.ToList()),
 			Surname = registeredUser.Surname ?? "",
 			IdRegion = registeredUser.IdRegion,
-			RegionName = registeredUser.IdRegionNavigation.Name,
+			RegionName = registeredUser.IdRegionNavigation?.Name,
 			Banned = registeredUser.Banned,
 			TwoFactorEnabled = registeredUser.TwoFactorEnabled,
 		};

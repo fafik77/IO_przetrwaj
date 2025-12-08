@@ -18,4 +18,8 @@
     <ProjectReference Include="..\Przetrwaj.Domain\Przetrwaj.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Quaries\AccountQuaries\" />
+  </ItemGroup>
+
 </Project>

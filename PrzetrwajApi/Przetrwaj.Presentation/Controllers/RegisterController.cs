@@ -1,6 +1,8 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Register;
+using Przetrwaj.Application.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -19,8 +21,13 @@ public partial class RegisterController : Controller
 
 	[HttpPost("email")]
 	[SwaggerOperation("Register using email")]
+	[ProducesResponseType(typeof(RegisteredUserDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> RegisterWithEmail([FromBody] RegisterEmailCommand model)
 	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
 		var result = await _mediator.Send(model);
 		return Ok(result);
 	}

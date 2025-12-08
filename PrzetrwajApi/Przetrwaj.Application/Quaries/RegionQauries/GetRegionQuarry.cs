@@ -1,12 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
 using Przetrwaj.Application.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Przetrwaj.Application.Quaries.Region;
+namespace Przetrwaj.Application.Quaries.RegionQauries;
 
 public class GetRegionQuarry : IQuery<RegionOnlyDto>
 {

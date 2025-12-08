@@ -5,12 +5,15 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Przetrwaj.Api;
 using Przetrwaj.Application;
+using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture;
 using Przetrwaj.Infrastucture.Context;
 using Przetrwaj.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
+
+const string AuthenticationCookie = "cookie";
 
 builder.Services.Configure<EmailSettings>(
 	builder.Configuration.GetSection("Email"));
@@ -32,8 +35,32 @@ builder.Services.AddCors(options =>
 #endregion
 
 #region Auth
-builder.Services.AddAuthentication("cookie")
-	.AddCookie("cookie");
+builder.Services.AddAuthentication(AuthenticationCookie)
+	.AddCookie(AuthenticationCookie);
+//.AddIdentityCookies();
+// cookie for multiple .Net apps https://learn.microsoft.com/en-us/aspnet/core/security/cookie-sharing?view=aspnetcore-9.0
+builder.Services.AddAuthorization(opt =>
+{
+	// Policy 1: User+ access (can add posts ...)
+	opt.AddPolicy(UserRoles.User, policy =>
+	{   // this is an or gate
+		policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin);
+	});
+
+	// Policy 2: Moderator+ access
+	opt.AddPolicy(UserRoles.Moderator, policy =>
+	{
+		// Only Moderators and Administrators can ...
+		policy.RequireRole(UserRoles.Moderator, UserRoles.Admin);
+	});
+
+	// Policy 3: Administrator access (can manage moderators)
+	opt.AddPolicy(UserRoles.Admin, policy =>
+	{
+		// Only Administrators can ...
+		policy.RequireRole(UserRoles.Admin);
+	});
+});
 #endregion
 
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -64,8 +91,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 	options.Cookie.HttpOnly = true;
 	options.ExpireTimeSpan = TimeSpan.FromHours(1);
 
-	options.LoginPath = "/Identity/Account/Login";
-	options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+	//options.LoginPath = "/Identity/Account/Login";
+	//options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 	options.SlidingExpiration = true;
 });
 
@@ -93,8 +120,6 @@ app.UsePresentation();
 
 //app.MapPost("login/email", () => "login email");
 //app.MapPost("login/google", () => "login google");
-
-//app.MapPost("register/email", () => "register email");
 
 
 app.Run();

@@ -2,9 +2,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models;
+using System.Security.Claims;
 
 namespace Przetrwaj.Application.AuthServices;
 
@@ -37,6 +40,16 @@ public class AuthService : IAuthService
 			return user;
 
 		throw new InvalidDataException("Email confirmation failed.");
+	}
+
+	public async Task<AppUser?> GetUserDetailsAsync(string userIdEmail)
+	{
+		AppUser? user;
+		if (userIdEmail.Contains("@"))
+			user = await _userManager.FindByEmailAsync(userIdEmail);
+		else
+			user = await _userManager.FindByIdAsync(userIdEmail);
+		return user;
 	}
 
 	public async Task<AppUser> LoginUserByEmailAsync(string email, string password)

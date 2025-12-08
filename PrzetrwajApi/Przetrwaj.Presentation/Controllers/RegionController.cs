@@ -1,7 +1,10 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.RegionCommands;
-using Przetrwaj.Application.Quaries.Region;
+using Przetrwaj.Application.Dtos;
+using Przetrwaj.Application.Quaries.RegionQauries;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -21,6 +24,7 @@ public class RegionController : Controller
 
 	[HttpGet]
 	[SwaggerOperation("Get Regions")]
+	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetRegions()
 	{
 		var res = await _mediator.Send(new GetRegionsQuarry());
@@ -29,6 +33,8 @@ public class RegionController : Controller
 
 	[HttpGet("{id}")]
 	[SwaggerOperation("Get Region")]
+	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> GetRegionById(int id)
 	{
 		var res = await _mediator.Send(new GetRegionQuarry() { IdRegion = id });
@@ -37,6 +43,10 @@ public class RegionController : Controller
 
 	[HttpPost]
 	[SwaggerOperation("Add Region")]
+	[Authorize]
+	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddRegion([FromBody] AddRegionCommand region)
 	{
 		var res = await _mediator.Send(region);
@@ -45,6 +55,10 @@ public class RegionController : Controller
 
 	[HttpPut]
 	[SwaggerOperation("Update Region")]
+	[Authorize]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> UpdateRegion([FromBody] UpdateRegionCommand region)
 	{
 		await _mediator.Send(region);
@@ -53,6 +67,10 @@ public class RegionController : Controller
 
 	[HttpDelete("{id}")]
 	[SwaggerOperation("Delete Region")]
+	[Authorize("Moderator")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> DeleteRegion(int id)
 	{
 		await _mediator.Send(new DeleteRegionCommand() { RegionId = id });

@@ -2,7 +2,7 @@
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
 
-namespace Przetrwaj.Application.Quaries.Region;
+namespace Przetrwaj.Application.Quaries.RegionQauries;
 
 public class GetRegionQuarryHandler : IQueryHandler<GetRegionQuarry, RegionOnlyDto>
 {

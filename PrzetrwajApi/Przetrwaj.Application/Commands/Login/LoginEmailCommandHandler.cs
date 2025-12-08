@@ -13,16 +13,18 @@ namespace Przetrwaj.Application.Commands.Login
 	{
 		private readonly IUserRepository _userRepository;
 		private readonly IUnitOfWork _unitOfWork;
+		private readonly IAuthService _authService;
 
-		public LoginEmailCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
+		public LoginEmailCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IAuthService authService)
 		{
 			_userRepository = userRepository;
 			_unitOfWork = unitOfWork;
+			_authService = authService;
 		}
 
 		public async Task<RegisteredUserDto> Handle(LoginEmailCommand request, CancellationToken cancellationToken)
 		{
-			var registeredUser = await _userRepository.LoginUserByEmailAsync(request.Email, request.Password);
+			var registeredUser = await _authService.LoginUserByEmailAsync(request.Email, request.Password);
 			if (registeredUser == null) throw new InvalidOperationException("Could not Login");
 			var dto = (RegisteredUserDto) registeredUser;
 			return dto;

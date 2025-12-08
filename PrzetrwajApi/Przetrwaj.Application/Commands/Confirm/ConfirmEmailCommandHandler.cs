@@ -8,16 +8,18 @@ public class ConfirmEmailCommandHandler : ICommandHandler<ConfirmEmailCommand, R
 {
 	private readonly IUserRepository _userRepository;
 	private readonly IUnitOfWork _unitOfWork;
+	private readonly IAuthService _authService;
 
-	public ConfirmEmailCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
+	public ConfirmEmailCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IAuthService authService)
 	{
 		_userRepository = userRepository;
 		_unitOfWork = unitOfWork;
+		_authService = authService;
 	}
 
 	public async Task<RegisteredUserDto> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
 	{
-		var res = await _userRepository.ConfirmEmailAsync(request.userId, request.code);
+		var res = await _authService.ConfirmEmailAsync(request.userId, request.code);
 		return (RegisteredUserDto)res;
 	}
 }

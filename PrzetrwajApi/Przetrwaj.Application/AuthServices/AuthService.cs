@@ -4,31 +4,28 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Infrastucture.Context;
+using Przetrwaj.Domain.Models;
 
-namespace Przetrwaj.Infrastucture.Repositories;
+namespace Przetrwaj.Application.AuthServices;
 
-public class UserRepository : IUserRepository
+public class AuthService : IAuthService
 {
-	private readonly ApplicationDbContext _dbContext;
 	private readonly UserManager<AppUser> _userManager;
 	private readonly SignInManager<AppUser> _signInManager;
 	private readonly IEmailSender _emailSender;
 	private readonly IUrlHelper _urlHelper;
 	private readonly IHttpContextAccessor _httpContextAccessor;
 
-	public UserRepository(ApplicationDbContext dbContext, UserManager<AppUser> userManager, IEmailSender emailSender, SignInManager<AppUser> signInManager, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor)
+	public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor)
 	{
-		_dbContext = dbContext;
 		_userManager = userManager;
-		_emailSender = emailSender;
 		_signInManager = signInManager;
+		_emailSender = emailSender;
 		_urlHelper = urlHelper;
 		_httpContextAccessor = httpContextAccessor;
 	}
 
 
-	/**
 	public async Task<AppUser> ConfirmEmailAsync(string userId, string code)
 	{
 		var user = await _userManager.FindByIdAsync(userId);
@@ -105,5 +102,4 @@ public class UserRepository : IUserRepository
 
 		return user;
 	}
-	**/
 }

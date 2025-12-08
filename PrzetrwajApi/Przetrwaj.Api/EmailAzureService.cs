@@ -11,7 +11,7 @@ public class EmailAzureService : IEmailSender
 	{
 		AzureEmailSettings = options.Value;
 		if (string.IsNullOrEmpty(AzureEmailSettings.AzureConnection))
-			return;
+			return; //do not throw an error at this point, we only injected it
 		this.EmailClient = new EmailClient(AzureEmailSettings.AzureConnection);
 	}
 

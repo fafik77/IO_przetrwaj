@@ -55,7 +55,8 @@ public class RegionController : Controller
 	[SwaggerOperation("Delete Region")]
 	public async Task<IActionResult> DeleteRegion(int id)
 	{
-		throw new NotImplementedException();
+		await _mediator.Send(new DeleteRegionCommand() { RegionId = id });
+		return NoContent();
 	}
 }
 

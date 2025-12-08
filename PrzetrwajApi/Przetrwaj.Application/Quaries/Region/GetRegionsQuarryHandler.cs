@@ -18,6 +18,8 @@ public class GetRegionsQuarryHandler : IQueryHandler<GetRegionsQuarry, IEnumerab
 	{
 		var res = await _regionRepository.GetAllAsync(cancellationToken);
 		if (res == null) throw new InvalidOperationException("Invalid region quarry");
-		return (IEnumerable<RegionOnlyDto>)res;
+		return res
+			.Select(r => (RegionOnlyDto)r)
+			.ToList();
 	}
 }

@@ -35,6 +35,10 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.HasValue<CategoryResource>(CategoryType.Resource)
 			.HasValue<CategoryDanger>(CategoryType.Danger);
 
+		//builder.Entity<Region>()
+		//	.HasIndex(r => r.Name)
+		//	.IsUnique();
+
 		// --- 2. Vote Entity Configuration ---
 		// Vote has a composite unique key (IdPost, IdUser) for the 'UniquePair'
 		// The [Key] on IdVote means it's the primary key, but we need to ensure 

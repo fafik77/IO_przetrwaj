@@ -25,7 +25,7 @@ public class RegionController : Controller
 	[HttpGet]
 	[SwaggerOperation("Get Regions")]
 	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetRegions()
+	public async Task<IActionResult> GetAll()
 	{
 		var res = await _mediator.Send(new GetRegionsQuarry());
 		return Ok(res);
@@ -35,7 +35,7 @@ public class RegionController : Controller
 	[SwaggerOperation("Get Region")]
 	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
-	public async Task<IActionResult> GetRegionById(int id)
+	public async Task<IActionResult> GetById(int id)
 	{
 		var res = await _mediator.Send(new GetRegionQuarry() { IdRegion = id });
 		return Ok(res);
@@ -50,7 +50,7 @@ public class RegionController : Controller
 	public async Task<IActionResult> AddRegion([FromBody] AddRegionCommand region)
 	{
 		var res = await _mediator.Send(region);
-		return Ok(res);
+		return CreatedAtAction(nameof(GetById), new { id = res.IdRegion }, res);
 	}
 
 	[HttpPut]

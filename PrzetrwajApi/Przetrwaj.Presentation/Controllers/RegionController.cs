@@ -43,7 +43,7 @@ public class RegionController : Controller
 	}
 
 	[HttpPost]
-	[SwaggerOperation("Add Region")]
+	[SwaggerOperation("Add Region (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -55,7 +55,7 @@ public class RegionController : Controller
 	}
 
 	[HttpPut]
-	[SwaggerOperation("Update Region")]
+	[SwaggerOperation("Update Region (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -67,7 +67,7 @@ public class RegionController : Controller
 	}
 
 	[HttpDelete("{id}")]
-	[SwaggerOperation("Delete Region")]
+	[SwaggerOperation("Delete Region (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]

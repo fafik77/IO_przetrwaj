@@ -4,7 +4,7 @@ using Przetrwaj.Domain.Models;
 
 namespace Przetrwaj.Application.Commands.Confirm
 {
-	public class ConfirmEmailCommand : ConfirmEmailInfo, ICommand<RegisteredUserDto>
+	public class ConfirmEmailCommand : ConfirmEmailInfo, ICommand<UserWithPersonalDataDto>
 	{
 	}
 }

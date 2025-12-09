@@ -4,7 +4,7 @@ using Przetrwaj.Domain.Abstractions;
 
 namespace Przetrwaj.Application.Commands.Register;
 
-internal class RegisterEmailCommandHandler : ICommandHandler<RegisterEmailCommand, RegisteredUserDto>
+internal class RegisterEmailCommandHandler : ICommandHandler<RegisterEmailCommand, UserWithPersonalDataDto>
 {
 	private readonly IUserRepository _userRepository;
 	private readonly IUnitOfWork _unitOfWork;
@@ -17,12 +17,12 @@ internal class RegisterEmailCommandHandler : ICommandHandler<RegisterEmailComman
 		_authService = authService;
 	}
 
-	public async Task<RegisteredUserDto> Handle(RegisterEmailCommand request, CancellationToken cancellationToken)
+	public async Task<UserWithPersonalDataDto> Handle(RegisterEmailCommand request, CancellationToken cancellationToken)
 	{
 		// The repository method now handles creating the AppUser, hashing the password, and saving it.
 		// After this line, userToAdd is a tracked entity with a generated PasswordHash.
 		var userToAdd = await _authService.RegisterUserByEmailAsync(request);
-		var dto = (RegisteredUserDto)userToAdd;
+		var dto = (UserWithPersonalDataDto)userToAdd;
 		return dto;
 	}
 }

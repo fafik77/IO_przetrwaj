@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Confirm;
+using Przetrwaj.Application.Commands.Users;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
@@ -14,6 +15,11 @@ using System.Security.Claims;
 
 namespace Przetrwaj.Presentation.Controllers;
 
+
+/// <summary>
+/// This is the Personal Account enpoint, only Owner can access those endpoint, 
+/// here we do not return sensitive data, or Only Moderator+ has acces to it.
+/// </summary>
 [Route("[controller]")]
 [ApiController]
 public class AccountController : Controller
@@ -35,9 +41,9 @@ public class AccountController : Controller
 
 
 	[HttpGet("{idEmail}")]
-	[SwaggerOperation("Gets user own details")]
+	[SwaggerOperation("Gets user own details (Owner only)")]
 	[Authorize]
-	[ProducesResponseType(typeof(RegisteredUserDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> GetUserInfoByIdEmail(string idEmail)
@@ -64,14 +70,14 @@ public class AccountController : Controller
 
 		if (user == null) return NotFound($"Not Found: {idEmail}");
 
-		var dto = (RegisteredUserDto)user;
+		var dto = (UserWithPersonalDataDto)user;
 		return Ok(dto);
 	}
 
 
 	[HttpGet("ConfirmEmail")]
 	[SwaggerOperation("Confirm Email")]
-	[ProducesResponseType(typeof(RegisteredUserDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> ConfirmEmail(string userId, string code)
 	{
@@ -97,7 +103,7 @@ public class AccountController : Controller
 
 	[HttpPost("MakeModerator")]
 	[Authorize(UserRoles.Admin)]
-	[SwaggerOperation("Admin grants Moderator role to user by Id or Email")]
+	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin only)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
 	public async Task<IdentityResult> AssignModeratorRole(string? userId, string? userEmail)
 	{
@@ -115,5 +121,21 @@ public class AccountController : Controller
 		var result = await _userManager.AddToRoleAsync(user, UserRoles.Moderator);
 
 		return result;
+	}
+
+	[HttpPost("Ban")]
+	[Authorize(UserRoles.Moderator)]
+	[SwaggerOperation("Ban a user by Id or Email (Moderator only)")]
+	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> Ban(BanUserCommand banUserCommand)
+	{
+		if (!ModelState.IsValid) return BadRequest(ModelState);
+		throw new NotImplementedException();
+		//var user = banUserCommand.UserId == null ? null : await _userManager.FindByIdAsync(banUserCommand.UserId);
+		//if (user == null && banUserCommand.UserEmail != null)
+		//	user = await _userManager.FindByEmailAsync(userEmail);
+		//return result;
 	}
 }

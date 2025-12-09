@@ -4,7 +4,7 @@ using Przetrwaj.Domain.Abstractions;
 
 namespace Przetrwaj.Application.Commands.Confirm;
 
-public class ConfirmEmailCommandHandler : ICommandHandler<ConfirmEmailCommand, RegisteredUserDto>
+public class ConfirmEmailCommandHandler : ICommandHandler<ConfirmEmailCommand, UserWithPersonalDataDto>
 {
 	private readonly IUserRepository _userRepository;
 	private readonly IUnitOfWork _unitOfWork;
@@ -17,9 +17,9 @@ public class ConfirmEmailCommandHandler : ICommandHandler<ConfirmEmailCommand, R
 		_authService = authService;
 	}
 
-	public async Task<RegisteredUserDto> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
+	public async Task<UserWithPersonalDataDto> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
 	{
 		var res = await _authService.ConfirmEmailAsync(request.userId, request.code);
-		return (RegisteredUserDto)res;
+		return (UserWithPersonalDataDto)res;
 	}
 }

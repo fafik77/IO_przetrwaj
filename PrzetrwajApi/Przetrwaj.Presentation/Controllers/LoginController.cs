@@ -21,7 +21,7 @@ public class LoginController : Controller
 
 	[HttpPost("email")]
 	[SwaggerOperation("Login using email")]
-	[ProducesResponseType(typeof(RegisteredUserDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> LoginWithEmail([FromBody] LoginEmailCommand model)
 	{

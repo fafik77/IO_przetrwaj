@@ -21,7 +21,7 @@ public partial class RegisterController : Controller
 
 	[HttpPost("email")]
 	[SwaggerOperation("Register using email")]
-	[ProducesResponseType(typeof(RegisteredUserDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> RegisterWithEmail([FromBody] RegisterEmailCommand model)
 	{

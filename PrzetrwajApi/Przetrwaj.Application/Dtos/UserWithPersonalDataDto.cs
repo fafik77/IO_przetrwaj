@@ -3,31 +3,29 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Dtos;
 
-public class RegisteredUserDto
+public class UserWithPersonalDataDto
 {
 	public string Id { get; set; }
 	[EmailAddress]
-	public string Email { get; set; }
-	public string Name { get; set; }
-	public string Surname { get; set; }
-	public int IdRegion { get; set; }
-	public string? RegionName { get; set; }
+	public string? Email { get; set; }
+	public string? Name { get; set; }
+	public string? Surname { get; set; }
+	public RegionOnlyDto? Region { get; set; }
 	public string? Role { get; set; }
 	public bool Banned { get; set; }
 	public bool TwoFactorEnabled { get; set; }
 
 
-	public static explicit operator RegisteredUserDto(AppUser registeredUser)
+	public static explicit operator UserWithPersonalDataDto(AppUser registeredUser)
 	{
-		return new RegisteredUserDto
+		return new UserWithPersonalDataDto
 		{
 			Id = registeredUser.Id,
 			Email = registeredUser.Email,
 			Name = registeredUser.Name ?? "",
 			//Role = string.Join(", ", registeredUser.clai.ToList()),
 			Surname = registeredUser.Surname ?? "",
-			IdRegion = registeredUser.IdRegion,
-			RegionName = registeredUser.IdRegionNavigation?.Name,
+			Region = registeredUser.IdRegionNavigation == null ? null : (RegionOnlyDto)registeredUser.IdRegionNavigation,
 			Banned = registeredUser.Banned,
 			TwoFactorEnabled = registeredUser.TwoFactorEnabled,
 		};

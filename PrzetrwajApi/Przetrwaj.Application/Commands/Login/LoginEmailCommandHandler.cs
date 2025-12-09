@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Przetrwaj.Application.Commands.Login
 {
-	public class LoginEmailCommandHandler : ICommandHandler<LoginEmailCommand, RegisteredUserDto>
+	public class LoginEmailCommandHandler : ICommandHandler<LoginEmailCommand, UserWithPersonalDataDto>
 	{
 		private readonly IUserRepository _userRepository;
 		private readonly IUnitOfWork _unitOfWork;
@@ -22,11 +22,11 @@ namespace Przetrwaj.Application.Commands.Login
 			_authService = authService;
 		}
 
-		public async Task<RegisteredUserDto> Handle(LoginEmailCommand request, CancellationToken cancellationToken)
+		public async Task<UserWithPersonalDataDto> Handle(LoginEmailCommand request, CancellationToken cancellationToken)
 		{
 			var registeredUser = await _authService.LoginUserByEmailAsync(request.Email, request.Password);
 			if (registeredUser == null) throw new InvalidOperationException("Could not Login");
-			var dto = (RegisteredUserDto) registeredUser;
+			var dto = (UserWithPersonalDataDto) registeredUser;
 			return dto;
 		}
 	}

@@ -96,7 +96,7 @@ public class AccountController : Controller
 
 
 	[HttpPost("MakeModerator")]
-	[Authorize("Admin")]
+	[Authorize(UserRoles.Admin)]
 	[SwaggerOperation("Admin grants Moderator role to user by Id or Email")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
 	public async Task<IdentityResult> AssignModeratorRole(string? userId, string? userEmail)

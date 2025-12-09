@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.RegionCommands;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Quaries.RegionQauries;
+using Przetrwaj.Domain;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -43,7 +44,7 @@ public class RegionController : Controller
 
 	[HttpPost]
 	[SwaggerOperation("Add Region")]
-	[Authorize]
+	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -55,7 +56,7 @@ public class RegionController : Controller
 
 	[HttpPut]
 	[SwaggerOperation("Update Region")]
-	[Authorize]
+	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -67,7 +68,7 @@ public class RegionController : Controller
 
 	[HttpDelete("{id}")]
 	[SwaggerOperation("Delete Region")]
-	[Authorize("Moderator")]
+	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]

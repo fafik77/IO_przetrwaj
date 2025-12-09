@@ -66,6 +66,7 @@ public class AccountController : Controller
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount)
 	{
+		if(!ModelState.IsValid) return BadRequest(ModelState);
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
 			return NotFound(); // Returns a 404 User for some reason does not exist

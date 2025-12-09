@@ -18,7 +18,7 @@ namespace Przetrwaj.Presentation.Controllers;
 /// Do not confuse this one with 'AccountController',
 /// as this one does not return any sensitive data period.
 /// </summary>
-[Route("[controller]")]
+[Route("WIP/[controller]")]
 [ApiController]
 public class UserController : Controller
 {
@@ -33,7 +33,7 @@ public class UserController : Controller
 
 
 	[HttpGet("{id}")]
-	[SwaggerOperation("Get publiclu visible General data of user by id")]
+	[SwaggerOperation("Get publicly visible General data of user by id")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	//[ProducesResponseType(StatusCodes.Status403Forbidden)]

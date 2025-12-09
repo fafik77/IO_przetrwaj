@@ -8,7 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
 
-[Route("[controller]")]
+[Route("WIP/[controller]")]
 [ApiController]
 public class PostsController : Controller
 {

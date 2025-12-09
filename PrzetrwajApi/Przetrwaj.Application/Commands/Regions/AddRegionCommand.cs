@@ -2,7 +2,7 @@
 using Przetrwaj.Application.Dtos;
 using System.ComponentModel.DataAnnotations;
 
-namespace Przetrwaj.Application.Commands.RegionCommands;
+namespace Przetrwaj.Application.Commands.Regions;
 
 public class AddRegionCommand : ICommand<RegionOnlyDto>
 {

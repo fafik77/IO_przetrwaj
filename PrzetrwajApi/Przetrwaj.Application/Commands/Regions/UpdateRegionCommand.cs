@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using System.ComponentModel.DataAnnotations;
 
-namespace Przetrwaj.Application.Commands.RegionCommands;
+namespace Przetrwaj.Application.Commands.Regions;
 
 public class UpdateRegionCommand : ICommand
 {

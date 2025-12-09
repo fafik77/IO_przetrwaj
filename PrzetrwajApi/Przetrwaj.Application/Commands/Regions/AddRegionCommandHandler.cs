@@ -3,7 +3,7 @@ using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
 
-namespace Przetrwaj.Application.Commands.RegionCommands;
+namespace Przetrwaj.Application.Commands.Regions;
 
 public class AddRegionCommandHandler : ICommandHandler<AddRegionCommand, RegionOnlyDto>
 {

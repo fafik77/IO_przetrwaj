@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Przetrwaj.Application.Commands.AccountOwn;
 using Przetrwaj.Application.Commands.Confirm;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
@@ -38,40 +39,46 @@ public class AccountController : Controller
 	}
 
 
-	//[HttpGet("{idEmail}")]
 	[HttpGet]
 	[SwaggerOperation("Gets user own details (Owner only)")]
 	[Authorize]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status403Forbidden)]
-	public async Task<IActionResult> GetUserInfoByIdEmail()
+	public async Task<IActionResult> GetUserOwnInfo()
 	{
-		//bool isSelf = false;
-		//var 
-		// 1. Get the ID of the currently logged-in user
-		// The ClaimTypes.NameIdentifier holds the user's Id from the Identity system.
-		//if (idEmail.Contains("@")) //email
-		//	currentUserId = User.FindFirstValue(ClaimTypes.Email);
-		//else //id
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-		// --- 2. Authorization Check ---
-		// Check 2a: Is the requesting user the SAME user? (Self-access)
-		//isSelf = string.Equals(currentUserId, idEmail, StringComparison.OrdinalIgnoreCase);
-		// Check 2b: Does the requesting user have an Administrator role? (Admin access)
-		//bool isAdmin = User.IsInRole(UserRoles.Admin);
-
-		// If the user is neither accessing their own profile NOR an admin, deny access.
-		//if (!(isSelf || isAdmin))
 		if (currentUserId is null)
-			return Forbid(); // Returns a 403 Forbidden status
+			return NotFound(); // Returns a 404 User for some reason does not exist
 
 		var user = await _authService.GetUserDetailsAsync(currentUserId);
 
-		if (user == null) return NotFound($"Not Found: {currentUserId}");
+		if (user == null)
+			return NotFound($"Not Found: {currentUserId}");
 
 		var dto = (UserWithPersonalDataDto)user;
 		return Ok(dto);
+	}
+
+	[HttpPut]
+	[SwaggerOperation("Updates user own account (Owner only)")]
+	[Authorize]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount)
+	{
+		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		if (currentUserId is null)
+			return NotFound(); // Returns a 404 User for some reason does not exist
+		var requ = new UpdateAccountInternalCommand
+		{
+			UserId = currentUserId,
+			IdRegion = updateAccount.IdRegion,
+			Name = updateAccount.Name,
+			Surname = updateAccount.Surname,
+		};
+
+		var res = await _mediator.Send(requ);
+		return Ok(res);
 	}
 
 

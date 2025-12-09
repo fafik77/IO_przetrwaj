@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Przetrwaj.Application.Commands.RegionCommands;
+using Przetrwaj.Application.Commands.Regions;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Quaries.RegionQauries;
 using Przetrwaj.Domain;

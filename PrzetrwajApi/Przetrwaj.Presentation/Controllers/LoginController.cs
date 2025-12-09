@@ -20,9 +20,9 @@ public class LoginController : Controller
 	}
 
 	[HttpPost("email")]
-	[SwaggerOperation("Login using email")]
+	[SwaggerOperation("Login using email. BadRequest if user is banned")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> LoginWithEmail([FromBody] LoginEmailCommand model)
 	{
 		if (!ModelState.IsValid)
@@ -30,6 +30,7 @@ public class LoginController : Controller
 
 		var result = await _mediator.Send(model);
 		if (result == null) return BadRequest("Invalid Credentials");
+		if (result.Banned) return BadRequest(result);
 
 		return Created("", result);
 	}

@@ -33,9 +33,9 @@ public class PostDto
 			Id = post.IdPost,
 			Title = post.Title,
 			Description = post.Description,
-			Category = post.IdCategoryNavigation == null ? null : (CategoryDto)post.IdCategoryNavigation,
-			Region = post.IdRegionNavigation == null ? null : (RegionOnlyDto)post.IdRegionNavigation,
-			Author = post.IdAutorNavigation == null ? null : (UserGeneralDto)post.IdAutorNavigation,
+			Category = (CategoryDto?)post.IdCategoryNavigation ?? null,
+			Region = (RegionOnlyDto?)post.IdRegionNavigation ?? null,
+			Author = (UserGeneralDto?)post.IdAutorNavigation ?? null,
 			DateCreated = post.DateCreated,
 			Active = post.Active,
 

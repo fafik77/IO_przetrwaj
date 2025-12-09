@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Confirm;
-using Przetrwaj.Application.Commands.Users;
 using Przetrwaj.Application.Dtos;
-using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Swashbuckle.AspNetCore.Annotations;
@@ -40,35 +38,37 @@ public class AccountController : Controller
 	}
 
 
-	[HttpGet("{idEmail}")]
+	//[HttpGet("{idEmail}")]
+	[HttpGet]
 	[SwaggerOperation("Gets user own details (Owner only)")]
 	[Authorize]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
-	public async Task<IActionResult> GetUserInfoByIdEmail(string idEmail)
+	public async Task<IActionResult> GetUserInfoByIdEmail()
 	{
-		bool isSelf = false;
-		var currentUserIdEmail = string.Empty;
+		//bool isSelf = false;
+		//var 
 		// 1. Get the ID of the currently logged-in user
 		// The ClaimTypes.NameIdentifier holds the user's Id from the Identity system.
-		if (idEmail.Contains("@")) //email
-			currentUserIdEmail = User.FindFirstValue(ClaimTypes.Email);
-		else //id
-			currentUserIdEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		//if (idEmail.Contains("@")) //email
+		//	currentUserId = User.FindFirstValue(ClaimTypes.Email);
+		//else //id
+		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		// --- 2. Authorization Check ---
 		// Check 2a: Is the requesting user the SAME user? (Self-access)
-		isSelf = string.Equals(currentUserIdEmail, idEmail, StringComparison.OrdinalIgnoreCase);
+		//isSelf = string.Equals(currentUserId, idEmail, StringComparison.OrdinalIgnoreCase);
 		// Check 2b: Does the requesting user have an Administrator role? (Admin access)
-		bool isAdmin = User.IsInRole(UserRoles.Admin);
+		//bool isAdmin = User.IsInRole(UserRoles.Admin);
 
 		// If the user is neither accessing their own profile NOR an admin, deny access.
-		if (!(isSelf || isAdmin))
+		//if (!(isSelf || isAdmin))
+		if (currentUserId is null)
 			return Forbid(); // Returns a 403 Forbidden status
 
-		var user = await _authService.GetUserDetailsAsync(idEmail);
+		var user = await _authService.GetUserDetailsAsync(currentUserId);
 
-		if (user == null) return NotFound($"Not Found: {idEmail}");
+		if (user == null) return NotFound($"Not Found: {currentUserId}");
 
 		var dto = (UserWithPersonalDataDto)user;
 		return Ok(dto);
@@ -76,7 +76,7 @@ public class AccountController : Controller
 
 
 	[HttpGet("ConfirmEmail")]
-	[SwaggerOperation("Confirm Email")]
+	[SwaggerOperation("Confirm Email using the code attached in email")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> ConfirmEmail(string userId, string code)
@@ -101,41 +101,4 @@ public class AccountController : Controller
 	}
 
 
-	[HttpPost("MakeModerator")]
-	[Authorize(UserRoles.Admin)]
-	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin only)")]
-	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
-	public async Task<IdentityResult> AssignModeratorRole(string? userId, string? userEmail)
-	{
-		var user = userId == null ? null : await _userManager.FindByIdAsync(userId);
-		if (user == null && userEmail != null)
-			user = await _userManager.FindByEmailAsync(userEmail);
-
-		if (user == null)
-			return IdentityResult.Failed(new IdentityError { Description = "User not found." });
-		//await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));		//seeding roles
-		//await _roleManager.CreateAsync(new IdentityRole(UserRoles.Moderator));
-		//await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-
-		// Add the user to the Moderator role
-		var result = await _userManager.AddToRoleAsync(user, UserRoles.Moderator);
-
-		return result;
-	}
-
-	[HttpPost("Ban")]
-	[Authorize(UserRoles.Moderator)]
-	[SwaggerOperation("Ban a user by Id or Email (Moderator only)")]
-	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
-	public async Task<IActionResult> Ban(BanUserCommand banUserCommand)
-	{
-		if (!ModelState.IsValid) return BadRequest(ModelState);
-		throw new NotImplementedException();
-		//var user = banUserCommand.UserId == null ? null : await _userManager.FindByIdAsync(banUserCommand.UserId);
-		//if (user == null && banUserCommand.UserEmail != null)
-		//	user = await _userManager.FindByEmailAsync(userEmail);
-		//return result;
-	}
 }

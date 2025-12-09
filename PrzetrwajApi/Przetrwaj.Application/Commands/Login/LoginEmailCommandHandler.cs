@@ -1,11 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Przetrwaj.Application.Commands.Login
 {
@@ -26,7 +21,7 @@ namespace Przetrwaj.Application.Commands.Login
 		{
 			var registeredUser = await _authService.LoginUserByEmailAsync(request.Email, request.Password);
 			if (registeredUser == null) throw new InvalidOperationException("Could not Login");
-			var dto = (UserWithPersonalDataDto) registeredUser;
+			var dto = (UserWithPersonalDataDto)registeredUser;
 			return dto;
 		}
 	}

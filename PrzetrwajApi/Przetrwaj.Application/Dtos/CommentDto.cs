@@ -16,7 +16,7 @@ public class CommentDto
 		{
 			Comment = comment.Comment,
 			DateCreated = comment.DateCreated,
-			Autor = comment.IdAutorNavigation == null ? null : (UserGeneralDto)comment.IdAutorNavigation,
+			Autor = (UserGeneralDto?)comment.IdAutorNavigation,
 		};
 	}
 

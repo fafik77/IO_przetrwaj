@@ -21,6 +21,15 @@ public class PostController : Controller
 	}
 
 
+	[HttpPost("_Filtered")]
+	[SwaggerOperation("Get posts that match filter")]
+	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> GetFiltered()
+	{
+		throw new NotImplementedException();
+	}
+
 	[HttpGet("{id}")]
 	[SwaggerOperation("Get post")]
 	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
@@ -35,6 +44,24 @@ public class PostController : Controller
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetAllInRegion(int id)
+	{
+		throw new NotImplementedException();
+	}
+
+	[HttpGet("Region/{id}/Danger")]
+	[SwaggerOperation("Get all Danger posts in region")]
+	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> GetDangerInRegion(int id)
+	{
+		throw new NotImplementedException();
+	}
+
+	[HttpGet("Region/{id}/Resource")]
+	[SwaggerOperation("Get all Resource posts in region")]
+	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> GetResourceInRegion(int id)
 	{
 		throw new NotImplementedException();
 	}
@@ -57,7 +84,7 @@ public class PostController : Controller
 	}
 
 
-	[HttpGet("{id}/Comments")]
+	[HttpGet("{id}/Comment")]
 	[SwaggerOperation("Get all comments of a post")]
 	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -66,18 +93,56 @@ public class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	//public class AddFiles
-	//{
-	//	public IList<AddAttachment>? Files { get; set; }
-	//}
+	[HttpPost("{id}/Comment")]
+	[SwaggerOperation("Add a comment to the post (User)")]
+	[Authorize]
+	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> AddComment(int id)
+	{
+		throw new NotImplementedException();
+	}
 
-	[HttpPost]
-	[SwaggerOperation("Add a post (User only)")]
+	[HttpPost("{id}/VotePositive")]
+	[SwaggerOperation("Add a Positive vote to the post (User)")]
+	[Authorize]
+	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status409Conflict)] //already voted
+	public async Task<IActionResult> VotePositive(int id)
+	{
+		throw new NotImplementedException();
+	}
+
+	[HttpPost("{id}/VoteNegative")]
+	[SwaggerOperation("Add a Negative vote to the post (User)")]
+	[Authorize]
+	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status409Conflict)] //already voted
+	public async Task<IActionResult> VoteNegative(int id)
+	{
+		throw new NotImplementedException();
+	}
+
+	[HttpPost("Danger")]
+	[SwaggerOperation("Add a Danger post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	public async Task<IActionResult> Add(AddAttachment files)
+	public async Task<IActionResult> AddPost(AddAttachment files)
+	{
+		throw new NotImplementedException();
+	}
+
+	[HttpPost("Resource")]
+	[SwaggerOperation("Add a Recource post (Moderator)")]
+	[Authorize(UserRoles.Moderator)]
+	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	public async Task<IActionResult> AddResource(AddAttachment files)
 	{
 		throw new NotImplementedException();
 	}
@@ -87,7 +152,7 @@ public class PostController : Controller
 
 
 	[HttpPut("{id}")]
-	[SwaggerOperation("Mark a post as Not Active (Moderator only)")]
+	[SwaggerOperation("Mark a post as Not Active (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]

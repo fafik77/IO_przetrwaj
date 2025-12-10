@@ -53,11 +53,12 @@ public class RegionController : Controller
 	[HttpPost]
 	[SwaggerOperation("Add Region (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddRegion([FromBody] AddRegionCommand region)
 	{
+		if (!ModelState.IsValid) return BadRequest(ModelState);
 		var res = await _mediator.Send(region);
 		return CreatedAtAction(nameof(GetById), new { id = res.IdRegion }, res);
 	}
@@ -68,22 +69,39 @@ public class RegionController : Controller
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> UpdateRegion([FromBody] UpdateRegionCommand region)
 	{
-		await _mediator.Send(region);
-		return NoContent();
+		if (!ModelState.IsValid) return BadRequest(ModelState);
+		try
+		{
+			await _mediator.Send(region);
+			return NoContent();
+		}
+		catch (RegionNotFoundException ex)
+		{
+			return NotFound(ex.Message);
+		}
 	}
 
 	[HttpDelete("{id}")]
 	[SwaggerOperation("Delete Region (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> DeleteRegion(int id)
 	{
-		await _mediator.Send(new DeleteRegionCommand() { RegionId = id });
-		return NoContent();
+		try
+		{
+			await _mediator.Send(new DeleteRegionCommand() { RegionId = id });
+			return NoContent();
+		}
+		catch (RegionNotFoundException ex)
+		{
+
+			return NotFound(ex.Message);
+		}
 	}
 }
 

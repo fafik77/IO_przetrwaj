@@ -36,7 +36,6 @@ public class UserController : Controller
 	[SwaggerOperation("Get publicly visible General data of user by id")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	//[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> GetById(string id)
 	{
 		throw new NotImplementedException();
@@ -47,7 +46,6 @@ public class UserController : Controller
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	//[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> GetAllPosts(string id)
 	{
 		throw new NotImplementedException();
@@ -57,7 +55,6 @@ public class UserController : Controller
 	[SwaggerOperation("Get all comments made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	//[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> GetAllComments(string id)
 	{
 		throw new NotImplementedException();
@@ -70,22 +67,11 @@ public class UserController : Controller
 	[Authorize(UserRoles.Admin)]
 	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin only)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
-	public async Task<IdentityResult> AssignModeratorRole(string? userId, string? userEmail)
+	public async Task<IdentityResult> AssignModeratorRole(MakeModeratorCommand userInfo)
 	{
-		var user = userId == null ? null : await _userManager.FindByIdAsync(userId);
-		if (user == null && userEmail != null)
-			user = await _userManager.FindByEmailAsync(userEmail);
-
-		if (user == null)
-			return IdentityResult.Failed(new IdentityError { Description = "User not found." });
-		//await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));		//seeding roles
-		//await _roleManager.CreateAsync(new IdentityRole(UserRoles.Moderator));
-		//await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-
-		// Add the user to the Moderator role
-		var result = await _userManager.AddToRoleAsync(user, UserRoles.Moderator);
-
-		return result;
+		if (!ModelState.IsValid) return IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" });
+		var res = await _mediator.Send(userInfo);
+		return res;
 	}
 
 	[HttpPost("Ban")]
@@ -97,6 +83,7 @@ public class UserController : Controller
 	public async Task<IActionResult> Ban(BanUserCommand banUserCommand)
 	{
 		if (!ModelState.IsValid) return BadRequest(ModelState);
+		//get info from the cookie and send a request
 		var command = new BanUserInternallCommand
 		{
 			UserIdOrEmail = banUserCommand.UserIdOrEmail,

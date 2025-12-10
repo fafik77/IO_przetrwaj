@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models;
 
 namespace Przetrwaj.Application.AuthServices;
@@ -56,11 +57,11 @@ public class AuthService : IAuthService
 		//var user = await _userManager.FindByEmailAsync(email);
 		var user = await _userRepository.GetByEmailAsync(email);
 		if (user == null || user.EmailConfirmed == false)
-			throw new InvalidOperationException("Bad login attempt");
+			throw new InvalidLoginException("Bad login attempt");
 
 
 		if (await _userManager.IsLockedOutAsync(user))
-			throw new InvalidOperationException("Bad login attempt");
+			throw new InvalidLoginException("Bad login attempt");
 
 		if (user.Banned || user.BanDate != null)
 		{
@@ -69,13 +70,13 @@ public class AuthService : IAuthService
 		}
 
 		if (false == await _userManager.CheckPasswordAsync(user, password))
-			throw new InvalidOperationException("Bad login attempt");
+			throw new InvalidLoginException("Bad login attempt");
 
 		var signedIn = await _signInManager.PasswordSignInAsync(user, password, true, true);
 		if (signedIn.Succeeded)
 
 			return user;
-		throw new InvalidOperationException("Bad login attempt");
+		throw new InvalidLoginException("Bad login attempt");
 	}
 
 	public async Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register)

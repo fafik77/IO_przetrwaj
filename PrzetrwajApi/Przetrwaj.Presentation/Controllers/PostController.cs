@@ -10,11 +10,11 @@ namespace Przetrwaj.Presentation.Controllers;
 
 [Route("WIP/[controller]")]
 [ApiController]
-public class PostsController : Controller
+public class PostController : Controller
 {
 	private readonly IMediator _mediator;
 
-	public PostsController(IMediator mediator)
+	public PostController(IMediator mediator)
 	{
 		_mediator = mediator;
 	}

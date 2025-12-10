@@ -21,7 +21,7 @@ public class PostDto
 	public int VoteSum { get; set; }
 	public int VoteRatio { get; set; }
 
-	public virtual IEnumerable<Attachment>? Attachments { get; set; }// = new List<Attachment>();
+	//public virtual IEnumerable<Attachment>? Attachments { get; set; }// = new List<Attachment>();
 
 
 

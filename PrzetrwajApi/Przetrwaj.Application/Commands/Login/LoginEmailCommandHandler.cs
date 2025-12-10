@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Exceptions;
 
 namespace Przetrwaj.Application.Commands.Login
 {
@@ -20,7 +21,7 @@ namespace Przetrwaj.Application.Commands.Login
 		public async Task<UserWithPersonalDataDto> Handle(LoginEmailCommand request, CancellationToken cancellationToken)
 		{
 			var registeredUser = await _authService.LoginUserByEmailAsync(request.Email, request.Password);
-			if (registeredUser == null) throw new InvalidOperationException("Could not Login");
+			if (registeredUser == null) throw new InvalidLoginException("Could not Login");
 			var dto = (UserWithPersonalDataDto)registeredUser;
 			return dto;
 		}

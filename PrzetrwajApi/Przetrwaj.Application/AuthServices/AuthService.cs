@@ -92,8 +92,7 @@ public class AuthService : IAuthService
 
 		var result = await _userManager.CreateAsync(user, register.Password);
 		if (!result.Succeeded)
-		{
-			// Handle errors, e.g., throw an exception with IdentityResult.Errors
+		{   // do not expose too much info
 			throw new InvalidOperationException("User creation failed.");
 		}
 
@@ -107,13 +106,13 @@ public class AuthService : IAuthService
 			values: new ConfirmEmailInfo { userId = user.Id, code = code });
 		// Check if relativeUrl is null (route not found)
 		if (string.IsNullOrEmpty(relativeUrl))
-		{
+		{   //Email confirmation related errors
 			throw new InvalidOperationException("Could not generate confirmation URL.");
 		}
 		// 3. Get the request scheme and host from HttpContext
 		var request = _httpContextAccessor.HttpContext?.Request;
 		if (request == null)
-		{
+		{   //Email confirmation related errors
 			throw new InvalidOperationException("Cannot access HTTP context to build URL.");
 		}
 		var scheme = request.Scheme;

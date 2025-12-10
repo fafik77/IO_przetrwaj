@@ -14,20 +14,13 @@ public class UserRepository : IUserRepository
 {
 	private readonly ApplicationDbContext _dbContext;
 	private readonly UserManager<AppUser> _userManager;
-	private readonly SignInManager<AppUser> _signInManager;
-	private readonly IEmailSender _emailSender;
-	private readonly IUrlHelper _urlHelper;
-	private readonly IHttpContextAccessor _httpContextAccessor;
 
-	public UserRepository(ApplicationDbContext dbContext, UserManager<AppUser> userManager, IEmailSender emailSender, SignInManager<AppUser> signInManager, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor)
+	public UserRepository(ApplicationDbContext dbContext, UserManager<AppUser> userManager)
 	{
 		_dbContext = dbContext;
 		_userManager = userManager;
-		_emailSender = emailSender;
-		_signInManager = signInManager;
-		_urlHelper = urlHelper;
-		_httpContextAccessor = httpContextAccessor;
 	}
+
 
 	public async Task<IEnumerable<AppUser>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
@@ -40,7 +33,6 @@ public class UserRepository : IUserRepository
 		var res = await _dbContext.Users
 			.Include(u => u.IdRegionNavigation)
 			.FirstOrDefaultAsync(u => u.Id == id.ToLower(), cancellationToken);
-		//var res = await _userManager.FindByIdAsync(id);
 		if (res == null) throw new UserNotFoundException(id);
 		return res;
 	}

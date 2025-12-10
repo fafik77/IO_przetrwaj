@@ -9,6 +9,7 @@ using Przetrwaj.Application.Commands.Confirm;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 
@@ -26,16 +27,13 @@ public class AccountController : Controller
 	private const string AuthenticationCookie = "cookie";
 	private readonly IMediator _mediator;
 	private readonly SignInManager<AppUser> _signInManager;
-	private readonly UserManager<AppUser> _userManager;
 	private readonly IAuthService _authService;
-	private readonly RoleManager<IdentityRole> _roleManager;
-	public AccountController(IMediator mediator, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IAuthService authService, RoleManager<IdentityRole> roleManager)
+
+	public AccountController(IMediator mediator, SignInManager<AppUser> signInManager, IAuthService authService)
 	{
 		_mediator = mediator;
 		_signInManager = signInManager;
-		_userManager = userManager;
 		_authService = authService;
-		_roleManager = roleManager;
 	}
 
 
@@ -50,13 +48,16 @@ public class AccountController : Controller
 		if (currentUserId is null)
 			return NotFound(); // Returns a 404 User for some reason does not exist
 
-		var user = await _authService.GetUserDetailsAsync(currentUserId);
-
-		if (user == null)
-			return NotFound($"Not Found: {currentUserId}");
-
-		var dto = (UserWithPersonalDataDto)user;
-		return Ok(dto);
+		try
+		{
+			var user = await _authService.GetUserDetailsAsync(currentUserId);
+			var dto = (UserWithPersonalDataDto)user;
+			return Ok(dto);
+		}
+		catch (UserNotFoundException ex)
+		{
+			return NotFound(ex.Message);
+		}
 	}
 
 	[HttpPut]
@@ -66,7 +67,7 @@ public class AccountController : Controller
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount)
 	{
-		if(!ModelState.IsValid) return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest(ModelState);
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
 			return NotFound(); // Returns a 404 User for some reason does not exist
@@ -77,9 +78,15 @@ public class AccountController : Controller
 			Name = updateAccount.Name,
 			Surname = updateAccount.Surname,
 		};
-
-		var res = await _mediator.Send(requ);
-		return Ok(res);
+		try
+		{
+			var res = await _mediator.Send(requ);
+			return Ok(res);
+		}
+		catch (UserNotFoundException ex)
+		{
+			return NotFound(ex.Message);
+		}
 	}
 
 
@@ -93,9 +100,15 @@ public class AccountController : Controller
 			return BadRequest("Invalid email confirmation request.");
 
 		var command = new ConfirmEmailCommand { userId = userId, code = code };
-		var res = await _mediator.Send(command);
-		if (res == null) return BadRequest("Invalid email confirmation request.");
-		return Ok(res);
+		try
+		{
+			var res = await _mediator.Send(command);
+			return Ok(res);
+		}
+		catch (Exception ex) when (ex is InvalidDataException or UserNotFoundException)
+		{
+			return BadRequest("Invalid email confirmation request.");
+		}
 	}
 
 	[HttpPost("Logout")]

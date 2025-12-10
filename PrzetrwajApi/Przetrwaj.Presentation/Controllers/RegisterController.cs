@@ -27,8 +27,18 @@ public partial class RegisterController : Controller
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
-
-		var result = await _mediator.Send(model);
-		return Ok(result);
+		try
+		{
+			var result = await _mediator.Send(model);
+			return Ok(result);
+		}
+		catch (InvalidOperationException ex) //from handler
+		{
+			return BadRequest(ex.Message);
+		}
+		catch (NotImplementedException ex) //from email service
+		{
+			return BadRequest(ex.Message);
+		}
 	}
 }

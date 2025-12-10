@@ -34,7 +34,7 @@ public class EmailAzureService : IEmailSender
 
 
 		if (EmailClient == null)
-			throw new NotImplementedException("Send Email is not configured!");
+			throw new NotImplementedException("Send Email Confirmation is not configured!");
 
 		EmailSendOperation emailSendOperation = await EmailClient.SendAsync(
 			WaitUntil.Completed,

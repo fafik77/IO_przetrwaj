@@ -12,7 +12,6 @@ namespace Przetrwaj.Presentation.Controllers;
 [ApiController]
 public class LoginController : Controller
 {
-	private const string AuthenticationCookie = "cookie";
 	private readonly IMediator _mediator;
 
 	public LoginController(IMediator mediator)

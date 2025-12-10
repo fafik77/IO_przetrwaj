@@ -7,7 +7,6 @@ namespace Przetrwaj.Application.Commands.AccountOwn;
 
 public class UpdateAccountInternalCommandHandler : ICommandHandler<UpdateAccountInternalCommand, UserWithPersonalDataDto>
 {
-
 	private readonly IUserRepository _userRepository;
 	private readonly IUnitOfWork _unitOfWork;
 

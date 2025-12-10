@@ -11,6 +11,10 @@ public partial class Attachment
 	public required string IdPost { get; set; }
 	[MaxLength(200)]
 	public string? AlternateDescription { get; set; }
+	/// <summary>
+	/// PN: i think this will be necessary
+	/// </summary>
+	public int OrderInList { get; set; }
 
 
 	public virtual Post IdPostNavigation { get; set; } = null!;

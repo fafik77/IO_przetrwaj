@@ -21,14 +21,24 @@ public partial class RegisterController : Controller
 
 	[HttpPost("email")]
 	[SwaggerOperation("Register using email")]
-	[ProducesResponseType(typeof(RegisteredUserDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> RegisterWithEmail([FromBody] RegisterEmailCommand model)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
-
-		var result = await _mediator.Send(model);
-		return Ok(result);
+		try
+		{
+			var result = await _mediator.Send(model);
+			return Ok(result);
+		}
+		catch (InvalidOperationException ex) //from handler
+		{
+			return BadRequest(ex.Message);
+		}
+		catch (NotImplementedException ex) //from email service
+		{
+			return BadRequest(ex.Message);
+		}
 	}
 }

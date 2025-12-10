@@ -2,7 +2,7 @@
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions.RegionException;
 
-namespace Przetrwaj.Application.Commands.RegionCommands;
+namespace Przetrwaj.Application.Commands.Regions;
 
 public class UpdateRegionCommandHandler : ICommandHandler<UpdateRegionCommand>
 {

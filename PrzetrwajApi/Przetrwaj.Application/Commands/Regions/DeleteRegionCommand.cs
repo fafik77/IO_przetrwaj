@@ -1,6 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 
-namespace Przetrwaj.Application.Commands.RegionCommands;
+namespace Przetrwaj.Application.Commands.Regions;
 
 public class DeleteRegionCommand : ICommand
 {

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.Login;
 
-public class LoginEmailCommand : ICommand<RegisteredUserDto>
+public class LoginEmailCommand : ICommand<UserWithPersonalDataDto>
 {
 	[Required]
 	[EmailAddress]

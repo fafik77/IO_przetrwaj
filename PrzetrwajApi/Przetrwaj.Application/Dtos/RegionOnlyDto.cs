@@ -8,9 +8,9 @@ public class RegionOnlyDto
 	public required string Name { get; set; }
 
 
-	public static explicit operator RegionOnlyDto(Region region)
+	public static explicit operator RegionOnlyDto?(Region region)
 	{
-		return new RegionOnlyDto
+		return region is null ? null : new RegionOnlyDto
 		{
 			IdRegion = region.IdRegion,
 			Name = region.Name,

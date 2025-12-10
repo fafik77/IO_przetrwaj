@@ -1,9 +1,9 @@
-﻿using FluentValidation;
-using Przetrwaj.Application.Configuration.Commands;
+﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Entities;
 
-namespace Przetrwaj.Application.Commands.RegionCommands;
+namespace Przetrwaj.Application.Commands.Regions;
 
 public class AddRegionCommandHandler : ICommandHandler<AddRegionCommand, RegionOnlyDto>
 {
@@ -19,9 +19,7 @@ public class AddRegionCommandHandler : ICommandHandler<AddRegionCommand, RegionO
 
 	public async Task<RegionOnlyDto> Handle(AddRegionCommand request, CancellationToken cancellationToken)
 	{
-		if (string.IsNullOrEmpty(request.RegionName)) throw new ValidationException("Invalid command: RegionName can not be null or empty");
-
-		var region = new Domain.Entities.Region { Name = request.RegionName };
+		var region = new Region { Name = request.RegionName };
 		await _regionRepository.AddAsync(region, cancellationToken);
 
 		await _unitOfWork.SaveChangesAsync(cancellationToken);

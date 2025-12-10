@@ -1,12 +1,13 @@
-﻿using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Models;
+﻿using Przetrwaj.Domain.Abstractions._base;
+using Przetrwaj.Domain.Entities;
 
 namespace Przetrwaj.Domain.Abstractions;
 
-public interface IUserRepository
+public interface IUserRepository : IGetsAsyncRepository<AppUser, string>
 {
+	public Task<AppUser> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+
 	//Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register);
 	//Task<AppUser> LoginUserByEmailAsync(string email, string password);
 	//Task<AppUser> ConfirmEmailAsync(string userId, string code);
-
 }

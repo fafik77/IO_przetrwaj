@@ -2,30 +2,30 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models;
-using System.Security.Claims;
 
 namespace Przetrwaj.Application.AuthServices;
 
 public class AuthService : IAuthService
 {
 	private readonly UserManager<AppUser> _userManager;
+	private readonly IUserRepository _userRepository;
 	private readonly SignInManager<AppUser> _signInManager;
 	private readonly IEmailSender _emailSender;
 	private readonly IUrlHelper _urlHelper;
 	private readonly IHttpContextAccessor _httpContextAccessor;
 
-	public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor)
+	public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
 	{
 		_userManager = userManager;
 		_signInManager = signInManager;
 		_emailSender = emailSender;
 		_urlHelper = urlHelper;
 		_httpContextAccessor = httpContextAccessor;
+		_userRepository = userRepository;
 	}
 
 
@@ -46,25 +46,37 @@ public class AuthService : IAuthService
 	{
 		AppUser? user;
 		if (userIdEmail.Contains("@"))
-			user = await _userManager.FindByEmailAsync(userIdEmail);
+			user = await _userRepository.GetByEmailAsync(userIdEmail);
 		else
-			user = await _userManager.FindByIdAsync(userIdEmail);
+			user = await _userRepository.GetByIdAsync(userIdEmail);
 		return user;
 	}
 
 	public async Task<AppUser> LoginUserByEmailAsync(string email, string password)
 	{
-		//var user = await _userManager.FindByLoginAsync(email);
-		var user = await _userManager.FindByEmailAsync(email);
+		//var user = await _userManager.FindByEmailAsync(email);
+		var user = await _userRepository.GetByEmailAsync(email);
 		if (user == null || user.EmailConfirmed == false)
-			throw new InvalidOperationException("Bad login attempt");
+			throw new InvalidLoginException("Bad login attempt");
+
+
+		if (await _userManager.IsLockedOutAsync(user))
+			throw new InvalidLoginException("Bad login attempt");
+
+		if (user.Banned || user.BanDate != null)
+		{
+
+			return user;
+		}
+
 		if (false == await _userManager.CheckPasswordAsync(user, password))
-			throw new InvalidOperationException("Bad login attempt");
+			throw new InvalidLoginException("Bad login attempt");
 
 		var signedIn = await _signInManager.PasswordSignInAsync(user, password, true, true);
 		if (signedIn.Succeeded)
+
 			return user;
-		throw new InvalidOperationException("Bad login attempt");
+		throw new InvalidLoginException("Bad login attempt");
 	}
 
 	public async Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register)
@@ -80,8 +92,7 @@ public class AuthService : IAuthService
 
 		var result = await _userManager.CreateAsync(user, register.Password);
 		if (!result.Succeeded)
-		{
-			// Handle errors, e.g., throw an exception with IdentityResult.Errors
+		{   // do not expose too much info
 			throw new InvalidOperationException("User creation failed.");
 		}
 
@@ -95,13 +106,13 @@ public class AuthService : IAuthService
 			values: new ConfirmEmailInfo { userId = user.Id, code = code });
 		// Check if relativeUrl is null (route not found)
 		if (string.IsNullOrEmpty(relativeUrl))
-		{
+		{   //Email confirmation related errors
 			throw new InvalidOperationException("Could not generate confirmation URL.");
 		}
 		// 3. Get the request scheme and host from HttpContext
 		var request = _httpContextAccessor.HttpContext?.Request;
 		if (request == null)
-		{
+		{   //Email confirmation related errors
 			throw new InvalidOperationException("Cannot access HTTP context to build URL.");
 		}
 		var scheme = request.Scheme;

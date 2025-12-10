@@ -6,8 +6,9 @@ using Przetrwaj.Application.Commands.Regions;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Quaries.RegionQauries;
 using Przetrwaj.Domain;
-using Przetrwaj.Domain.Exceptions.RegionException;
+using Przetrwaj.Domain.Exceptions._base;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 
 namespace Przetrwaj.Presentation.Controllers;
 
@@ -44,7 +45,7 @@ public class RegionController : Controller
 			var res = await _mediator.Send(new GetRegionQuarry() { IdRegion = id });
 			return Ok(res);
 		}
-		catch (RegionNotFoundException ex)
+		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
 			return NotFound(ex.Message);
 		}
@@ -78,7 +79,7 @@ public class RegionController : Controller
 			await _mediator.Send(region);
 			return NoContent();
 		}
-		catch (RegionNotFoundException ex)
+		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
 			return NotFound(ex.Message);
 		}
@@ -97,9 +98,8 @@ public class RegionController : Controller
 			await _mediator.Send(new DeleteRegionCommand() { RegionId = id });
 			return NoContent();
 		}
-		catch (RegionNotFoundException ex)
+		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
-
 			return NotFound(ex.Message);
 		}
 	}

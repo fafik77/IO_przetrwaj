@@ -2,15 +2,12 @@
 
 namespace Przetrwaj.Application.Dtos;
 
-public class PostDto
+public class PostOverwievDto
 {
 	public required string Id { get; set; }
 	public required string Title { get; set; }
-	public required string Description { get; set; }
 	public CategoryDto? Category { get; set; }
 	public RegionOnlyDto? Region { get; set; }
-
-	public UserGeneralDto? Author { get; set; }
 	public DateTime DateCreated { get; set; }
 
 
@@ -22,21 +19,17 @@ public class PostDto
 
 	public int CommentsAmount { get; set; }
 
-	//public virtual IEnumerable<Attachment>? Attachments { get; set; }// = new List<Attachment>();
 
 
-
-	public static explicit operator PostDto?(Post? post)
+	public static explicit operator PostOverwievDto?(Post? post)
 	{
 		int positive, negative, sum, ratio;
-		return post is null ? null : new PostDto
+		return post is null ? null : new PostOverwievDto
 		{
 			Id = post.IdPost,
 			Title = post.Title,
-			Description = post.Description,
 			Category = (CategoryDto?)post.IdCategoryNavigation,
 			Region = (RegionOnlyDto?)post.IdRegionNavigation,
-			Author = (UserGeneralDto?)post.IdAutorNavigation,
 			DateCreated = post.DateCreated,
 
 			//VoteSum

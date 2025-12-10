@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Przetrwaj.Application.Commands.Posts.Attachments;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain;
 using Swashbuckle.AspNetCore.Annotations;
@@ -24,7 +25,6 @@ public class PostController : Controller
 	[SwaggerOperation("Get post")]
 	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	//[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> GetById(string id)
 	{
 		throw new NotImplementedException();
@@ -34,8 +34,15 @@ public class PostController : Controller
 	[SwaggerOperation("Get all posts in region")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	//[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> GetAllInRegion(int id)
+	{
+		throw new NotImplementedException();
+	}
+
+	[HttpGet("Region/Custom")]
+	[SwaggerOperation("Get all posts with Custom region")]
+	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	public async Task<IActionResult> GetAllWithCustomRegion()
 	{
 		throw new NotImplementedException();
 	}
@@ -44,29 +51,33 @@ public class PostController : Controller
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	//[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> GetAllAuthoredBy(string id)
 	{
 		throw new NotImplementedException();
 	}
 
+
 	[HttpGet("{id}/Comments")]
 	[SwaggerOperation("Get all comments of a post")]
 	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	//[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> GetAllComments(int id)
 	{
 		throw new NotImplementedException();
 	}
+
+	//public class AddFiles
+	//{
+	//	public IList<AddAttachment>? Files { get; set; }
+	//}
 
 	[HttpPost]
 	[SwaggerOperation("Add a post (User only)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status403Forbidden)]
-	public async Task<IActionResult> Add()
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	public async Task<IActionResult> Add(AddAttachment files)
 	{
 		throw new NotImplementedException();
 	}
@@ -78,9 +89,9 @@ public class PostController : Controller
 	[HttpPut("{id}")]
 	[SwaggerOperation("Mark a post as Not Active (Moderator only)")]
 	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status403Forbidden)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> MarkAsInactive(string id)
 	{
 		throw new NotImplementedException();

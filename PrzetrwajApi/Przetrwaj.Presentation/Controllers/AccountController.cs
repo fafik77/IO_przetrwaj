@@ -10,7 +10,9 @@ using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
+using Przetrwaj.Domain.Exceptions._base;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 using System.Security.Claims;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -54,7 +56,7 @@ public class AccountController : Controller
 			var dto = (UserWithPersonalDataDto)user;
 			return Ok(dto);
 		}
-		catch (UserNotFoundException ex)
+		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
 			return NotFound(ex.Message);
 		}
@@ -83,7 +85,7 @@ public class AccountController : Controller
 			var res = await _mediator.Send(requ);
 			return Ok(res);
 		}
-		catch (UserNotFoundException ex)
+		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
 			return NotFound(ex.Message);
 		}

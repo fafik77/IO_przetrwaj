@@ -6,6 +6,7 @@ using Przetrwaj.Application.Commands.Regions;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Quaries.RegionQauries;
 using Przetrwaj.Domain;
+using Przetrwaj.Domain.Exceptions.RegionException;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -35,11 +36,18 @@ public class RegionController : Controller
 	[HttpGet("{id}")]
 	[SwaggerOperation("Get Region")]
 	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(int id)
 	{
-		var res = await _mediator.Send(new GetRegionQuarry() { IdRegion = id });
-		return Ok(res);
+		try
+		{
+			var res = await _mediator.Send(new GetRegionQuarry() { IdRegion = id });
+			return Ok(res);
+		}
+		catch (RegionNotFoundException ex)
+		{
+			return NotFound(ex.Message);
+		}
 	}
 
 	[HttpPost]

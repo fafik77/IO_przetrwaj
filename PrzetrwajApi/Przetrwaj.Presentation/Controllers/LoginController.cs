@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Login;
 using Przetrwaj.Application.Dtos;
-using Przetrwaj.Domain.Exceptions;
+using Przetrwaj.Domain.Exceptions.Auth;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;

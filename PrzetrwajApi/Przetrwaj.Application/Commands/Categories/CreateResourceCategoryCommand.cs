@@ -1,9 +1,11 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Application.Dtos;
+using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.Categories;
 
 public class CreateResourceCategoryCommand : ICommand<CategoryDto>
 {
-    public required string Name { get; set; }
+	[Required]
+	public required string Name { get; set; }
 }

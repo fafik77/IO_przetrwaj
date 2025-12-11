@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
-using Przetrwaj.Domain.Exceptions;
+using Przetrwaj.Domain.Exceptions.Users;
 
 namespace Przetrwaj.Application.Commands.AccountOwn;
 

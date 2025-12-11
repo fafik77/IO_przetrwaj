@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions;
+using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Models;
 
 namespace Przetrwaj.Application.AuthServices;

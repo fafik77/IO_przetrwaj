@@ -8,8 +8,8 @@ using Przetrwaj.Application.Quaries.Categories;
 namespace Przetrwaj.Presentation.Controllers;
 
 [ApiController]
-[Route("categories/danger")]
-public class DangerCategoriesController : ControllerBase
+[Route("Category/Danger")]
+public class DangerCategoriesController : Controller
 {
     private readonly IMediator _mediator;
     public DangerCategoriesController(IMediator mediator) => _mediator = mediator;

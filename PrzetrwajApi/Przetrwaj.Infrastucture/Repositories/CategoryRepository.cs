@@ -7,30 +7,46 @@ namespace Przetrwaj.Infrastucture.Repositories;
 
 public class CategoryRepository : ICategoryRepository
 {
-	private readonly ApplicationDbContext _dbContext;
+	private readonly ApplicationDbContext _db;
+	public CategoryRepository(ApplicationDbContext db) => _db = db;
 
-	public CategoryRepository(ApplicationDbContext dbContext)
-	{
-		_dbContext = dbContext;
-	}
 
-	public async Task<Category> AddAsync(Category category, CancellationToken cancellationToken)
+	public async Task<Category> AddAsync(Category category, CancellationToken ct)
 	{
-		await _dbContext.Categories.AddAsync(category, cancellationToken);
-		//await _dbContext.SaveChangesAsync(cancellationToken);
+		await _db.Categories.AddAsync(category, ct);
 		return category;
 	}
 
-	public async Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken cancellationToken)
+	public async Task<IEnumerable<CategoryDanger>> GetDangersAsync(CancellationToken ct)
 	{
-		return await _dbContext.Categories
-			.AsNoTracking() //only for multiple entries we use this
-			.ToListAsync(cancellationToken);
+		var list = await _db.CategoryDangers
+			.AsNoTracking()
+			.ToListAsync(ct);
+		return list;
 	}
 
-	public async Task<Category?> GetByIdAsync(int idCategory, CancellationToken cancellationToken)
+	public async Task<IEnumerable<CategoryResource>> GetResourcesAsync(CancellationToken ct)
 	{
-		return await _dbContext.Categories //for single entries we want with tracking
-			.FirstOrDefaultAsync(c => c.IdCategory == idCategory, cancellationToken);
+		var list = await _db.CategoryResources
+			.AsNoTracking()
+			.ToListAsync(ct);
+		return list;
+	}
+
+	public Task<CategoryDanger?> GetDangerByIdAsync(int id, CancellationToken ct)
+	{
+		return _db.CategoryDangers
+		   .FirstOrDefaultAsync(c => c.IdCategory == id, ct);
+	}
+
+	public Task<CategoryResource?> GetResourceByIdAsync(int id, CancellationToken ct)
+	{
+		return _db.CategoryResources
+		   .FirstOrDefaultAsync(c => c.IdCategory == id, ct);
+	}
+
+	public void Delete(Category category)
+	{
+		_db.Categories.Remove(category);
 	}
 }

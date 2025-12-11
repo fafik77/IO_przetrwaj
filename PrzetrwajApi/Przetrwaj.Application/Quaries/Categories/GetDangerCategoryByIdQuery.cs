@@ -3,7 +3,7 @@ using Przetrwaj.Application.Dtos;
 
 namespace Przetrwaj.Application.Quaries.Categories;
 
-public class GetCategoryByIdQuery : IQuery<CategoryDto?>
+public class GetDangerCategoryByIdQuery : IQuery<CategoryDto?>
 {
-	public int IdCategory { get; set; }
+    public int IdCategory { get; set; }
 }

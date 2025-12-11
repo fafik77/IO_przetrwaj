@@ -21,16 +21,17 @@ internal class CreateCategoryCommandHandler
 
 	public async Task<CategoryDto> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
 	{
-		Category category = request.Type switch
-		{
-			CategoryType.Danger => new CategoryDanger { Name = request.Name },
-			CategoryType.Resource => new CategoryResource { Name = request.Name },
-			_ => throw new ArgumentOutOfRangeException(nameof(request.Type), "Unknown category type")
-		};
+        Category added = request.Type switch
+        {
+            CategoryType.Danger => await _categoryRepository
+                                            .AddDangerAsync(request.Name, cancellationToken),
+            CategoryType.Resource => await _categoryRepository
+                                            .AddResourceAsync(request.Name, cancellationToken),
+            _ => throw new ArgumentOutOfRangeException(nameof(request.Type), "Unknown category type")
+        };
 
-		var added = await _categoryRepository.AddAsync(category, cancellationToken);
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-		return (CategoryDto)added;
-	}
+        return (CategoryDto)added;
+    }
 }

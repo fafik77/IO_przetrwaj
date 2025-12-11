@@ -1,0 +1,25 @@
+﻿using Przetrwaj.Application.Configuration.Commands;
+using Przetrwaj.Application.Dtos;
+using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Entities;
+
+namespace Przetrwaj.Application.Commands.Categories;
+
+internal class CreateDangerCategoryCommandHandler
+    : ICommandHandler<CreateDangerCategoryCommand, CategoryDto>
+{
+    private readonly ICategoryRepository _repo;
+    private readonly IUnitOfWork _uow;
+
+    public CreateDangerCategoryCommandHandler(ICategoryRepository repo, IUnitOfWork uow)
+    {
+        _repo = repo; _uow = uow;
+    }
+
+    public async Task<CategoryDto> Handle(CreateDangerCategoryCommand request, CancellationToken ct)
+    {
+        var e = await _repo.AddDangerAsync(request.Name, ct);
+        await _uow.SaveChangesAsync(ct);
+        return (CategoryDto)e;
+    }
+}

@@ -20,14 +20,13 @@ public class DangerCategoriesController : Controller
 
     [HttpPost]
     [Authorize(UserRoles.Moderator)]
-    [Consumes("application/json")]
+    //[Consumes("application/json")]
     [SwaggerOperation("Create a Danger category (Moderator only)")]
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<CategoryDto>> Create([FromBody] CreateDangerCategoryCommand cmd, CancellationToken ct)
     {
- 
-        if (cmd is null) return BadRequest("Body is required.");
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (string.IsNullOrWhiteSpace(cmd.Name)) return BadRequest("Name is required.");
         if (cmd.Name.Length < 3 || cmd.Name.Length > 400) return BadRequest("Name must be 3–400 characters.");
@@ -67,7 +66,8 @@ public class DangerCategoriesController : Controller
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
         if (id <= 0) return BadRequest("Id must be a positive integer.");
 

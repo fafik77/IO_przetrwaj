@@ -21,17 +21,17 @@ public class PostController : Controller
 	}
 
 
-	[HttpPost("_Filtered")]
-	[SwaggerOperation("Get posts that match filter")]
-	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
-	public async Task<IActionResult> GetFiltered()
-	{
-		throw new NotImplementedException();
-	}
+	//[HttpPost("_Filtered")]
+	//[SwaggerOperation("Get posts that match filter")]
+	//[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	//[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	//public async Task<IActionResult> GetFiltered()
+	//{
+	//	throw new NotImplementedException();
+	//}
 
 	[HttpGet("{id}")]
-	[SwaggerOperation("Get post")]
+	[SwaggerOperation("Get post with all content")]
 	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(string id)
@@ -39,14 +39,14 @@ public class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	[HttpGet("Region/{id}")]
-	[SwaggerOperation("Get all posts in region")]
-	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetAllInRegion(int id)
-	{
-		throw new NotImplementedException();
-	}
+	//[HttpGet("Region/{id}")]
+	//[SwaggerOperation("Get all posts in region")]
+	//[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	//[ProducesResponseType(StatusCodes.Status404NotFound)]
+	//public async Task<IActionResult> GetAllInRegion(int id)
+	//{
+	//	throw new NotImplementedException();
+	//}
 
 	[HttpGet("Region/{id}/Danger")]
 	[SwaggerOperation("Get all Danger posts in region")]
@@ -66,13 +66,13 @@ public class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	[HttpGet("Region/Custom")]
-	[SwaggerOperation("Get all posts with Custom region")]
-	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetAllWithCustomRegion()
-	{
-		throw new NotImplementedException();
-	}
+	//[HttpGet("Region/Custom")]
+	//[SwaggerOperation("Get all posts with Custom region")]
+	//[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	//public async Task<IActionResult> GetAllWithCustomRegion()
+	//{
+	//	throw new NotImplementedException();
+	//}
 
 	[HttpGet("Authored/{id}")]
 	[SwaggerOperation("Get all posts made by user id")]
@@ -84,14 +84,14 @@ public class PostController : Controller
 	}
 
 
-	[HttpGet("{id}/Comment")]
-	[SwaggerOperation("Get all comments of a post")]
-	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetAllComments(int id)
-	{
-		throw new NotImplementedException();
-	}
+	//[HttpGet("{id}/Comment")]
+	//[SwaggerOperation("Get all comments of a post")]
+	//[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
+	//[ProducesResponseType(StatusCodes.Status404NotFound)]
+	//public async Task<IActionResult> GetAllComments(int id)
+	//{
+	//	throw new NotImplementedException();
+	//}
 
 	[HttpPost("{id}/Comment")]
 	[SwaggerOperation("Add a comment to the post (User)")]

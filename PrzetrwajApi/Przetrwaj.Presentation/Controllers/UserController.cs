@@ -20,7 +20,7 @@ namespace Przetrwaj.Presentation.Controllers;
 /// Do not confuse this one with 'AccountController',
 /// as this one does not return any sensitive data period.
 /// </summary>
-[Route("WIP/[controller]")]
+[Route("[controller]")]
 [ApiController]
 public class UserController : Controller
 {
@@ -34,7 +34,7 @@ public class UserController : Controller
 	}
 
 
-	[HttpGet("{id}")]
+	[HttpGet("WIP/{id}")]
 	[SwaggerOperation("Get publicly visible General data of user by id")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -44,7 +44,7 @@ public class UserController : Controller
 	}
 
 
-	[HttpGet("{id}/Posts")]
+	[HttpGet("WIP/{id}/Posts")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -53,7 +53,7 @@ public class UserController : Controller
 		throw new NotImplementedException();
 	}
 
-	[HttpGet("{id}/Comments")]
+	[HttpGet("WIP/{id}/Comments")]
 	[SwaggerOperation("Get all comments made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -35,7 +35,7 @@ button:hover {
     color: white;
 }
 
-input[type=email], input[type=password] {
+.form-control {
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;

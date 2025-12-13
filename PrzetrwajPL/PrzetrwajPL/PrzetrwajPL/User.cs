@@ -1,17 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace PrzetrwajPL;
 
-namespace PrzetrwajPL
+public class User
 {
-    public class User
-    {
-        public string id { get; set; }
-        public string email { get; set; }
-        public string name { get; set; }
-        public string surname { get; set; }
-        public string role { get; set; }
-        public bool twoFactorEnabled { get; set; }
-        public bool banned { get; set; }
-        public string banReason { get; set; }
+	public string Id { get; set; }
+	public string Email { get; set; }
+	public string Name { get; set; }
+	public string Surname { get; set; }
+	public string Role { get; set; }
+	public bool TwoFactorEnabled { get; set; }
+	public bool Banned { get; set; }
+	public string BanReason { get; set; }
 
-    }
+	public BannedByUser BannedBy { get; set; }
+}
+public class BannedByUser
+{
+	public string Id { get; set; }
+	public string Name { get; set; }
+	public string Surname { get; set; }
 }

@@ -4,6 +4,7 @@
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @using PrzetrwajPL;
+@using PrzetrwajPL.Models
 
 <div class="container">
 	<div class="inContainer">
@@ -87,9 +88,9 @@
 			}
 			else
 			{
-				var errorText = await response.Content.ReadAsStringAsync();
+				var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
 				// errorMessage = "Nieprawidłowy email lub hasło.";
-				errorMessage = errorText;
+				errorMessage = errorText?.Error.Message;
 			}
 		}
 		catch (Exception ex)

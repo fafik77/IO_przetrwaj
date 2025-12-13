@@ -4,6 +4,7 @@
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @using PrzetrwajPL;
+@using PrzetrwajPL.Models
 
 <div class="container">
 	<div class="inContainer">
@@ -66,32 +67,43 @@
 		try
 		{
 			var response = await HttpClient.PostAsJsonAsync("/Login/email", loginRequest);
-			var result = await response.Content.ReadFromJsonAsync<User>();
 			if (response.IsSuccessStatusCode)
 			{
+				var result = await response.Content.ReadFromJsonAsync<User>();
 				if (result != null)
 				{
 					user = result;
-					if (result.banned)
-					{
-						errorMessage = $"Twoje konto jest zablokowane. Powód: {result.banReason}";
-					}
-					else
-					{
-						NavigationManager.NavigateTo("/", forceLoad: true);
-					}
+					// if (result.Banned)
+					// {
+					// 	errorMessage = $"Twoje konto jest zablokowane. Powód: {result.banReason}";
+					// }
+					// else
+					// {
+					NavigationManager.NavigateTo("/", forceLoad: true);
+					// }
 				}
-				else{
+				else
+				{
 					errorMessage = "Nieprawidłowa odpowiedź z serwera.";
 				}
 			}
-			else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest && result?.banned == true)
+			else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
 			{
-				errorMessage = $"Twoje konto jest zablokowane. Powód: {result.banReason}";
+				User? result = null;
+				try
+				{
+					result = await response.Content.ReadFromJsonAsync<User>();
+					if (result?.Banned == true)
+						errorMessage = $"Twoje konto zostało zablokowane przez {result.BannedBy.Name} {result.BannedBy.Surname}. Powód: {result.BanReason}";
+				}
+				catch (Exception ex)
+				{
+					errorMessage = "Nieprawidłowy email lub hasło.";
+				}
 			}
 			else
 			{
-				var errorText = await response.Content.ReadAsStringAsync();
+				var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
 				errorMessage = "Nieprawidłowy email lub hasło.";
 			}
 		}

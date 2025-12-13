@@ -48,6 +48,14 @@ public class PostController : Controller
 	//	throw new NotImplementedException();
 	//}
 
+	[HttpGet]
+	[SwaggerOperation("Get all posts for map display.")]
+	[ProducesResponseType(typeof(IEnumerable<PostMinimalCategoryRegionDto>), StatusCodes.Status200OK)]
+	public async Task<IActionResult> GetAllPosts()
+	{
+		throw new NotImplementedException();
+	}
+
 	[HttpGet("Region/{id}/Danger")]
 	[SwaggerOperation("Get all Danger posts in region")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]

@@ -59,18 +59,14 @@ public class AuthService : IAuthService
 		if (user == null || user.EmailConfirmed == false)
 			throw new InvalidLoginException("Bad login attempt");
 
-
 		if (await _userManager.IsLockedOutAsync(user))
 			throw new InvalidLoginException("Bad login attempt");
 
-		if (user.Banned || user.BanDate != null)
-		{
-
-			return user;
-		}
-
 		if (false == await _userManager.CheckPasswordAsync(user, password))
 			throw new InvalidLoginException("Bad login attempt");
+
+		if (user.Banned || user.BanDate != null)    //user is banned
+			return user;
 
 		var signedIn = await _signInManager.PasswordSignInAsync(user, password, true, true);
 		if (signedIn.Succeeded)
@@ -88,6 +84,7 @@ public class AuthService : IAuthService
 			Surname = register.Surname,
 			UserName = register.Email, // Typically, UserName is set to the email for login (its enforced unique)
 			IdRegion = register.IdRegion ?? 0,
+			RegistrationDate = DateTimeOffset.UtcNow,
 		};
 
 		var result = await _userManager.CreateAsync(user, register.Password);

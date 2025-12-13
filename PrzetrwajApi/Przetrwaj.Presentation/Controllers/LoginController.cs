@@ -35,9 +35,9 @@ public class LoginController : Controller
 
 			return Ok(result);
 		}
-		catch (InvalidLoginException invalidLogin)
+		catch (Exception ex) when (ex is InvalidLoginException)
 		{
-			return BadRequest(invalidLogin.Message);
+			return BadRequest(ex.Message);
 		}
 		catch (Exception)
 		{

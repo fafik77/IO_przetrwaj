@@ -30,12 +30,14 @@ public class AccountController : Controller
 	private readonly IMediator _mediator;
 	private readonly SignInManager<AppUser> _signInManager;
 	private readonly IAuthService _authService;
+	private readonly UserManager<AppUser> _userManager;
 
-	public AccountController(IMediator mediator, SignInManager<AppUser> signInManager, IAuthService authService)
+	public AccountController(IMediator mediator, SignInManager<AppUser> signInManager, IAuthService authService, UserManager<AppUser> userManager)
 	{
 		_mediator = mediator;
 		_signInManager = signInManager;
 		_authService = authService;
+		_userManager = userManager;
 	}
 
 
@@ -54,6 +56,8 @@ public class AccountController : Controller
 		{
 			var user = await _authService.GetUserDetailsAsync(currentUserId);
 			var dto = (UserWithPersonalDataDto)user;
+			var roles = await _userManager.GetRolesAsync(user);
+			dto.Role = string.Join(", ", roles);
 			return Ok(dto);
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)

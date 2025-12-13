@@ -20,10 +20,10 @@ public class RegionRepository : IRegionRepository
 		await _dbContext.Regions.AddAsync(region, cancellationToken);
 	}
 
-	public async Task<Region> GetByIdAsync(int id, CancellationToken cancellationToken)
+	public async Task<Region?> GetByIdAsync(int id, CancellationToken cancellationToken)
 	{
 		var region = await _dbContext.Regions.FirstOrDefaultAsync(r => r.IdRegion == id, cancellationToken);
-		if (region == null) throw new RegionNotFoundException(id);
+		//if (region == null) throw new RegionNotFoundException(id);
 		return region;
 	}
 

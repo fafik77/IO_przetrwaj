@@ -13,7 +13,7 @@
 		<DataAnnotationsValidator />
 		@if (!string.IsNullOrEmpty(errorMessage))
 		{
-			<div class="alert alert-danger" role="alert" style="color: red; text-align:center;">@errorMessage</div>
+			<div class="alert alert-danger pre-wrap" role="alert" style="color: black; text-align:center;">@errorMessage</div>
 		}
 		<label for="name">Imie:</label><br />
 		<InputText @bind-Value="registerRequest.Name" id="name" placeholder="Podaj imie" class="form-control"/>
@@ -32,8 +32,8 @@
 		<ValidationMessage For="@(() => registerRequest.Password)" style="color:red; font-size: 12px;" /><br />
 		
 		<label for="passwordRetake">Powtórz hasło:</label><br />
-		<InputText @bind-Value="registerRequest.Password" type="password" id="password" placeholder="Powtórz hasło" class="form-control"/>
-		<ValidationMessage For="@(() => registerRequest.Password)" style="color:red; font-size: 12px;" /><br />
+		<InputText @bind-Value="registerRequest.ConfirmPassword" type="password" id="password" placeholder="Powtórz hasło" class="form-control"/>
+			<ValidationMessage For="@(() => registerRequest.ConfirmPassword)" style="color:red; font-size: 12px;" /><br />
 
 		<label>
 			<input type="checkbox" checked="checked" name="ifUser"> Użytkownik
@@ -64,6 +64,11 @@
 
 	private async Task HandleRegister()
 	{
+		if (registerRequest.ConfirmPassword != registerRequest.Password)
+		{
+			errorMessage = "Hasła nie są takie same!";
+			return;
+		}
 		isLoading = true;
 		errorMessage = string.Empty;
 		try
@@ -83,7 +88,7 @@
 			else
 			{
 				var errorText = await response.Content.ReadAsStringAsync();
-				errorMessage = "Nieprawidłowy email lub hasło.";
+				// errorMessage = "Nieprawidłowy email lub hasło.";
 				errorMessage = errorText;
 			}
 		}

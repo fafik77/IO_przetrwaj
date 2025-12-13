@@ -13,7 +13,7 @@
 		<DataAnnotationsValidator />
 		@if (!string.IsNullOrEmpty(errorMessage))
 		{
-			<div class="alert alert-danger" role="alert" style="color: red; text-align:center;">@errorMessage</div>
+			<div class="alert alert-danger pre-wrap" role="alert" style="color: black; text-align:center;">@errorMessage</div>
 		}
 		<label for="email">E-mail:</label><br />
 		<InputText @bind-Value="loginRequest.Email" id="email" placeholder="Podaj email" class="form-control"/>
@@ -66,9 +66,9 @@
 		try
 		{
 			var response = await HttpClient.PostAsJsonAsync("/Login/email", loginRequest);
+			var result = await response.Content.ReadFromJsonAsync<User>();
 			if (response.IsSuccessStatusCode)
 			{
-				var result = await response.Content.ReadFromJsonAsync<User>();
 				if (result != null)
 				{
 					user = result;
@@ -84,6 +84,10 @@
 				else{
 					errorMessage = "Nieprawidłowa odpowiedź z serwera.";
 				}
+			}
+			else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest && result?.banned == true)
+			{
+				errorMessage = $"Twoje konto jest zablokowane. Powód: {result.banReason}";
 			}
 			else
 			{

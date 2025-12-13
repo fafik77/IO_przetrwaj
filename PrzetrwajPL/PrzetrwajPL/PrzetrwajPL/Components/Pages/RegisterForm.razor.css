@@ -9,9 +9,9 @@
     width: 100%;
 }
 
-    button:hover {
-        opacity: 0.8;
-    }
+button:hover {
+    opacity: 0.8;
+}
 
 .google {
     background-color: #ffffff;
@@ -61,4 +61,8 @@
 
 div p {
     text-align: center;
+}
+
+.pre-wrap {
+	white-space: pre-wrap;
 }

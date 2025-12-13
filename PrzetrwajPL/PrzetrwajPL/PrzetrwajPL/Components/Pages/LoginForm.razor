@@ -1,25 +1,38 @@
 ﻿@page "/login"
-<h2 style="text-align=center">Login</h2>
 
+@inject HttpClient HttpClient
 
-<form>
-	<div style="margin: auto; width: 300px;">
+<div class="container">
+	<div class="inContainer">
+	<h2 style="text-align:center; font-weight:bold;">Zaloguj się</h2>
+	<p style="text-align:center;">Witamy! Podaj swoje dane poniżej żeby się zalogować</p>
+	<form>
 		<label for="email">E-mail:</label><br />
 		<input type="email" id="email" name="email" placeholder="Podaj email" required/><br /><br />
 
 		<label for="password">Hasło:</label><br />
-		<input type="password" id="password" name="password" placeholder="Podaj hasło" required /><br /><br />
+		<input type="password" id="password" name="password" placeholder="Podaj hasło" required /><br />
 
-		<button type="submit">Zaloguj się</button>
+		<label>
+			<input type="checkbox" checked="checked" name="remember"> Zapamiętaj mnie
+		</label><br /><br />
 
-		@* <input style="margin: auto;" type="submit" value="Zaloguj się" /> *@
-	</div>
-	<div>
+		<button type="submit">Zaloguj się</button><br /><br />
+
 		<p>Nie masz konta? <a href="/register">Zarejestruj się</a></p>
+		@* <p style="font-size:12px; text-align:center; margin-top: -10px"><a href=#>Prześlij ponownie potwierdzenie e-mail</a></p> *@
+	</form>
 	</div>
-</form>
-
+	<div class="inContainer">
+		<h2 style="text-align:center; font-weight:bold;">Szybkie logowanie</h2>
+		<p>Użyj konta do zalogowania:</p><br />
+		<button type="button" class="google">Google</button><br /><br />
+		<button type="button" class="facebook">Facebook</button><br /><br />
+		<button type="button" class="github">GitHub</button><br /><br />
+		<button type="button" class="microsoft">Microsoft</button><br /><br />
+	</div>
+</div>
 
 @code {
-
+	
 }

@@ -28,7 +28,7 @@ public partial class RegisterController : Controller
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> RegisterWithEmail([FromBody] RegisterEmailCommand model)
 	{
-		if (!ModelState.IsValid) return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		try
 		{
 			var result = await _mediator.Send(model);
@@ -41,10 +41,6 @@ public partial class RegisterController : Controller
 		catch (NotImplementedException ex)
 		{
 			return BadRequest((ExceptionCasting)new RegisterException(ex.Message));
-		}
-		catch (ValidationException ex)
-		{
-			return BadRequest(ex);
 		}
 	}
 }

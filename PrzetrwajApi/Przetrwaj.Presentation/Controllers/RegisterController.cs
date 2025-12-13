@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Register;
@@ -32,11 +33,7 @@ public partial class RegisterController : Controller
 			var result = await _mediator.Send(model);
 			return Ok(result);
 		}
-		catch (InvalidOperationException ex) //from handler
-		{
-			return BadRequest(ex.Message);
-		}
-		catch (NotImplementedException ex) //from email service
+		catch (Exception ex) when (ex is InvalidOperationException or NotImplementedException or ValidationException)
 		{
 			return BadRequest(ex.Message);
 		}

@@ -90,7 +90,8 @@ public class AuthService : IAuthService
 		var result = await _userManager.CreateAsync(user, register.Password);
 		if (!result.Succeeded)
 		{   // do not expose too much info
-			throw new InvalidOperationException("User creation failed.");
+			string errors = string.Join("\n", result.Errors.Where(e => e.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)).Select(e=>e.Description).ToList());
+			throw new InvalidOperationException(errors);
 		}
 
 		// 1. Generate the Code

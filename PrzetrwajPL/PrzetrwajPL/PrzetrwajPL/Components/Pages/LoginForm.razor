@@ -1,24 +1,26 @@
 ﻿@page "/login"
+@rendermode InteractiveServer
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@using PrzetrwajPL;
 
 <div class="container">
 	<div class="inContainer">
 	<h2 style="text-align:center; font-weight:bold;">Zaloguj się</h2>
 	<p style="text-align:center;">Witamy! Podaj swoje dane poniżej żeby się zalogować</p>
 	<EditForm Model="@loginRequest" OnValidSubmit="HandleLogin" FormName="loginForm">
-		<DataAnnotationsValidator />
+		@* <DataAnnotationsValidator />
 		@if (!string.IsNullOrEmpty(errorMessage))
 		{
 			<div class="alert alert-danger" role="alert" style="color: red; text-align:center;">@errorMessage</div>
-		}
+		} *@
 		<label for="email">E-mail:</label><br />
 		<InputText @bind-Value="loginRequest.Email" id="email" placeholder="Podaj email" class="form-control"/>
 		<ValidationMessage For="@(() => loginRequest.Email)" style="color:red; font-size: 12px;" /><br />
 		@* <input type="email" id="email" name="email" placeholder="Podaj email" required/><br /><br /> *@
 
-		<label for="password">Hasło:</label><br />
+			<label for="password">Hasło:</label><br />
 		<InputText @bind-Value="loginRequest.Password" type="password" id="password" placeholder="Podaj hasło" class="form-control"/>
 		<ValidationMessage For="@(() => loginRequest.Password)" style="color:red; font-size: 12px;" /><br />
 		@* <input type="password" id="password" name="password" placeholder="Podaj hasło" required /><br /> *@
@@ -53,8 +55,9 @@
 </div>
 
 @code {
-	private User user = new();
-	private LoginRequest loginRequest = new();
+	private User user = null;
+	[SupplyParameterFromForm]
+	public LoginRequest loginRequest { get; set; } = new LoginRequest();
 	private string errorMessage;
 	private bool isLoading = false;
 
@@ -69,10 +72,11 @@
 			{
 				var result = await response.Content.ReadFromJsonAsync<User>();
 				if (result != null)
-                {
-                    if (user.banned)
+				{
+					user = result;
+					if (result.banned)
                     {
-                        errorMessage = $"Twoje konto jest zablokowane. Powód: {user.banReason}";
+						errorMessage = $"Twoje konto jest zablokowane. Powód: {result.banReason}";
                     }
                     else
                     {

@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrzetrwajPL", "PrzetrwajPL\PrzetrwajPL.csproj", "{DC12F0DD-11F3-24E4-9B78-3CF74FAC4D44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrzetrwajPL.Client", "PrzetrwajPL.Client\PrzetrwajPL.Client.csproj", "{34B77725-FD29-72D9-36EA-82672C0AC318}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC12F0DD-11F3-24E4-9B78-3CF74FAC4D44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC12F0DD-11F3-24E4-9B78-3CF74FAC4D44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC12F0DD-11F3-24E4-9B78-3CF74FAC4D44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC12F0DD-11F3-24E4-9B78-3CF74FAC4D44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34B77725-FD29-72D9-36EA-82672C0AC318}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34B77725-FD29-72D9-36EA-82672C0AC318}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34B77725-FD29-72D9-36EA-82672C0AC318}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34B77725-FD29-72D9-36EA-82672C0AC318}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CB1C7258-94DB-4605-8B03-DDD78925BC5C}
+	EndGlobalSection
+EndGlobal

@@ -10,20 +10,18 @@
 	<h2 style="text-align:center; font-weight:bold;">Zaloguj się</h2>
 	<p style="text-align:center;">Witamy! Podaj swoje dane poniżej żeby się zalogować</p>
 	<EditForm Model="@loginRequest" OnValidSubmit="HandleLogin" FormName="loginForm">
-		@* <DataAnnotationsValidator />
+		<DataAnnotationsValidator />
 		@if (!string.IsNullOrEmpty(errorMessage))
 		{
 			<div class="alert alert-danger" role="alert" style="color: red; text-align:center;">@errorMessage</div>
-		} *@
+		}
 		<label for="email">E-mail:</label><br />
 		<InputText @bind-Value="loginRequest.Email" id="email" placeholder="Podaj email" class="form-control"/>
 		<ValidationMessage For="@(() => loginRequest.Email)" style="color:red; font-size: 12px;" /><br />
-		@* <input type="email" id="email" name="email" placeholder="Podaj email" required/><br /><br /> *@
 
 			<label for="password">Hasło:</label><br />
 		<InputText @bind-Value="loginRequest.Password" type="password" id="password" placeholder="Podaj hasło" class="form-control"/>
 		<ValidationMessage For="@(() => loginRequest.Password)" style="color:red; font-size: 12px;" /><br />
-		@* <input type="password" id="password" name="password" placeholder="Podaj hasło" required /><br /> *@
 
 		<label>
 			<input type="checkbox" checked="checked" name="remember"> Zapamiętaj mnie
@@ -75,15 +73,14 @@
 				{
 					user = result;
 					if (result.banned)
-                    {
+					{
 						errorMessage = $"Twoje konto jest zablokowane. Powód: {result.banReason}";
-                    }
-                    else
-                    {
-						Console.WriteLine($"Logowanie: {loginRequest.Email}");
-                        NavigationManager.NavigateTo("/", forceLoad: true);
-                    }
-                }
+					}
+					else
+					{
+						NavigationManager.NavigateTo("/", forceLoad: true);
+					}
+				}
 				else{
 					errorMessage = "Nieprawidłowa odpowiedź z serwera.";
 				}
@@ -91,9 +88,7 @@
 			else
 			{
 				var errorText = await response.Content.ReadAsStringAsync();
-                errorMessage = string.IsNullOrEmpty(errorText) 
-                    ? "Nieprawidłowy email lub hasło." 
-                    : $"Błąd: {errorText}";
+				errorMessage = "Nieprawidłowy email lub hasło.";
 			}
 		}
 		catch (Exception ex)

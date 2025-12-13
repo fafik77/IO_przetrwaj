@@ -1,0 +1,98 @@
+﻿@page "/register"
+@rendermode InteractiveServer
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@using PrzetrwajPL;
+
+<div class="container">
+	<div class="inContainer">
+	<h2 style="text-align:center; font-weight:bold;">Zarejestruj się</h2>
+	<p style="text-align:center;">Witamy! Podaj swoje dane poniżej żeby się zarejestrować</p>
+	<EditForm Model="@registerRequest" OnValidSubmit="HandleLogin" FormName="loginForm">
+		<DataAnnotationsValidator />
+		@if (!string.IsNullOrEmpty(errorMessage))
+		{
+			<div class="alert alert-danger" role="alert" style="color: red; text-align:center;">@errorMessage</div>
+		}
+		<label for="name">Imie:</label><br />
+		<InputText @bind-Value="registerRequest.Name" id="name" placeholder="Podaj imie" class="form-control"/>
+		<ValidationMessage For="@(() => registerRequest.Email)" style="color:red; font-size: 12px;" /><br />
+		
+		<label for="surname">Nazwisko:</label><br />
+		<InputText @bind-Value="registerRequest.Surname" id="surname" placeholder="Podaj nazwisko" class="form-control"/>
+		<ValidationMessage For="@(() => registerRequest.Email)" style="color:red; font-size: 12px;" /><br />
+
+		<label for="email">E-mail:</label><br />
+		<InputText @bind-Value="registerRequest.Email" id="email" placeholder="Podaj email" class="form-control"/>
+		<ValidationMessage For="@(() => registerRequest.Email)" style="color:red; font-size: 12px;" /><br />
+
+		<label for="password">Hasło:</label><br />
+		<InputText @bind-Value="registerRequest.Password" type="password" id="password" placeholder="Podaj hasło" class="form-control"/>
+		<ValidationMessage For="@(() => registerRequest.Password)" style="color:red; font-size: 12px;" /><br />
+		
+		<label for="passwordRetake">Powtórz hasło:</label><br />
+		<InputText @bind-Value="registerRequest.Password" type="password" id="password" placeholder="Powtórz hasło" class="form-control"/>
+		<ValidationMessage For="@(() => registerRequest.Password)" style="color:red; font-size: 12px;" /><br />
+
+		<label>
+			<input type="checkbox" checked="checked" name="ifUser"> Użytkownik
+			</label>
+		<label>
+			<input type="checkbox" name="ifModerator"> Moderator
+		</label><br /><br />
+
+		<button type="submit" disabled="@isLoading">
+			@if (isLoading)
+			{
+				<span>Rejsetrowanie...</span>
+			}
+			else
+			{
+				<span>Zarejestruj</span>
+			}
+		</button><br /><br />
+	</EditForm>
+	</div>
+</div>
+
+@code {
+	private User user = new();
+	private RegisterRequest registerRequest = new();
+	private string errorMessage;
+	private bool isLoading = false;
+
+	private async Task HandleLogin()
+	{
+		isLoading = true;
+		errorMessage = string.Empty;
+		try
+		{
+			var response = await HttpClient.PostAsJsonAsync("/Register/email", registerRequest);
+			if (response.IsSuccessStatusCode)
+			{
+				var result = await response.Content.ReadFromJsonAsync<User>();
+				if (result != null)
+                {
+                    NavigationManager.NavigateTo("/", forceLoad: true);
+                }
+				else{
+					errorMessage = "Nieprawidłowa odpowiedź z serwera.";
+				}
+			}
+			else
+			{
+				var errorText = await response.Content.ReadAsStringAsync();
+                errorMessage = "Nieprawidłowy email lub hasło.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = $"Błąd połączenia: {ex.Message}";
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+}

@@ -1,0 +1,64 @@
+﻿button {
+    background-color: #0094ff;
+    color: white;
+    padding: 14px 20px;
+    margin: auto;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+    button:hover {
+        opacity: 0.8;
+    }
+
+.google {
+    background-color: #ffffff;
+    color: #0094ff;
+    border: 2px solid #0094ff;
+}
+
+.facebook {
+    background-color: #3b5998;
+    color: white;
+}
+
+.github {
+    background-color: #ffffff;
+    color: black;
+    border: 2px solid #000000;
+}
+
+.microsoft {
+    background-color: #263fc9;
+    color: white;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.container {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    place-content: center;
+}
+
+.inContainer {
+    display: flex-block;
+    padding: 22px;
+    flex-basis: 55%;
+    border-radius: 8px 8px 8px 8px;
+}
+
+
+div p {
+    text-align: center;
+}

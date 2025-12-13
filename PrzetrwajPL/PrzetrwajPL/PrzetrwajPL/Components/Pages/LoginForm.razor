@@ -53,10 +53,10 @@
 </div>
 
 @code {
-	private User user = null;
+	private User? user = null;
 	[SupplyParameterFromForm]
 	public LoginRequest loginRequest { get; set; } = new LoginRequest();
-	private string errorMessage;
+	private string errorMessage = string.Empty;
 	private bool isLoading = false;
 
 	private async Task HandleLogin()

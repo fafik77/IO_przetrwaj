@@ -9,7 +9,7 @@
 	<div class="inContainer">
 	<h2 style="text-align:center; font-weight:bold;">Zarejestruj się</h2>
 	<p style="text-align:center;">Witamy! Podaj swoje dane poniżej żeby się zarejestrować</p>
-	<EditForm Model="@registerRequest" OnValidSubmit="HandleLogin" FormName="loginForm">
+	<EditForm Model="@registerRequest" OnValidSubmit="HandleRegister" FormName="loginForm">
 		<DataAnnotationsValidator />
 		@if (!string.IsNullOrEmpty(errorMessage))
 		{
@@ -45,7 +45,7 @@
 		<button type="submit" disabled="@isLoading">
 			@if (isLoading)
 			{
-				<span>Rejsetrowanie...</span>
+				<span>Rejestrowanie...</span>
 			}
 			else
 			{
@@ -59,10 +59,10 @@
 @code {
 	private User user = new();
 	private RegisterRequest registerRequest = new();
-	private string errorMessage;
+	private string errorMessage = string.Empty;
 	private bool isLoading = false;
 
-	private async Task HandleLogin()
+	private async Task HandleRegister()
 	{
 		isLoading = true;
 		errorMessage = string.Empty;
@@ -73,9 +73,9 @@
 			{
 				var result = await response.Content.ReadFromJsonAsync<User>();
 				if (result != null)
-                {
-                    NavigationManager.NavigateTo("/", forceLoad: true);
-                }
+				{
+					NavigationManager.NavigateTo("/", forceLoad: true);
+				}
 				else{
 					errorMessage = "Nieprawidłowa odpowiedź z serwera.";
 				}
@@ -83,7 +83,8 @@
 			else
 			{
 				var errorText = await response.Content.ReadAsStringAsync();
-                errorMessage = "Nieprawidłowy email lub hasło.";
+				errorMessage = "Nieprawidłowy email lub hasło.";
+				errorMessage = errorText;
 			}
 		}
 		catch (Exception ex)

@@ -3,7 +3,7 @@ using System.Net;
 
 namespace Przetrwaj.Domain.Exceptions.Auth;
 
-public class InvalidLoginException(string message) : BaseException(message)
+public class InvalidConfirmationException(string msg) : BaseException(msg)
 {
 	public override HttpStatusCode HttpStatusCode => HttpStatusCode.BadRequest;
 }

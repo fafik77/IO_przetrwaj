@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Auth;
+using Przetrwaj.Domain.Exceptions.Users;
 using Przetrwaj.Domain.Models;
 
 namespace Przetrwaj.Application.AuthServices;
@@ -91,7 +92,7 @@ public class AuthService : IAuthService
 		if (!result.Succeeded)
 		{   // do not expose too much info
 			string errors = string.Join("\n", result.Errors.Where(e => e.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)).Select(e=>e.Description).ToList());
-			throw new InvalidOperationException(errors);
+			throw new RegisterException(errors);
 		}
 
 		// 1. Generate the Code
@@ -105,13 +106,13 @@ public class AuthService : IAuthService
 		// Check if relativeUrl is null (route not found)
 		if (string.IsNullOrEmpty(relativeUrl))
 		{   //Email confirmation related errors
-			throw new InvalidOperationException("Could not generate confirmation URL.");
+			throw new RegisterException("Could not generate confirmation URL.");
 		}
 		// 3. Get the request scheme and host from HttpContext
 		var request = _httpContextAccessor.HttpContext?.Request;
 		if (request == null)
 		{   //Email confirmation related errors
-			throw new InvalidOperationException("Cannot access HTTP context to build URL.");
+			throw new RegisterException("Cannot access HTTP context to build URL.");
 		}
 		var scheme = request.Scheme;
 		var host = request.Host.Value;

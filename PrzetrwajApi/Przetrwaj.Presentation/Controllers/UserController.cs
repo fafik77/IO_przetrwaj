@@ -37,7 +37,7 @@ public class UserController : Controller
 	[HttpGet("WIP/{id}")]
 	[SwaggerOperation("Get publicly visible General data of user by id")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(string id)
 	{
 		throw new NotImplementedException();
@@ -47,7 +47,7 @@ public class UserController : Controller
 	[HttpGet("WIP/{id}/Posts")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetAllPosts(string id)
 	{
 		throw new NotImplementedException();
@@ -56,7 +56,7 @@ public class UserController : Controller
 	[HttpGet("WIP/{id}/Comments")]
 	[SwaggerOperation("Get all comments made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetAllComments(string id)
 	{
 		throw new NotImplementedException();
@@ -69,18 +69,26 @@ public class UserController : Controller
 	[Authorize(UserRoles.Admin)]
 	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin only)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
-	public async Task<IdentityResult> AssignModeratorRole(MakeModeratorCommand userInfo)
+	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> AssignModeratorRole(MakeModeratorCommand userInfo)
 	{
-		if (!ModelState.IsValid) return IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" });
-		var res = await _mediator.Send(userInfo);
-		return res;
+		if (!ModelState.IsValid) return BadRequest(IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" }));
+		try
+		{
+			var res = await _mediator.Send(userInfo);
+			return Ok(res);
+		}catch(BaseException ex)
+		{
+			return NotFound((ExceptionCasting)ex);
+		}
 	}
 
 	[HttpPost("Ban")]
 	[Authorize(UserRoles.Moderator)]
 	[SwaggerOperation("Ban a user by Id or Email (Moderator only)")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> Ban(BanUserCommand banUserCommand)
 	{
@@ -99,7 +107,7 @@ public class UserController : Controller
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
-			return NotFound(ex.Message);
+			return NotFound((ExceptionCasting)ex);
 		}
 	}
 }

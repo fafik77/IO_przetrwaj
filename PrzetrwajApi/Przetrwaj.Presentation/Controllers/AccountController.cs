@@ -9,7 +9,9 @@ using Przetrwaj.Application.Commands.Confirm;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
+using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Exceptions.Users;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
@@ -45,7 +47,7 @@ public class AccountController : Controller
 	[SwaggerOperation("Gets user own details (Owner only)")]
 	[Authorize]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetUserOwnInfo()
 	{
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -62,7 +64,7 @@ public class AccountController : Controller
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
-			return NotFound(ex.Message);
+			return NotFound((ExceptionCasting)ex);
 		}
 	}
 
@@ -70,7 +72,8 @@ public class AccountController : Controller
 	[SwaggerOperation("Updates user own account (Owner only)")]
 	[Authorize]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount)
 	{
 		if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -91,7 +94,7 @@ public class AccountController : Controller
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
-			return NotFound(ex.Message);
+			return NotFound((ExceptionCasting)ex);
 		}
 	}
 
@@ -99,11 +102,11 @@ public class AccountController : Controller
 	[HttpGet("ConfirmEmail")]
 	[SwaggerOperation("Confirm Email using the code attached in email")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> ConfirmEmail(string userId, string code)
 	{
 		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(code))
-			return BadRequest("Invalid email confirmation request.");
+			return BadRequest((ExceptionCasting)new InvalidConfirmationException("Invalid email confirmation request."));
 
 		var command = new ConfirmEmailCommand { userId = userId, code = code };
 		try
@@ -113,7 +116,7 @@ public class AccountController : Controller
 		}
 		catch (Exception ex) when (ex is InvalidDataException or UserNotFoundException)
 		{
-			return BadRequest("Invalid email confirmation request.");
+			return BadRequest((ExceptionCasting)new InvalidConfirmationException("Invalid email confirmation request."));
 		}
 	}
 

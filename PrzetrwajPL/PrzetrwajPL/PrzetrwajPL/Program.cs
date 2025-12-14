@@ -1,5 +1,8 @@
 using PrzetrwajPL.Client.Pages;
 using PrzetrwajPL.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/") });
 
 var app = builder.Build();
 

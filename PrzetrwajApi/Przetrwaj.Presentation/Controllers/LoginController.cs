@@ -22,16 +22,17 @@ public class LoginController : Controller
 	}
 
 	[HttpPost("email")]
-	[SwaggerOperation("Login using email. BadRequest with info if user is banned")]
+	[SwaggerOperation("Login using email. 418 with info if user is banned")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status418ImATeapot)]
 	public async Task<IActionResult> LoginWithEmail([FromBody] LoginEmailCommand model)
 	{
-		if (!ModelState.IsValid) return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		try
 		{
 			var result = await _mediator.Send(model);
-			if (result.Banned) return BadRequest(result);
+			if (result.Banned) return StatusCode(StatusCodes.Status418ImATeapot, result);
 
 			return Ok(result);
 		}

@@ -91,7 +91,9 @@ public class AuthService : IAuthService
 		var result = await _userManager.CreateAsync(user, register.Password);
 		if (!result.Succeeded)
 		{   // do not expose too much info
-			string errors = string.Join("\n", result.Errors.Where(e => e.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)).Select(e=>e.Description).ToList());
+			string errors = string.Join("\n", result.Errors.Where(e => e.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)).Select(e => e.Description).ToList());
+			if (string.IsNullOrEmpty(errors))
+				throw new RegisterException($"Could not register email: {register.Email} with password: {register.Password}.\nTry another email or password");
 			throw new RegisterException(errors);
 		}
 

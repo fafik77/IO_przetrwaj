@@ -60,7 +60,7 @@ public class RegionController : Controller
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddRegion([FromBody] AddRegionCommand region)
 	{
-		if (!ModelState.IsValid) return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var res = await _mediator.Send(region);
 		return CreatedAtAction(nameof(GetById), new { id = res.IdRegion }, res);
 	}
@@ -74,7 +74,7 @@ public class RegionController : Controller
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> UpdateRegion([FromBody] UpdateRegionCommand region)
 	{
-		if (!ModelState.IsValid) return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		try
 		{
 			await _mediator.Send(region);

@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -28,7 +27,7 @@ namespace Przetrwaj.Presentation.Controllers;
 [ApiController]
 public class AccountController : Controller
 {
-	private const string AuthenticationCookie = "cookie";
+	//private const string AuthenticationCookie = "cookie";
 	private readonly IMediator _mediator;
 	private readonly SignInManager<AppUser> _signInManager;
 	private readonly IAuthService _authService;
@@ -52,7 +51,7 @@ public class AccountController : Controller
 	{
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
-			return NotFound(); // Returns a 404 User for some reason does not exist
+			return NotFound((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 404 User for some reason does not exist
 
 		try
 		{
@@ -76,10 +75,10 @@ public class AccountController : Controller
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount)
 	{
-		if (!ModelState.IsValid) return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
-			return NotFound(); // Returns a 404 User for some reason does not exist
+			return NotFound((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 404 User for some reason does not exist
 		var requ = new UpdateAccountInternalCommand
 		{
 			UserId = currentUserId,
@@ -126,7 +125,7 @@ public class AccountController : Controller
 	public async Task<IActionResult> Logout()
 	{
 		await _signInManager.SignOutAsync();
-		await HttpContext.SignOutAsync(AuthenticationCookie);
+		//await HttpContext.SignOutAsync(AuthenticationCookie);
 		return NoContent();
 	}
 

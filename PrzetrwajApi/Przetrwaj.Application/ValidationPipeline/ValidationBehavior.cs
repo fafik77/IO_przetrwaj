@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using Przetrwaj.Domain.Exceptions;
 
 namespace Przetrwaj.Application.ValidationPipeline;
 
@@ -17,7 +18,7 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
 	{
 		if (!_validators.Any())
 		{
-			return await next(); // No validators found, proceed
+			return await next(cancellationToken); // No validators found, proceed
 		}
 
 		var context = new ValidationContext<TRequest>(request);
@@ -34,11 +35,11 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
 		{
 			// You should implement a custom exception here (e.g., ValidationException)
 			// that your API layer can catch and map to a 400 Bad Request response.
-			var errorMessages = string.Join(" | ", failures.Select(f => f.ErrorMessage));
-			throw new ValidationException(failures); // FluentValidation's built-in exception
+			var errorMessages = string.Join("\n", failures.Select(f => f.ErrorMessage));
+			throw new ValidationError(errorMessages);
 		}
 
-		return await next();
+		return await next(cancellationToken);
 	}
 }
 

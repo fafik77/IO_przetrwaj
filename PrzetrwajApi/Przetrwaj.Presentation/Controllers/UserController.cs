@@ -78,7 +78,8 @@ public class UserController : Controller
 		{
 			var res = await _mediator.Send(userInfo);
 			return Ok(res);
-		}catch(BaseException ex)
+		}
+		catch (BaseException ex)
 		{
 			return NotFound((ExceptionCasting)ex);
 		}
@@ -89,10 +90,10 @@ public class UserController : Controller
 	[SwaggerOperation("Ban a user by Id or Email (Moderator only)")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> Ban(BanUserCommand banUserCommand)
 	{
-		if (!ModelState.IsValid) return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		//get info from the cookie and send a request
 		var command = new BanUserInternallCommand
 		{

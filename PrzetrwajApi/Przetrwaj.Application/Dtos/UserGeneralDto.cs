@@ -8,6 +8,7 @@ public class UserGeneralDto
 	public string Name { get; set; }
 	public string Surname { get; set; }
 	public RegionOnlyDto? Region { get; set; }
+	public DateTimeOffset RegistrationDate { get; set; }
 
 
 	public static explicit operator UserGeneralDto?(AppUser registeredUser)
@@ -19,6 +20,7 @@ public class UserGeneralDto
 			//Role = string.Join(", ", registeredUser.clai.ToList()),
 			Surname = registeredUser.Surname ?? "",
 			Region = (RegionOnlyDto?)registeredUser.IdRegionNavigation,
+			RegistrationDate = registeredUser.RegistrationDate,
 		};
 	}
 }

@@ -39,7 +39,7 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 
 		AppUser moderator = await _userRepository.GetByIdAsync(request.ModeratorId);
 
-		user.BanDate = DateTime.UtcNow;
+		user.BanDate = DateTimeOffset.UtcNow;
 		user.BanReason = request.Reason;
 		user.BannedById = request.ModeratorId;
 		user.Banned = true;

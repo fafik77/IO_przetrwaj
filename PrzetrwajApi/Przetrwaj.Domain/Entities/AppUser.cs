@@ -14,12 +14,12 @@ public class AppUser : IdentityUser
 	public string? Surname { get; set; }
 	public int IdRegion { get; set; }
 	public bool Banned { get; set; } = false;
-	public DateTime? BanDate { get; set; }
+	public DateTimeOffset? BanDate { get; set; }
 	[MaxLength(300)]
 	public string? BanReason { get; set; }
 	[MaxLength(64)]
 	public string? BannedById { get; set; }
-
+	public DateTimeOffset RegistrationDate { get; set; } = DateTimeOffset.UtcNow;
 
 
 	[ForeignKey(nameof(IdRegion))]

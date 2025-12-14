@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Auth;
+using Przetrwaj.Domain.Exceptions.Users;
 using Przetrwaj.Domain.Models;
 
 namespace Przetrwaj.Application.AuthServices;
@@ -59,18 +60,14 @@ public class AuthService : IAuthService
 		if (user == null || user.EmailConfirmed == false)
 			throw new InvalidLoginException("Bad login attempt");
 
-
 		if (await _userManager.IsLockedOutAsync(user))
 			throw new InvalidLoginException("Bad login attempt");
 
-		if (user.Banned || user.BanDate != null)
-		{
-
-			return user;
-		}
-
 		if (false == await _userManager.CheckPasswordAsync(user, password))
 			throw new InvalidLoginException("Bad login attempt");
+
+		if (user.Banned || user.BanDate != null)    //user is banned
+			return user;
 
 		var signedIn = await _signInManager.PasswordSignInAsync(user, password, true, true);
 		if (signedIn.Succeeded)
@@ -88,12 +85,16 @@ public class AuthService : IAuthService
 			Surname = register.Surname,
 			UserName = register.Email, // Typically, UserName is set to the email for login (its enforced unique)
 			IdRegion = register.IdRegion ?? 0,
+			RegistrationDate = DateTimeOffset.UtcNow,
 		};
 
 		var result = await _userManager.CreateAsync(user, register.Password);
 		if (!result.Succeeded)
 		{   // do not expose too much info
-			throw new InvalidOperationException("User creation failed.");
+			string errors = string.Join("\n", result.Errors.Where(e => e.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)).Select(e => e.Description).ToList());
+			if (string.IsNullOrEmpty(errors))
+				throw new RegisterException($"Could not register email: {register.Email} with password: {register.Password}.\nTry another email or password");
+			throw new RegisterException(errors);
 		}
 
 		// 1. Generate the Code
@@ -107,13 +108,13 @@ public class AuthService : IAuthService
 		// Check if relativeUrl is null (route not found)
 		if (string.IsNullOrEmpty(relativeUrl))
 		{   //Email confirmation related errors
-			throw new InvalidOperationException("Could not generate confirmation URL.");
+			throw new RegisterException("Could not generate confirmation URL.");
 		}
 		// 3. Get the request scheme and host from HttpContext
 		var request = _httpContextAccessor.HttpContext?.Request;
 		if (request == null)
 		{   //Email confirmation related errors
-			throw new InvalidOperationException("Cannot access HTTP context to build URL.");
+			throw new RegisterException("Cannot access HTTP context to build URL.");
 		}
 		var scheme = request.Scheme;
 		var host = request.Host.Value;

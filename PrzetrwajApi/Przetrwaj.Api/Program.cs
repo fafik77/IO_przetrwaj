@@ -115,7 +115,7 @@ builder.Services.AddTransient<IEmailSender, EmailAzureService>();
 
 var app = builder.Build();
 
-
+app.UseCors(AllowAllOrigins);
 app.UsePresentation();
 
 //app.MapPost("login/email", () => "login email");

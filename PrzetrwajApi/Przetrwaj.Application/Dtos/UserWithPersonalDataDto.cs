@@ -13,6 +13,7 @@ public class UserWithPersonalDataDto
 	public RegionOnlyDto? Region { get; set; }
 	public string? Role { get; set; }
 	public bool TwoFactorEnabled { get; set; }
+	public DateTimeOffset RegistrationDate { get; set; }
 
 	public bool Banned { get; set; }
 	public string? BanReason { get; set; }
@@ -35,6 +36,7 @@ public class UserWithPersonalDataDto
 			Banned = registeredUser.Banned,
 			BanReason = registeredUser.BanReason,
 			TwoFactorEnabled = registeredUser.TwoFactorEnabled,
+			RegistrationDate = registeredUser.RegistrationDate,
 		};
 	}
 }

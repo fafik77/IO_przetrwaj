@@ -6,6 +6,7 @@ using Przetrwaj.Application.Commands.Regions;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Quaries.RegionQauries;
 using Przetrwaj.Domain;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
@@ -37,7 +38,7 @@ public class RegionController : Controller
 	[HttpGet("{id}")]
 	[SwaggerOperation("Get Region")]
 	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(int id)
 	{
 		try
@@ -47,7 +48,7 @@ public class RegionController : Controller
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
-			return NotFound(ex.Message);
+			return NotFound((ExceptionCasting)ex);
 		}
 	}
 
@@ -55,11 +56,11 @@ public class RegionController : Controller
 	[SwaggerOperation("Add Region (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status201Created)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddRegion([FromBody] AddRegionCommand region)
 	{
-		if (!ModelState.IsValid) return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var res = await _mediator.Send(region);
 		return CreatedAtAction(nameof(GetById), new { id = res.IdRegion }, res);
 	}
@@ -68,12 +69,12 @@ public class RegionController : Controller
 	[SwaggerOperation("Update Region (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> UpdateRegion([FromBody] UpdateRegionCommand region)
 	{
-		if (!ModelState.IsValid) return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		try
 		{
 			await _mediator.Send(region);
@@ -81,7 +82,7 @@ public class RegionController : Controller
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
-			return NotFound(ex.Message);
+			return NotFound((ExceptionCasting)ex);
 		}
 	}
 
@@ -90,7 +91,7 @@ public class RegionController : Controller
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> DeleteRegion(int id)
 	{
 		try
@@ -100,7 +101,7 @@ public class RegionController : Controller
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
 		{
-			return NotFound(ex.Message);
+			return NotFound((ExceptionCasting)ex);
 		}
 	}
 }

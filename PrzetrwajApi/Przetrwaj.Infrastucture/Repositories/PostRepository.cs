@@ -29,7 +29,7 @@ internal class PostRepository : IPostRepository
 		throw new NotImplementedException();
 	}
 
-	public Task<Post> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+	public Task<Post?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
 	{
 		throw new NotImplementedException();
 	}

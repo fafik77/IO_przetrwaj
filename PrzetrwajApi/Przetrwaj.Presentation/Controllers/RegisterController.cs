@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Register;
 using Przetrwaj.Application.Dtos;
+using Przetrwaj.Domain.Exceptions;
+using Przetrwaj.Domain.Exceptions.Users;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -22,23 +24,22 @@ public partial class RegisterController : Controller
 	[HttpPost("email")]
 	[SwaggerOperation("Register using email")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> RegisterWithEmail([FromBody] RegisterEmailCommand model)
 	{
-		if (!ModelState.IsValid)
-			return BadRequest(ModelState);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		try
 		{
 			var result = await _mediator.Send(model);
 			return Ok(result);
 		}
-		catch (InvalidOperationException ex) //from handler
+		catch (RegisterException ex) //when (ex is  or NotImplementedException or ValidationException)
 		{
-			return BadRequest(ex.Message);
+			return BadRequest((ExceptionCasting)ex);
 		}
-		catch (NotImplementedException ex) //from email service
+		catch (NotImplementedException ex)
 		{
-			return BadRequest(ex.Message);
+			return BadRequest((ExceptionCasting)new RegisterException(ex.Message));
 		}
 	}
 }

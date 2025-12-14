@@ -11,5 +11,5 @@ public interface IGetsAsyncRepository<T> : IGetsAsyncRepository<T, int>
 public interface IGetsAsyncRepository<T, TId>
 {
 	public Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
-	public Task<T> GetByIdAsync(TId id, CancellationToken cancellationToken = default);
+	public Task<T?> GetByIdAsync(TId id, CancellationToken cancellationToken = default);
 }

@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Przetrwaj.Application.AuthServices;
+using Przetrwaj.Application.Services;
 using Przetrwaj.Application.ValidationPipeline;
 using Przetrwaj.Domain.Abstractions;
 using System.Reflection;
@@ -20,6 +21,7 @@ public static class Extensions
 		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>)); // 3. Register the Validation Behavior as a MediatR Pipeline
 
 		services.AddScoped<IAuthService, AuthService>();
+		services.AddHostedService<UnconfirmedUserCleanupService>();
 
 		return services;
 	}

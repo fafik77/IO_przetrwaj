@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions.Users;
 using Przetrwaj.Infrastucture.Context;
 
 namespace Przetrwaj.Infrastucture.Repositories;
@@ -25,22 +24,20 @@ public class UserRepository : IUserRepository
 		return res;
 	}
 
-	public async Task<AppUser> GetByIdAsync(string id, CancellationToken cancellationToken = default)
+	public async Task<AppUser?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
 	{
 		var res = await _dbContext.Users
 			.Include(u => u.IdRegionNavigation)
 			.FirstOrDefaultAsync(u => u.Id == id.ToLower(), cancellationToken);
-		if (res == null) throw new UserNotFoundException(id);
 		return res;
 	}
 
-	public async Task<AppUser> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+	public async Task<AppUser?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
 	{
 		var normEmail = _userManager.NormalizeEmail(email);
 		var res = await _dbContext.Users
 			.Include(u => u.IdRegionNavigation)
 			.FirstOrDefaultAsync(u => u.NormalizedEmail == normEmail, cancellationToken);
-		if (res == null) throw new UserNotFoundException(email);
 		return res;
 	}
 }

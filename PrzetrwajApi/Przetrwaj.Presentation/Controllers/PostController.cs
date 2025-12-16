@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Posts.Attachments;
-using Przetrwaj.Application.Dtos;
+using Przetrwaj.Application.Dtos.Posts;
 using Przetrwaj.Domain;
+using Przetrwaj.Domain.Entities;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -30,9 +31,10 @@ public class PostController : Controller
 	//	throw new NotImplementedException();
 	//}
 
+	//PN priority high
 	[HttpGet("{id}")]
 	[SwaggerOperation("Get post with all content")]
-	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(string id)
 	{
@@ -56,9 +58,10 @@ public class PostController : Controller
 		throw new NotImplementedException();
 	}
 
+	//KL priority high
 	[HttpGet("Region/{id}/Danger")]
 	[SwaggerOperation("Get all Danger posts in region")]
-	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetDangerInRegion(int id)
 	{
@@ -67,7 +70,7 @@ public class PostController : Controller
 
 	[HttpGet("Region/{id}/Resource")]
 	[SwaggerOperation("Get all Resource posts in region")]
-	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetResourceInRegion(int id)
 	{
@@ -84,7 +87,7 @@ public class PostController : Controller
 
 	[HttpGet("Authored/{id}")]
 	[SwaggerOperation("Get all posts made by user id")]
-	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetAllAuthoredBy(string id)
 	{
@@ -104,17 +107,18 @@ public class PostController : Controller
 	[HttpPost("{id}/Comment")]
 	[SwaggerOperation("Add a comment to the post (User)")]
 	[Authorize]
-	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> AddComment(int id)
 	{
 		throw new NotImplementedException();
 	}
 
+	//KL priority high
 	[HttpPost("{id}/VotePositive")]
 	[SwaggerOperation("Add a Positive vote to the post (User)")]
 	[Authorize]
-	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status409Conflict)] //already voted
 	public async Task<IActionResult> VotePositive(int id)
@@ -122,10 +126,11 @@ public class PostController : Controller
 		throw new NotImplementedException();
 	}
 
+	//KL priority high
 	[HttpPost("{id}/VoteNegative")]
 	[SwaggerOperation("Add a Negative vote to the post (User)")]
 	[Authorize]
-	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status409Conflict)] //already voted
 	public async Task<IActionResult> VoteNegative(int id)
@@ -133,10 +138,11 @@ public class PostController : Controller
 		throw new NotImplementedException();
 	}
 
+	//PN priority high
 	[HttpPost("Danger")]
 	[SwaggerOperation("Add a Danger post (User)")]
 	[Authorize(UserRoles.User)]
-	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddPost(AddAttachment files)
@@ -147,7 +153,7 @@ public class PostController : Controller
 	[HttpPost("Resource")]
 	[SwaggerOperation("Add a Recource post (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(typeof(PostDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddResource(AddAttachment files)

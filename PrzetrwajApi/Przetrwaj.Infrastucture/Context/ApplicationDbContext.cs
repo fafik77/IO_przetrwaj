@@ -44,8 +44,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 		// The [Key] on IdVote means it's the primary key, but we need to ensure 
 		// the (IdPost, IdUser) pair is unique.
 		builder.Entity<Vote>()
-			.HasIndex(v => new { v.IdPost, v.IdUser })
-			.IsUnique();
+			.HasKey(v => new { v.IdPost, v.IdUser }); //Key is unique and indexed
 
 		// Relationship: Post (Principal) -> Vote (Dependent)
 		builder.Entity<Vote>()

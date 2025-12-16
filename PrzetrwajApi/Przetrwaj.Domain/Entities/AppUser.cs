@@ -15,7 +15,7 @@ public class AppUser : IdentityUser
 	public int IdRegion { get; set; }
 	public bool Banned { get; set; } = false;
 	public DateTimeOffset? BanDate { get; set; }
-	[MaxLength(300)]
+	//[MaxLength(300)]
 	public string? BanReason { get; set; }
 	[MaxLength(64)]
 	public string? BannedById { get; set; }

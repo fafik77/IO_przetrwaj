@@ -14,7 +14,7 @@ public partial class UserComment
 	[MaxLength(64)]
 	public required string IdAutor { get; set; }
 
-	[MaxLength(1000)]
+	//[MaxLength(1000)]
 	public string Comment { get; set; } = null!;
 
 	public DateTime DateCreated { get; set; }

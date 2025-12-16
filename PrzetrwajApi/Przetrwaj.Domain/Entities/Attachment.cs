@@ -9,7 +9,7 @@ public partial class Attachment
 	public required string IdAttachment { get; set; }
 	[MaxLength(64)]
 	public required string IdPost { get; set; }
-	[MaxLength(200)]
+	//[MaxLength(200)]
 	public string? AlternateDescription { get; set; }
 	/// <summary>
 	/// PN: i think this will be necessary

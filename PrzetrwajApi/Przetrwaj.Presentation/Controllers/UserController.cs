@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Users;
 using Przetrwaj.Application.Dtos;
+using Przetrwaj.Application.Dtos.Posts;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
@@ -36,7 +37,7 @@ public class UserController : Controller
 
 	[HttpGet("WIP/{id}")]
 	[SwaggerOperation("Get publicly visible General data of user by id")]
-	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(string id)
 	{
@@ -46,7 +47,7 @@ public class UserController : Controller
 
 	[HttpGet("WIP/{id}/Posts")]
 	[SwaggerOperation("Get all posts made by user id")]
-	[ProducesResponseType(typeof(IEnumerable<PostDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetAllPosts(string id)
 	{

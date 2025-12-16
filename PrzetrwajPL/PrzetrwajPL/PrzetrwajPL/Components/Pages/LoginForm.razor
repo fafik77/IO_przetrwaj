@@ -1,5 +1,5 @@
 ﻿@page "/login"
-@rendermode InteractiveServer
+@* @rendermode InteractiveServer *@
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
@@ -53,67 +53,4 @@
 	</div>
 </div>
 
-@code {
-	private User? user = null;
-	[SupplyParameterFromForm]
-	public LoginRequest loginRequest { get; set; } = new LoginRequest();
-	private string errorMessage = string.Empty;
-	private bool isLoading = false;
 
-	private async Task HandleLogin()
-	{
-		isLoading = true;
-		errorMessage = string.Empty;
-		try
-		{
-			var response = await HttpClient.PostAsJsonAsync("/Login/email", loginRequest);
-			if (response.IsSuccessStatusCode)
-			{
-				var result = await response.Content.ReadFromJsonAsync<User>();
-				if (result != null)
-				{
-					user = result;
-					// if (result.Banned)
-					// {
-					// 	errorMessage = $"Twoje konto jest zablokowane. Powód: {result.banReason}";
-					// }
-					// else
-					// {
-					NavigationManager.NavigateTo("/", forceLoad: true);
-					// }
-				}
-				else
-				{
-					errorMessage = "Nieprawidłowa odpowiedź z serwera.";
-				}
-			}
-			else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-			{
-				User? result = null;
-				try
-				{
-					result = await response.Content.ReadFromJsonAsync<User>();
-					if (result?.Banned == true)
-						errorMessage = $"Twoje konto zostało zablokowane przez {result.BannedBy.Name} {result.BannedBy.Surname}. Powód: {result.BanReason}";
-				}
-				catch (Exception ex)
-				{
-					errorMessage = "Nieprawidłowy email lub hasło.";
-				}
-			}
-			else
-			{
-				var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-				errorMessage = "Nieprawidłowy email lub hasło.";
-			}
-		}
-		catch (Exception ex)
-		{
-			errorMessage = $"Błąd połączenia: {ex.Message}";
-		}
-		finally
-		{
-			isLoading = false;
-		}
-	}
-}

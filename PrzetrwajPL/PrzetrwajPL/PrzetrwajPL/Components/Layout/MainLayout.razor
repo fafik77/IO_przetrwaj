@@ -8,11 +8,20 @@
     <main>
         <div class="top-row px-4">
             <div>
-                <a href="">PrzetrwajPL</a>
+                <a href="/">PrzetrwajPL</a>
             </div>
-            <div>
-                <a href="login">Zaloguj się</a>
-            </div>
+			<AuthorizeView>
+				<NotAuthorized>
+					<div>
+						<a href="/login">Zaloguj się</a>
+					</div>
+				</NotAuthorized>
+				<Authorized>
+					<div>
+						<a href="/logout">Wyloguj się</a>
+					</div>
+				</Authorized>
+			</AuthorizeView>
         </div>
 
         <article class="content px-4">

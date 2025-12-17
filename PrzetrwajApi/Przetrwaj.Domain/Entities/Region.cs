@@ -6,8 +6,10 @@ public partial class Region
 {
 	[Key]
 	public int IdRegion { get; set; }
-	[MaxLength(100)]
+	//[MaxLength(100)]
 	public required string Name { get; set; }
+	public double Lat {  get; set; }
+	public double Long { get; set; }
 
 
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();

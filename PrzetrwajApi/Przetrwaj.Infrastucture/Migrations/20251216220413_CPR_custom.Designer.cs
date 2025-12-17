@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Przetrwaj.Infrastucture.Context;
@@ -11,9 +12,11 @@ using Przetrwaj.Infrastucture.Context;
 namespace Przetrwaj.Infrastucture.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251216220413_CPR_custom")]
+    partial class CPR_custom
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -173,8 +176,8 @@ namespace Przetrwaj.Infrastucture.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("BannedById")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -197,8 +200,8 @@ namespace Przetrwaj.Infrastucture.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(24)
-                        .HasColumnType("character varying(24)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -224,8 +227,8 @@ namespace Przetrwaj.Infrastucture.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Surname")
-                        .HasMaxLength(24)
-                        .HasColumnType("character varying(24)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
@@ -259,8 +262,8 @@ namespace Przetrwaj.Infrastucture.Migrations
 
                     b.Property<string>("IdPost")
                         .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("OrderInList")
                         .HasColumnType("integer");
@@ -302,8 +305,8 @@ namespace Przetrwaj.Infrastucture.Migrations
             modelBuilder.Entity("Przetrwaj.Domain.Entities.Post", b =>
                 {
                     b.Property<string>("IdPost")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<bool>("Active")
                         .HasColumnType("boolean");
@@ -324,8 +327,8 @@ namespace Przetrwaj.Infrastucture.Migrations
 
                     b.Property<string>("IdAutor")
                         .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("IdCategory")
                         .HasColumnType("integer");
@@ -374,25 +377,25 @@ namespace Przetrwaj.Infrastucture.Migrations
             modelBuilder.Entity("Przetrwaj.Domain.Entities.UserComment", b =>
                 {
                     b.Property<string>("IdComment")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset>("DateCreated")
+                    b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("IdAutor")
                         .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("IdPost")
                         .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.HasKey("IdComment");
 
@@ -406,12 +409,12 @@ namespace Przetrwaj.Infrastucture.Migrations
             modelBuilder.Entity("Przetrwaj.Domain.Entities.Vote", b =>
                 {
                     b.Property<string>("IdPost")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("IdUser")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.HasKey("IdPost", "IdUser");
 

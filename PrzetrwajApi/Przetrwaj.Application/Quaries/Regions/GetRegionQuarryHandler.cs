@@ -1,8 +1,8 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
-using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Quaries.RegionQauries;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions.RegionException;
+using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Quaries.Regions;
 

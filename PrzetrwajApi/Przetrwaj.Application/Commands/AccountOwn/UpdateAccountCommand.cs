@@ -1,13 +1,6 @@
-﻿using Przetrwaj.Application.Configuration.Commands;
-using Przetrwaj.Application.Dtos;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.AccountOwn;
-
-public class UpdateAccountInternalCommand : UpdateAccountCommand, ICommand<UserWithPersonalDataDto>
-{
-	public string UserId { get; set; }
-}
 
 public class UpdateAccountCommand
 {

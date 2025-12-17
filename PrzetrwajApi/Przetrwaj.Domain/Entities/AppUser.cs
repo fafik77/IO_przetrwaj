@@ -8,16 +8,16 @@ public class AppUser : IdentityUser
 {
 	public AppUser() : base() { }
 
-	[MaxLength(64)]
+	[MaxLength(24)]
 	public string? Name { get; set; }
-	[MaxLength(64)]
+	[MaxLength(24)]
 	public string? Surname { get; set; }
 	public int IdRegion { get; set; }
 	public bool Banned { get; set; } = false;
 	public DateTimeOffset? BanDate { get; set; }
-	[MaxLength(300)]
+	//[MaxLength(300)]
 	public string? BanReason { get; set; }
-	[MaxLength(64)]
+	[MaxLength(36)]
 	public string? BannedById { get; set; }
 	public DateTimeOffset RegistrationDate { get; set; } = DateTimeOffset.UtcNow;
 

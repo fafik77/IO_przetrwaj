@@ -73,13 +73,13 @@ public class AccountController : Controller
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount)
+	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount, CancellationToken cancellationToken)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
 			return NotFound((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 404 User for some reason does not exist
-		var requ = new UpdateAccountInternalCommand
+		var requ = new UpdateAccountInternallCommand
 		{
 			UserId = currentUserId,
 			IdRegion = updateAccount.IdRegion,
@@ -88,7 +88,7 @@ public class AccountController : Controller
 		};
 		try
 		{
-			var res = await _mediator.Send(requ);
+			var res = await _mediator.Send(requ, cancellationToken);
 			return Ok(res);
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
@@ -102,7 +102,7 @@ public class AccountController : Controller
 	[SwaggerOperation("Confirm Email using the code attached in email")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	public async Task<IActionResult> ConfirmEmail(string userId, string code)
+	public async Task<IActionResult> ConfirmEmail(string userId, string code, CancellationToken cancellationToken)
 	{
 		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(code))
 			return BadRequest((ExceptionCasting)new InvalidConfirmationException("Invalid email confirmation request."));
@@ -110,7 +110,7 @@ public class AccountController : Controller
 		var command = new ConfirmEmailCommand { userId = userId, code = code };
 		try
 		{
-			var res = await _mediator.Send(command);
+			var res = await _mediator.Send(command, cancellationToken);
 			return Ok(res);
 		}
 		catch (Exception ex) when (ex is InvalidDataException or UserNotFoundException)

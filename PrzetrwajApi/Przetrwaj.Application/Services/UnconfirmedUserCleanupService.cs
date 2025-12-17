@@ -24,6 +24,7 @@ public class UnconfirmedUserCleanupService : BackgroundService
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
 		_logger.LogInformation("Unconfirmed User Cleanup Service running.");
+		await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
 		while (!stoppingToken.IsCancellationRequested)
 		{
 			_logger.LogInformation("Unconfirmed User Cleanup Service working at: {time}", DateTimeOffset.Now);

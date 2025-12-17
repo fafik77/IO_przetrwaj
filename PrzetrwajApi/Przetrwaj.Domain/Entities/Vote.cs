@@ -2,15 +2,12 @@
 
 namespace Przetrwaj.Domain.Entities;
 
-public partial class Vote
+public class Vote
 {
-	[Key]
-	[MaxLength(64)]
-	public string IdVote { get; set; }
 	#region UniquePair(IdPost,IdUser)
-	[MaxLength(64)]
+	[MaxLength(36)]
 	public required string IdPost { get; set; }
-	[MaxLength(64)]
+	[MaxLength(36)]
 	public required string IdUser { get; set; }
 	#endregion
 

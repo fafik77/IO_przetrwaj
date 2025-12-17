@@ -1,6 +1,6 @@
 ﻿using Przetrwaj.Domain.Entities;
 
-namespace Przetrwaj.Application.Dtos;
+namespace Przetrwaj.Domain.Models.Dtos;
 
 public class CategoryDto
 {

@@ -1,6 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
-using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Quaries.RegionQauries;
 

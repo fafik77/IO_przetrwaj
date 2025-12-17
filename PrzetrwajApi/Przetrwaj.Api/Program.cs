@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.Extensions.FileProviders;
 using Przetrwaj.Api;
 using Przetrwaj.Application;
 using Przetrwaj.Domain;
@@ -115,11 +116,24 @@ builder.Services.AddTransient<IEmailSender, EmailAzureService>();
 
 var app = builder.Build();
 
+#region Attachments
+// Define the physical folder (outside the project root for safety)
+string uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "Attachments");
+// Ensure the directory exists
+if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
+app.UseStaticFiles(new StaticFileOptions     //Allow serving <Image> in requests
+{
+	FileProvider = new PhysicalFileProvider(uploadsPath),
+	RequestPath = "/Attachments" // The URL prefix
+});
+#endregion //Attachments
+
 app.UseCors(AllowAllOrigins);
 app.UsePresentation();
 
 //app.MapPost("login/email", () => "login email");
 //app.MapPost("login/google", () => "login google");
+//app.MapGet("/Attachments/", () => provides the given Attachment file (for frontend rendering as an image) );
 
 
 app.Run();

@@ -13,10 +13,3 @@ public class BanUserInternallCommand : ICommand<UserWithPersonalDataDto>
 	[Required]
 	public required string Reason { get; set; }
 }
-public class BanUserCommand
-{
-	[Required]
-	public required string UserIdOrEmail { get; set; }
-	[Required]
-	public required string Reason { get; set; }
-}

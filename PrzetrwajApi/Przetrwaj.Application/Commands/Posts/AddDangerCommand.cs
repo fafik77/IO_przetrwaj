@@ -17,7 +17,7 @@ public class AddDangerCommand
 	public string? CustomCategory { get; set; }
 	public int IdRegion { get; set; }
 
-	public IList<string>? AlternateDescriptions { get; set; }
-	public IFormFileCollection? Files { get; set; }
+	//public IList<string>? AlternateDescriptions { get; set; }
+	//public IFormFileCollection? Files { get; set; }
 }
 

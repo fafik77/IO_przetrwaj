@@ -1,4 +1,5 @@
 ﻿using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Dtos;
 

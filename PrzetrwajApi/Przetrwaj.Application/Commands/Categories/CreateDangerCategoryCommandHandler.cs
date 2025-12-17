@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
-using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Categories;
 

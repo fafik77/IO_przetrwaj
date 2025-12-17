@@ -1,6 +1,6 @@
 ﻿using Przetrwaj.Domain.Entities;
 
-namespace Przetrwaj.Application.Dtos.Posts;
+namespace Przetrwaj.Domain.Models.Dtos.Posts;
 
 /// <summary>
 /// Trully minimal amount of data, usefull for sending a list of thousands of posts to place on map.

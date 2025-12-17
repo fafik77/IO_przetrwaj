@@ -14,7 +14,7 @@ namespace Przetrwaj.Infrastucture
 			var connectionString = configuration.GetConnectionString("Database");
 			services.AddDbContext<ApplicationDbContext>(ctx => ctx.UseNpgsql(connectionString));
 
-			services.AddScoped<IUnitOfWork, UnitOfWork>();
+			services.AddScoped<IUnitOfWork, UnitOfWork>();  //AddScoped makes this per request, Transient makes a new instance every time its called
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IRegionRepository, RegionRepository>();
 			services.AddScoped<ICategoryRepository, CategoryRepository>();

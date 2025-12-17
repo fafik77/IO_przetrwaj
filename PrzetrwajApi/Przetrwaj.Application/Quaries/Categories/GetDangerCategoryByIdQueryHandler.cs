@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
-using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Quaries.Categories;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Models.Dtos;
 
 internal class GetDangerCategoryByIdQueryHandler
     : IQueryHandler<GetDangerCategoryByIdQuery, CategoryDto?>

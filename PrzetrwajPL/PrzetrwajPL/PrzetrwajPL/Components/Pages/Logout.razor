@@ -1,0 +1,18 @@
+﻿@page "/logout"
+@using Microsoft.AspNetCore.Authentication
+
+<h3>Logout</h3>
+
+@code {
+	[CascadingParameter]
+	private HttpContext? httpContext { get; set; }
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+		if (httpContext.User.Identity.IsAuthenticated)
+		{
+			await httpContext.SignOutAsync();
+			httpContext.Response.Redirect("/logout"); //again use this over naviMgr
+		}
+	}
+}

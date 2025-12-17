@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Users;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Dtos.Posts;
+using Przetrwaj.Application.Quaries.Users;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
@@ -37,11 +38,19 @@ public class UserController : Controller
 
 	[HttpGet("WIP/{id}")]
 	[SwaggerOperation("Get publicly visible General data of user by id")]
-	[ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(UserGeneralDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		try
+		{
+			var user = await _mediator.Send(new GetUserByIdQuery { UserId = id }, cancellationToken);
+			return Ok(user);
+		}
+		catch (BaseException ex)
+		{
+			return NotFound((ExceptionCasting)ex);
+		}
 	}
 
 

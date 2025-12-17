@@ -21,7 +21,7 @@ public class StatsController : Controller
 	[HttpGet]
 	[SwaggerOperation("Get statistics")]
 	[ProducesResponseType(typeof(StatisticsDto), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetStatistics()
+	public async Task<IActionResult> GetStatistics(CancellationToken cancellationToken)
 	{
 		throw new NotImplementedException();
 	}

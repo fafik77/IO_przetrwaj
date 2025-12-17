@@ -4,10 +4,13 @@ namespace Przetrwaj.Domain.Entities;
 
 public partial class Attachment
 {
+	/// <summary>
+	/// This might be the sha256 hash
+	/// </summary>
 	[Key]
 	[MaxLength(64)]
 	public required string IdAttachment { get; set; }
-	[MaxLength(64)]
+	[MaxLength(36)]
 	public required string IdPost { get; set; }
 	//[MaxLength(200)]
 	public string? AlternateDescription { get; set; }

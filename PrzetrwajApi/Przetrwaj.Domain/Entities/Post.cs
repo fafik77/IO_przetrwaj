@@ -5,7 +5,7 @@ namespace Przetrwaj.Domain.Entities;
 public class Post
 {
 	[Key]
-	[MaxLength(64)]
+	[MaxLength(36)]
 	public virtual string IdPost { get; set; } = default!;
 
 	//[MaxLength(200)]
@@ -22,7 +22,7 @@ public class Post
 
 	public int IdRegion { get; set; }
 
-	[MaxLength(64)]
+	[MaxLength(36)]
 	public required string IdAutor { get; set; }
 
 	public DateTimeOffset DateCreated { get; set; } = DateTimeOffset.UtcNow;

@@ -39,7 +39,7 @@ public class UserController : Controller
 	[SwaggerOperation("Get publicly visible General data of user by id")]
 	[ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetById(string id)
+	public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
 	{
 		throw new NotImplementedException();
 	}
@@ -49,7 +49,7 @@ public class UserController : Controller
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetAllPosts(string id)
+	public async Task<IActionResult> GetAllPosts(string id, CancellationToken cancellationToken)
 	{
 		throw new NotImplementedException();
 	}
@@ -58,7 +58,7 @@ public class UserController : Controller
 	[SwaggerOperation("Get all comments made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetAllComments(string id)
+	public async Task<IActionResult> GetAllComments(string id, CancellationToken cancellationToken)
 	{
 		throw new NotImplementedException();
 	}
@@ -72,12 +72,12 @@ public class UserController : Controller
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> AssignModeratorRole(MakeModeratorCommand userInfo)
+	public async Task<IActionResult> AssignModeratorRole(MakeModeratorCommand userInfo, CancellationToken cancellationToken)
 	{
 		if (!ModelState.IsValid) return BadRequest(IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" }));
 		try
 		{
-			var res = await _mediator.Send(userInfo);
+			var res = await _mediator.Send(userInfo, cancellationToken);
 			return Ok(res);
 		}
 		catch (BaseException ex)
@@ -92,7 +92,7 @@ public class UserController : Controller
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	public async Task<IActionResult> Ban(BanUserCommand banUserCommand)
+	public async Task<IActionResult> Ban(BanUserCommand banUserCommand, CancellationToken cancellationToken)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		//get info from the cookie and send a request
@@ -104,7 +104,7 @@ public class UserController : Controller
 		};
 		try
 		{
-			var res = await _mediator.Send(command);
+			var res = await _mediator.Send(command, cancellationToken);
 			return Ok(res);
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)

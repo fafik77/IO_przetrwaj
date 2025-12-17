@@ -9,6 +9,7 @@ public class UserGeneralDto
 	public string Surname { get; set; }
 	public RegionOnlyDto? Region { get; set; }
 	public DateTimeOffset RegistrationDate { get; set; }
+	public DateTimeOffset? BanDate { get; set; }
 
 
 	public static explicit operator UserGeneralDto?(AppUser registeredUser)
@@ -21,6 +22,7 @@ public class UserGeneralDto
 			Surname = registeredUser.Surname ?? "",
 			Region = (RegionOnlyDto?)registeredUser.IdRegionNavigation,
 			RegistrationDate = registeredUser.RegistrationDate,
+			BanDate = registeredUser.BanDate,
 		};
 	}
 }

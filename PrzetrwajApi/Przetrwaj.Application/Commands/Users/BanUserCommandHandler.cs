@@ -21,23 +21,23 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 	public async Task<UserWithPersonalDataDto> Handle(BanUserInternallCommand request, CancellationToken cancellationToken)
 	{
 		//bool isSelf = false;
-		AppUser user;
+		AppUser? user;
 		// 1. Get the ID of the currently logged-in user
 		// The ClaimTypes.NameIdentifier holds the user's Id from the Identity system.
-		if (request.UserIdOrEmail.Contains("@")) //email
-			user = await _userRepository.GetByEmailAsync(request.UserIdOrEmail);
+		if (request.UserIdOrEmail.Contains('@')) //email
+			user = await _userRepository.GetByEmailAsync(request.UserIdOrEmail, cancellationToken);
 		else //id
-			user = await _userRepository.GetByIdAsync(request.UserIdOrEmail);
+			user = await _userRepository.GetByIdAsync(request.UserIdOrEmail, cancellationToken);
 		if (user == null) throw new UserNotFoundException(request.UserIdOrEmail);
 		if (user.Banned || user.BannedById != null) //user was already banned
 		{
-			AppUser moderatorOld = await _userRepository.GetByIdAsync(user.BannedById);
+			AppUser? moderatorOld = await _userRepository.GetByIdAsync(user.BannedById, cancellationToken);
 			var dto2 = (UserWithPersonalDataDto)user;
 			dto2.BannedBy = (UserGeneralDto?)moderatorOld; //add Moderator info
 			return dto2;
 		}
 
-		AppUser moderator = await _userRepository.GetByIdAsync(request.ModeratorId);
+		AppUser? moderator = await _userRepository.GetByIdAsync(request.ModeratorId, cancellationToken);
 
 		user.BanDate = DateTimeOffset.UtcNow;
 		user.BanReason = request.Reason;

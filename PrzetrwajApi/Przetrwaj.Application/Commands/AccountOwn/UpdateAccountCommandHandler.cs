@@ -5,19 +5,19 @@ using Przetrwaj.Domain.Exceptions.Users;
 
 namespace Przetrwaj.Application.Commands.AccountOwn;
 
-public class UpdateAccountInternalCommandHandler : ICommandHandler<UpdateAccountInternalCommand, UserWithPersonalDataDto>
+public class UpdateAccountCommandHandler : ICommandHandler<UpdateAccountInternallCommand, UserWithPersonalDataDto>
 {
 	private readonly IUserRepository _userRepository;
 	private readonly IUnitOfWork _unitOfWork;
 
-	public UpdateAccountInternalCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
+	public UpdateAccountCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
 	{
 		_userRepository = userRepository;
 		_unitOfWork = unitOfWork;
 	}
 
 
-	public async Task<UserWithPersonalDataDto> Handle(UpdateAccountInternalCommand request, CancellationToken cancellationToken)
+	public async Task<UserWithPersonalDataDto> Handle(UpdateAccountInternallCommand request, CancellationToken cancellationToken)
 	{
 		var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
 		if (user == null) throw new UserNotFoundException(request.UserId);

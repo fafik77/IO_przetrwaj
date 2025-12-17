@@ -79,7 +79,7 @@ public class AccountController : Controller
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
 			return NotFound((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 404 User for some reason does not exist
-		var requ = new UpdateAccountInternalCommand
+		var requ = new UpdateAccountInternallCommand
 		{
 			UserId = currentUserId,
 			IdRegion = updateAccount.IdRegion,

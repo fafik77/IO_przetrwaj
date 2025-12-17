@@ -36,7 +36,7 @@ public class UserController : Controller
 	}
 
 
-	[HttpGet("WIP/{id}")]
+	[HttpGet("{id}")]
 	[SwaggerOperation("Get publicly visible General data of user by id")]
 	[ProducesResponseType(typeof(UserGeneralDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]

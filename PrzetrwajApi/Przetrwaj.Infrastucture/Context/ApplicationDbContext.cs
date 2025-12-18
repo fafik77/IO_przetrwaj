@@ -27,7 +27,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	/// Returns only Active Resource Posts
 	/// </summary>
 	public IQueryable<Post> PostsResourcesRO => Posts.AsNoTracking().Where(p => p.Active == true && p.Category == CategoryType.Resource);
-	public DbSet<PostMinimalCategoryRegionDto> PostMinimalViews { get; set; }
+	public DbSet<PostMinimalCategoryRegion> PostMinimalViews { get; set; }
 	#endregion
 
 	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -47,7 +47,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.HasValue<CategoryResource>(CategoryType.Resource)
 			.HasValue<CategoryDanger>(CategoryType.Danger);
 
-		builder.Entity<PostMinimalCategoryRegionDto>(entity =>
+		builder.Entity<PostMinimalCategoryRegion>(entity =>
 		{
 			entity.HasNoKey(); // Views usually don't have a PK in EF context
 			entity.ToView("View_PostMinimal", "przetrwaj");

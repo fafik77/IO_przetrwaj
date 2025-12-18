@@ -20,7 +20,7 @@ public interface IPostRepository
 	public Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default);
 	public Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default);
 	public Task<IEnumerable<Attachment>> GetAttachmentsROAsync(string idPost, CancellationToken cancellationToken = default);
-	public Task<IEnumerable<PostMinimalCategoryRegionDto>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default);
+	public Task<IEnumerable<PostMinimalCategoryRegion>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default);
 	#endregion //Get
 
 	//public void AddComment(string id, CancellationToken cancellationToken = default);

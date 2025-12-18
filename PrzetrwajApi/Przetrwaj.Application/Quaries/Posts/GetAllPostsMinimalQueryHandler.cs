@@ -4,7 +4,7 @@ using Przetrwaj.Domain.Models.Dtos.Posts;
 
 namespace Przetrwaj.Application.Quaries.Posts;
 
-public class GetAllPostsMinimalQueryHandler : IQueryHandler<GetAllPostsMinimalQuery, IEnumerable<PostMinimalCategoryRegionDto>>
+public class GetAllPostsMinimalQueryHandler : IQueryHandler<GetAllPostsMinimalQuery, IEnumerable<PostMinimalCategoryRegion>>
 {
 	private readonly IPostRepository _postRepository;
 
@@ -14,7 +14,7 @@ public class GetAllPostsMinimalQueryHandler : IQueryHandler<GetAllPostsMinimalQu
 	}
 
 
-	public async Task<IEnumerable<PostMinimalCategoryRegionDto>> Handle(GetAllPostsMinimalQuery request, CancellationToken cancellationToken)
+	public async Task<IEnumerable<PostMinimalCategoryRegion>> Handle(GetAllPostsMinimalQuery request, CancellationToken cancellationToken)
 	{
 		return await _postRepository.GetPostsMinimalCategoryRegion(cancellationToken);
 	}

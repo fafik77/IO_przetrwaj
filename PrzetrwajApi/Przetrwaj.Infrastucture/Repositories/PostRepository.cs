@@ -146,9 +146,9 @@ internal class PostRepository : IPostRepository
 		return posts;
 	}
 
-	public async Task<IEnumerable<PostMinimalCategoryRegionDto>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default)
+	public async Task<IEnumerable<PostMinimalCategoryRegion>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default)
 	{
-		return await _context.PostMinimalViews.ToListAsync(cancellationToken);
+		return await _context.PostMinimalViews.AsNoTracking().Where(p => p.Active == true).ToListAsync(cancellationToken);
 	}
 
 	public Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default)

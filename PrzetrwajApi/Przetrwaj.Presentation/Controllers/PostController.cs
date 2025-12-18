@@ -47,7 +47,7 @@ public partial class PostController : Controller
 
 	[HttpGet]
 	[SwaggerOperation("Get all posts for map display.")]
-	[ProducesResponseType(typeof(IEnumerable<PostMinimalCategoryRegionDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IEnumerable<PostMinimalCategoryRegion>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetAllPosts(CancellationToken CT)
 	{
 		var posts = await _mediator.Send(new GetAllPostsMinimalQuery(), CT);

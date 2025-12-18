@@ -5,7 +5,7 @@ namespace Przetrwaj.Domain.Models.Dtos.Posts;
 /// <summary>
 /// Truly minimal amount of data, usefull for sending a list of thousands of posts to place on map.
 /// </summary>
-public class PostMinimalCategoryRegionDto
+public class PostMinimalCategoryRegion
 {
 	// Added this to act as a unique identifier for EF's internal tracking
 	public string IdPost { get; set; } = null!;
@@ -16,15 +16,16 @@ public class PostMinimalCategoryRegionDto
 
 	public double Lat { get; set; }
 	public double Long { get; set; }
+	public bool Active { get; set; }
 
 
-	public static explicit operator PostMinimalCategoryRegionDto?(Post? post)
-	{
-		return post is null ? null : new PostMinimalCategoryRegionDto
-		{
-			IdRegion = post.IdRegion,
-			Title = post.Title,
-			IdCategory = post.IdCategory,
-		};
-	}
+	//public static explicit operator PostMinimalCategoryRegion?(Post? post)
+	//{
+	//	return post is null ? null : new PostMinimalCategoryRegion
+	//	{
+	//		IdRegion = post.IdRegion,
+	//		Title = post.Title,
+	//		IdCategory = post.IdCategory,
+	//	};
+	//}
 }

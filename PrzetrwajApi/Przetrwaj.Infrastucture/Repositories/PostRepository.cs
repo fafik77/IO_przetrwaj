@@ -1,4 +1,5 @@
-﻿using Przetrwaj.Domain.Abstractions;
+﻿using Microsoft.EntityFrameworkCore;
+using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Przetrwaj.Infrastucture.Context;
@@ -15,9 +16,9 @@ internal class PostRepository : IPostRepository
 	}
 
 
-	public Task AddAsync(Post item, CancellationToken cancellationToken = default)
+	public async Task AddAsync(Post item, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
+		await _context.Posts.AddAsync(item, cancellationToken);
 	}
 
 	public Task<Attachment> AddAttachmentAsync(Attachment attachment, CancellationToken cancellationToken = default)
@@ -45,9 +46,17 @@ internal class PostRepository : IPostRepository
 		throw new NotImplementedException();
 	}
 
-	public Task<Post?> GetByIdAsync(string idPost, CancellationToken cancellationToken = default)
+	public async Task<Post?> GetByIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
+		var post = await _context.Posts
+			.Include(x => x.IdAutorNavigation)
+			.Include(x => x.IdCategoryNavigation)
+			.Include(x => x.IdRegionNavigation)
+			.Include(x => x.Attachments)
+			.Include(x => x.Comments)
+			.Include(x => x.Votes)
+			.FirstOrDefaultAsync(u => u.IdPost == idPost.ToLower(), cancellationToken);
+		return post;
 	}
 
 	public Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default)

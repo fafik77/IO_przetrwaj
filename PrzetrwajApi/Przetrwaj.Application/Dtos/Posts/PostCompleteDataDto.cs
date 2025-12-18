@@ -12,6 +12,7 @@ public class PostCompleteDataDto
 	public required string Title { get; set; }
 	public required string Description { get; set; }
 	public CategoryDto? Category { get; set; }
+	public CategoryType CategoryType { get; set; }
 	public RegionOnlyDto? Region { get; set; }
 
 	public UserGeneralDto? Author { get; set; }
@@ -41,6 +42,7 @@ public class PostCompleteDataDto
 			Description = post.Description,
 			//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = (CategoryDto?)post.IdCategoryNavigation,
+			CategoryType = post.Category,
 			Region = (RegionOnlyDto?)post.IdRegionNavigation,
 			Author = (UserGeneralDto?)post.IdAutorNavigation,
 			DateCreated = post.DateCreated,

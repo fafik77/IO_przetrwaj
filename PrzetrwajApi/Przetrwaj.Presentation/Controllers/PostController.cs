@@ -6,6 +6,7 @@ using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Dtos.Posts;
+using Przetrwaj.Application.Quaries.Posts;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
@@ -34,7 +35,15 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(string id, CancellationToken CT)
 	{
-		throw new NotImplementedException();
+		try
+		{
+			var post = await _mediator.Send(new GetPostByIdQuery { Id = id }, CT);
+			return Ok(post);
+		}
+		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+		{
+			return NotFound((ExceptionCasting)ex);
+		}
 	}
 
 	[HttpGet]
@@ -132,7 +141,7 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(postI, CT);
-			return Ok(res);
+			return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
 		}
 		catch (BaseException ex)
 		{

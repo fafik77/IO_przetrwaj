@@ -10,9 +10,9 @@ public class Vote
 	[MaxLength(36)]
 	public required string IdUser { get; set; }
 	#endregion
+	public required bool IsUpvote { get; set; }
 
 
 	public virtual Post IdPostNavigation { get; set; } = null!;
-
 	public virtual AppUser IdUserNavigation { get; set; } = null!;
 }

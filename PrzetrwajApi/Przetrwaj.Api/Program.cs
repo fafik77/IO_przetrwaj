@@ -118,12 +118,16 @@ var app = builder.Build();
 
 #region Attachments
 // Define the physical folder (outside the project root for safety)
-string uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "Attachments");
+string attachmentsPath = Path.Combine(builder.Environment.ContentRootPath, "Attachments");
 // Ensure the directory exists
-if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
+if (!Directory.Exists(attachmentsPath))
+{
+	Console.WriteLine($"Warning! Creating Attachments directory: {attachmentsPath}");
+	Directory.CreateDirectory(attachmentsPath);
+}
 app.UseStaticFiles(new StaticFileOptions     //Allow serving <Image> in requests
 {
-	FileProvider = new PhysicalFileProvider(uploadsPath),
+	FileProvider = new PhysicalFileProvider(attachmentsPath),
 	RequestPath = "/Attachments" // The URL prefix
 });
 #endregion //Attachments

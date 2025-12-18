@@ -16,7 +16,7 @@ using System.Security.Claims;
 
 namespace Przetrwaj.Presentation.Controllers;
 
-[Route("WIP/[controller]")]
+[Route("[controller]")]
 [ApiController]
 public partial class PostController : Controller
 {
@@ -28,7 +28,6 @@ public partial class PostController : Controller
 	}
 
 
-	//PN priority high
 	[HttpGet("{id}")]
 	[SwaggerOperation("Get post with all content")]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status200OK)]
@@ -51,11 +50,12 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(IEnumerable<PostMinimalCategoryRegionDto>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetAllPosts(CancellationToken CT)
 	{
-		throw new NotImplementedException();
+		var posts = _mediator.Send(new GetAllPostsMinimalQuery(), CT);
+		return Ok(posts);
 	}
 
 	//KL priority high
-	[HttpGet("Region/{id}/Danger")]
+	[HttpGet("WIP/Region/{id}/Danger")]
 	[SwaggerOperation("Get all Danger posts in region")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -64,7 +64,7 @@ public partial class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	[HttpGet("Region/{id}/Resource")]
+	[HttpGet("WIP/Region/{id}/Resource")]
 	[SwaggerOperation("Get all Resource posts in region")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -73,7 +73,7 @@ public partial class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	[HttpGet("Authored/{id}")]
+	[HttpGet("WIP/Authored/{id}")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -82,7 +82,7 @@ public partial class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	[HttpPost("{id}/Comment")]
+	[HttpPost("WIP/{id}/Comment")]
 	[SwaggerOperation("Add a comment to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
@@ -93,7 +93,7 @@ public partial class PostController : Controller
 	}
 
 	//KL priority high
-	[HttpPost("{id}/VotePositive")]
+	[HttpPost("WIP/{id}/VotePositive")]
 	[SwaggerOperation("Add a Positive vote to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
@@ -105,7 +105,7 @@ public partial class PostController : Controller
 	}
 
 	//KL priority high
-	[HttpPost("{id}/VoteNegative")]
+	[HttpPost("WIP/{id}/VoteNegative")]
 	[SwaggerOperation("Add a Negative vote to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
@@ -116,7 +116,6 @@ public partial class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	//PN priority high
 	[HttpPost("Danger")]
 	[SwaggerOperation("Add a Danger post (User)")]
 	[Authorize(UserRoles.User)]
@@ -149,7 +148,7 @@ public partial class PostController : Controller
 		}
 	}
 
-	[HttpPost("Resource")]
+	[HttpPost("WIP/Resource")]
 	[SwaggerOperation("Add a Recource post (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
@@ -161,7 +160,7 @@ public partial class PostController : Controller
 	}
 
 	//PN priority low
-	[HttpPost("{id}/Attachment")]
+	[HttpPost("WIP/{id}/Attachment")]
 	[SwaggerOperation("Add Attachments to post (Owner of the post)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(AttachmentDto), StatusCodes.Status201Created)]
@@ -176,7 +175,7 @@ public partial class PostController : Controller
 	//the only thing is to mark it not Active (Mod only)
 
 
-	[HttpPut("{id}")]
+	[HttpPut("WIP/{id}")]
 	[SwaggerOperation("Mark a post as Not Active (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]

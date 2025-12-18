@@ -1,5 +1,5 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
-using Przetrwaj.Application.Dtos.Posts;
+using Przetrwaj.Domain.Models.Dtos.Posts;
 using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Quaries.Posts;

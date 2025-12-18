@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Register;
-using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Users;
+using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;

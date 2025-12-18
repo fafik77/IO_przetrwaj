@@ -1,7 +1,6 @@
 ﻿using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Models.Dtos;
 
-namespace Przetrwaj.Application.Dtos.Posts;
+namespace Przetrwaj.Domain.Models.Dtos.Posts;
 
 /// <summary>
 /// Contains all the post data: full title & description, category, region, author, 
@@ -20,21 +19,22 @@ public class PostCompleteDataDto
 
 
 	///To add all this bellow
-	public int VotePositive { get; set; }
-	public int VoteNegative { get; set; }
-	public int VoteSum { get; set; }
-	public int VoteRatio { get; set; }
+	public long VotePositive { get; set; }
+	public long VoteNegative { get; set; }
+	public long VoteSum { get; set; }
+	//public float VoteRatio { get; set; }
 
-	//public int CommentsAmount { get; set; }
-
-	public virtual IEnumerable<CommentDto>? Comments { get; set; } = new List<CommentDto>();
-	public virtual IEnumerable<AttachmentDto>? Attachments { get; set; }// = new List<Attachment>();
+	public virtual IEnumerable<CommentDto?>? Comments { get; set; } = [];
+	public virtual IEnumerable<AttachmentDto?> Attachments { get; set; } = [];
 
 
 
 	public static explicit operator PostCompleteDataDto?(Post? post)
 	{
-		int positive, negative, sum, ratio;
+		if (post is null) return null;
+		var pos = post.Votes.Count(v => v.IsUpvote);
+		var neg = post.Votes.Count(v => !v.IsUpvote);
+		long sum = pos + neg;
 		return post is null ? null : new PostCompleteDataDto
 		{
 			Id = post.IdPost,
@@ -46,6 +46,14 @@ public class PostCompleteDataDto
 			Region = (RegionOnlyDto?)post.IdRegionNavigation,
 			Author = (UserGeneralDto?)post.IdAutorNavigation,
 			DateCreated = post.DateCreated,
+			//Attachments = post.Attachments.Select(a => (AttachmentDto?)a).ToList(),
+			Comments = post.Comments.Select(c => (CommentDto)c).ToList(),
+			VotePositive = pos,
+			VoteNegative = neg,
+			VoteSum = sum,
+			//VoteRatio = sum > 0
+			//	? (float)pos / sum * 100
+			//	: 100
 		};
 	}
 }

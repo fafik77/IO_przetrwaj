@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions.Posts;
 using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Przetrwaj.Infrastucture.Context;
@@ -17,14 +18,16 @@ internal class PostRepository : IPostRepository
 	}
 
 
-	public async Task AddAsync(Post item, CancellationToken cancellationToken = default)
+	public async Task<Post> AddAsync(Post item, CancellationToken cancellationToken = default)
 	{
 		await _context.Posts.AddAsync(item, cancellationToken);
+		return item;
 	}
 
-	public Task<Attachment> AddAttachmentAsync(Attachment attachment, CancellationToken cancellationToken = default)
+	public async Task<Attachment> AddAttachmentAsync(Attachment attachment, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
+		await _context.Attachments.AddAsync(attachment, cancellationToken);
+		return attachment;
 	}
 
 	public Task<UserComment> AddCommentAsync(UserComment comment, CancellationToken cancellationToken = default)
@@ -32,9 +35,18 @@ internal class PostRepository : IPostRepository
 		throw new NotImplementedException();
 	}
 
-	public Task<Vote> AddVoteAsync(Vote vote, CancellationToken cancellationToken = default)
+	public async Task<Vote> AddVoteAsync(Vote vote, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
+		try
+		{
+			var res = await _context.Votes.AddAsync(vote, cancellationToken);
+			return vote;
+		}
+		catch (Exception ex)
+		{
+			//this Exception (Microsoft.EntityFrameworkCore.DbUpdateException) might only be thrown when performing .SaveChangesAsync()
+			throw new AlreadyVotedException("Already Voted");
+		}
 	}
 
 	public Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default)
@@ -42,24 +54,64 @@ internal class PostRepository : IPostRepository
 		throw new NotImplementedException();
 	}
 
-	public Task<IEnumerable<Attachment>> GetAttachmentsAsync(string idPost, CancellationToken cancellationToken = default)
+	public async Task<IEnumerable<Attachment>> GetAttachmentsROAsync(string idPost, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
+		var res = await _context.Attachments.AsNoTracking().Where(a => a.IdPost == idPost).ToListAsync(cancellationToken);
+		return res;
 	}
 
-	public async Task<Post?> GetByIdAsync(string idPost, CancellationToken cancellationToken = default)
+	public async Task<PostCompleteDataDto?> GetFullROPostByIdAsync(string idPost, CancellationToken cancellationToken = default)
+	{
+		idPost = idPost.ToLower();
+		return await _context.Posts
+		.AsNoTracking()
+		.Where(u => u.IdPost == idPost)
+		.Select(p => new PostCompleteDataDto
+		{
+			Id = p.IdPost,
+			Title = p.Title,
+			Description = p.Description,
+			CategoryType = p.Category,
+			Comments = p.Comments.Select(c => (CommentDto)c).ToList(),
+			DateCreated = p.DateCreated,
+			Region = (RegionOnlyDto?)p.IdRegionNavigation,
+			Author = (UserGeneralDto?)p.IdAutorNavigation,
+			//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
+			Category = p.CustomCategory.Length > 0 ? new CategoryDto
+			{
+				IdCategory = p.IdCategory,
+				Type = p.IdCategoryNavigation.Type,
+				Name = p.CustomCategory,
+			}
+			: (CategoryDto?)p.IdCategoryNavigation,
+
+			// Fetch only the bool values
+			VotePositive = p.Votes.Count(p => p.IsUpvote),
+			VoteNegative = p.Votes.Count(p => !p.IsUpvote),
+			VoteSum = p.Votes.Count(),
+			// Map attachments using the URL logic
+			Attachments = p.Attachments.Select(a => new AttachmentDto
+			{
+				AlternateDescription = a.AlternateDescription,
+				FileURL = $"/Attachments/{a.IdAttachment}.webp",
+			}).ToList()
+		})
+		.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+	}
+	public async Task<Post?> GetPostWithAttachmentsByIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
 		var post = await _context.Posts
-			.AsNoTracking()
-			.Include(x => x.IdAutorNavigation)
-			.Include(x => x.IdCategoryNavigation)
-			.Include(x => x.IdRegionNavigation)
 			.Include(x => x.Attachments)
-			.Include(x => x.Comments)
-			.Include(x => x.Votes)
-			.FirstOrDefaultAsync(u => u.IdPost == idPost.ToLower(), cancellationToken);
+			.FirstOrDefaultAsync(u => u.IdPost == idPost, cancellationToken);
 		return post;
 	}
+	public async Task<Post?> GetRWPostByIdAsync(string idPost, CancellationToken cancellationToken = default)
+	{
+		var post = await _context.Posts
+			.FirstOrDefaultAsync(u => u.IdPost == idPost, cancellationToken);
+		return post;
+	}
+
 
 	public async Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
 	{
@@ -104,8 +156,9 @@ internal class PostRepository : IPostRepository
 		throw new NotImplementedException();
 	}
 
-	public void MarkAsInactive(string id, CancellationToken cancellationToken = default)
+	public void Update(Post post, CancellationToken cancellationToken = default)
 	{
 		throw new NotImplementedException();
 	}
+
 }

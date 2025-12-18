@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
 using Przetrwaj.Application.Dtos;
-using Przetrwaj.Application.Dtos.Posts;
 using Przetrwaj.Application.Quaries.Posts;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
+using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
@@ -29,7 +29,7 @@ public partial class PostController : Controller
 
 
 	[HttpGet("{id}")]
-	[SwaggerOperation("Get post with all content")]
+	[SwaggerOperation("Get post with all content. Vote status in NOT included(use Get: /Post/{id}/Vote)")]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(string id, CancellationToken CT)
@@ -98,24 +98,35 @@ public partial class PostController : Controller
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status409Conflict)] //already voted
+	[ProducesResponseType(typeof(VoteDto), StatusCodes.Status409Conflict)] //already voted
 	public async Task<IActionResult> VotePositive(string id, CancellationToken CT)
 	{
 		throw new NotImplementedException();
 	}
-
 	//KL priority high
 	[HttpPost("WIP/{id}/VoteNegative")]
 	[SwaggerOperation("Add a Negative vote to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status409Conflict)] //already voted
+	[ProducesResponseType(typeof(VoteDto), StatusCodes.Status409Conflict)] //already voted
 	public async Task<IActionResult> VoteNegative(string id, CancellationToken CT)
 	{
 		throw new NotImplementedException();
 	}
+	//KL priority mid
+	[HttpGet("WIP/{id}/Vote")]
+	[SwaggerOperation("Get user Vote status on Post (User)")]
+	[Authorize(UserRoles.User)]
+	[ProducesResponseType(typeof(VoteDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> GetVote(string id, CancellationToken CT)
+	{
+		throw new NotImplementedException();
+	}
 
+
+	//ToDo: implement CustomCategory checking (allow it only if Category.id/Name == inne)
 	[HttpPost("Danger")]
 	[SwaggerOperation("Add a Danger post (User)")]
 	[Authorize(UserRoles.User)]
@@ -132,8 +143,6 @@ public partial class PostController : Controller
 			IdCategory = newPost.IdCategory,
 			CustomCategory = newPost.CustomCategory,
 			IdRegion = newPost.IdRegion,
-			//AlternateDescriptions = newPost.AlternateDescriptions,
-			//Files = newPost.Files,
 			// Set user from cookie
 			IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
 		};

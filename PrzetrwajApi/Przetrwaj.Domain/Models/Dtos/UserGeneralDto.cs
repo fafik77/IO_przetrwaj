@@ -1,7 +1,6 @@
 ﻿using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Models.Dtos;
 
-namespace Przetrwaj.Application.Dtos;
+namespace Przetrwaj.Domain.Models.Dtos;
 
 public class UserGeneralDto
 {

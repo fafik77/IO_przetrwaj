@@ -50,7 +50,7 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(IEnumerable<PostMinimalCategoryRegionDto>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetAllPosts(CancellationToken CT)
 	{
-		var posts = _mediator.Send(new GetAllPostsMinimalQuery(), CT);
+		var posts = await _mediator.Send(new GetAllPostsMinimalQuery(), CT);
 		return Ok(posts);
 	}
 

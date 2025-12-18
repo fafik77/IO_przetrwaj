@@ -64,7 +64,7 @@ internal class PostRepository : IPostRepository
 		throw new NotImplementedException();
 	}
 
-	public async Task<IEnumerable<PostMinimalCategoryRegionDto>> GetPostMinimalCategoryRegion(CancellationToken cancellationToken = default)
+	public async Task<IEnumerable<PostMinimalCategoryRegionDto>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default)
 	{
 		return await _context.PostMinimalViews.ToListAsync(cancellationToken);
 	}

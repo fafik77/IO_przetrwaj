@@ -22,11 +22,11 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	/// <summary>
 	/// Returns only Active Danger Posts
 	/// </summary>
-	public IQueryable<Post> PostsDanger => Posts.Where(p => p.Active == true && p.Category == CategoryType.Danger);
+	public IQueryable<Post> PostsDangerRO => Posts.AsNoTracking().Where(p => p.Active == true && p.Category == CategoryType.Danger);
 	/// <summary>
 	/// Returns only Active Resource Posts
 	/// </summary>
-	public IQueryable<Post> PostsResources => Posts.Where(p => p.Active == true && p.Category == CategoryType.Resource);
+	public IQueryable<Post> PostsResourcesRO => Posts.AsNoTracking().Where(p => p.Active == true && p.Category == CategoryType.Resource);
 	public DbSet<PostMinimalCategoryRegionDto> PostMinimalViews { get; set; }
 	#endregion
 

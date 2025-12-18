@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Przetrwaj.Infrastucture.Context;
 
@@ -49,6 +50,7 @@ internal class PostRepository : IPostRepository
 	public async Task<Post?> GetByIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
 		var post = await _context.Posts
+			.AsNoTracking()
 			.Include(x => x.IdAutorNavigation)
 			.Include(x => x.IdCategoryNavigation)
 			.Include(x => x.IdRegionNavigation)
@@ -59,9 +61,37 @@ internal class PostRepository : IPostRepository
 		return post;
 	}
 
-	public Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
+	public async Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
+		var posts = await _context.PostsDangerRO
+			//.Where(p => p.Active == true && p.Category == CategoryType.Danger) //Posts without the pre-filtered(mapping) to PostsDanger
+			.Where(p => p.IdRegion == idRegion)
+			.Select(p => new PostOverviewDto
+			{
+				Id = p.IdPost,
+				Title = p.Title,
+				DateCreated = p.DateCreated,
+				// Map Navigations safely
+				Category = p.IdCategoryNavigation != null ? new CategoryDto
+				{
+					IdCategory = p.IdCategoryNavigation.IdCategory,
+					Name = p.IdCategoryNavigation.Name
+				} : null,
+				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
+				{
+					IdRegion = p.IdRegionNavigation.IdRegion,
+					Name = p.IdRegionNavigation.Name
+				} : null,
+				// --- VOTE CALCULATIONS (Executed on Database side) ---
+				VotePositive = p.Votes.Count(v => v.IsUpvote),
+				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
+				VoteSum = p.Votes.Count(),
+				VoteRatio = (p.Votes.Count() > 0)
+				? ((float)p.Votes.Count(v => v.IsUpvote) / p.Votes.Count() * 100)
+				: 100
+			})
+		.ToListAsync(cancellationToken);
+		return posts;
 	}
 
 	public async Task<IEnumerable<PostMinimalCategoryRegionDto>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default)

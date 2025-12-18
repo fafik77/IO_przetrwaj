@@ -6,7 +6,6 @@ namespace Przetrwaj.Infrastucture.Context;
 
 public class ApplicationDbContext : IdentityDbContext<AppUser>
 {
-	//public DbSet<AppUser> Users { get; set; }
 	public DbSet<Category> Categories { get; set; }
 	// also include DbSets for the derived types if you want to query them directly.
 	public DbSet<CategoryResource> CategoryResources { get; set; }
@@ -17,6 +16,14 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	public DbSet<Region> Regions { get; set; }
 	public DbSet<UserComment> Comments { get; set; }
 	public DbSet<Vote> Votes { get; set; }
+	/// <summary>
+	/// Returns only Active Danger Posts
+	/// </summary>
+	public IQueryable<Post> PostsDanger => Posts.Where(p => p.Active == true && p.Category == CategoryType.Danger);
+	/// <summary>
+	/// Returns only Active Resource Posts
+	/// </summary>
+	public IQueryable<Post> PostsResources => Posts.Where(p => p.Active == true && p.Category == CategoryType.Resource);
 
 	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 			: base(options)
@@ -103,6 +110,10 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.WithMany(r => r.Posts)                 // Region has many Posts
 			.HasForeignKey(p => p.IdRegion)         // Foreign Key is IdRegion (int) in Post
 			.OnDelete(DeleteBehavior.Restrict);
+
+		builder.Entity<Post>()
+			.Property(p => p.Category)
+			.IsRequired();
 
 
 		// --- 5. Attachment Entity Configuration ---

@@ -12,7 +12,7 @@ public class AttachmentDto
 	public required string FileURL { get; set; }
 	//public required Stream File {  get; set; }
 
-	public static AttachmentDto? MapFromEntity(Attachment? attachment, string baseUrl)
+	public static AttachmentDto? Map(Attachment? attachment, string baseUrl)
 	{
 		return attachment is null ? null : new AttachmentDto
 		{

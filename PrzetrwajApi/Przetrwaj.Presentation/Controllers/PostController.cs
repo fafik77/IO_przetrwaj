@@ -163,7 +163,7 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	public async Task<IActionResult> AddResource(AddAttachment files, CancellationToken CT)
+	public async Task<IActionResult> AddResource(AddAttachments files, CancellationToken CT)
 	{
 		throw new NotImplementedException();
 	}
@@ -172,12 +172,33 @@ public partial class PostController : Controller
 	[HttpPost("WIP/{id}/Attachment")]
 	[SwaggerOperation("Add Attachments to post (Owner of the post)")]
 	[Authorize(UserRoles.User)]
-	[ProducesResponseType(typeof(AttachmentDto), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(IEnumerable<AttachmentDto>), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	public async Task<IActionResult> AddAttachment(string id, AddAttachment attachments, CancellationToken CT)
+	public async Task<IActionResult> AddAttachment(string id, AddAttachments attachments, CancellationToken CT)
 	{
-		throw new NotImplementedException();
+		var req = new AddAttachmentsInternal
+		{
+			IdPost = id,
+			AlternateDescriptions = attachments.AlternateDescriptions,
+			Files = attachments.Files,
+			// Set user from cookie
+			IdUser = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+		};
+		try
+		{
+			var res = await _mediator.Send(req, CT);
+			return Ok(res);
+		}
+		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+		{
+			return NotFound((ExceptionCasting)ex);
+		}
+		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.BadRequest)
+		{
+			return BadRequest((ExceptionCasting)ex);
+		}
 	}
 
 	//we never delete or update posts

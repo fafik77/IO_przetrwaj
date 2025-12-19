@@ -72,7 +72,10 @@ internal class PostRepository : IPostRepository
 			Title = p.Title,
 			Description = p.Description,
 			CategoryType = p.Category,
-			Comments = p.Comments.Select(c => (CommentDto)c).ToList(),
+			Comments = p.Comments
+			.OrderByDescending(x => x.DateCreated)  //sort by Date desc (newest first)
+			.Select(c => (CommentDto)c)
+			.ToList(),
 			DateCreated = p.DateCreated,
 			Region = (RegionOnlyDto?)p.IdRegionNavigation,
 			Author = (UserGeneralDto?)p.IdAutorNavigation,
@@ -90,7 +93,9 @@ internal class PostRepository : IPostRepository
 			VoteNegative = p.Votes.Count(p => !p.IsUpvote),
 			VoteSum = p.Votes.Count(),
 			// Map attachments using the URL logic
-			Attachments = p.Attachments.Select(a => new AttachmentDto
+			Attachments = p.Attachments
+			.OrderBy(x => x.OrderInList)    //sort by OrderInList asc
+			.Select(a => new AttachmentDto
 			{
 				AlternateDescription = a.AlternateDescription,
 				FileURL = $"/Attachments/{a.IdAttachment}.webp",
@@ -101,7 +106,7 @@ internal class PostRepository : IPostRepository
 	public async Task<Post?> GetPostWithAttachmentsByIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
 		var post = await _context.Posts
-			.Include(x => x.Attachments)
+			.Include(x => x.Attachments.OrderBy(a => a.OrderInList))    //sort by OrderInList asc
 			.FirstOrDefaultAsync(u => u.IdPost == idPost, cancellationToken);
 		return post;
 	}
@@ -123,12 +128,20 @@ internal class PostRepository : IPostRepository
 				Id = p.IdPost,
 				Title = p.Title,
 				DateCreated = p.DateCreated,
-				// Map Navigations safely
-				Category = p.IdCategoryNavigation != null ? new CategoryDto
+				//// Map Navigations safely
+				//Category = p.IdCategoryNavigation != null ? new CategoryDto
+				//{
+				//	IdCategory = p.IdCategoryNavigation.IdCategory,
+				//	Name = p.IdCategoryNavigation.Name
+				//} : null,
+				//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
+				Category = p.CustomCategory.Length > 0 ? new CategoryDto
 				{
-					IdCategory = p.IdCategoryNavigation.IdCategory,
-					Name = p.IdCategoryNavigation.Name
-				} : null,
+					IdCategory = p.IdCategory,
+					Type = p.IdCategoryNavigation.Type,
+					Name = p.CustomCategory,
+				}
+				: (CategoryDto?)p.IdCategoryNavigation,
 				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
 				{
 					IdRegion = p.IdRegionNavigation.IdRegion,
@@ -138,9 +151,9 @@ internal class PostRepository : IPostRepository
 				VotePositive = p.Votes.Count(v => v.IsUpvote),
 				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
 				VoteSum = p.Votes.Count(),
-				VoteRatio = (p.Votes.Count() > 0)
-				? ((float)p.Votes.Count(v => v.IsUpvote) / p.Votes.Count() * 100)
-				: 100
+				//VoteRatio = (p.Votes.Count() > 0)
+				//? ((float)p.Votes.Count(v => v.IsUpvote) / p.Votes.Count() * 100)
+				//: 100
 			})
 		.ToListAsync(cancellationToken);
 		return posts;

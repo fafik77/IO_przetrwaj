@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Przetrwaj.Application.AuthServices;
 using Przetrwaj.Application.Services;
@@ -14,6 +15,8 @@ public static class Extensions
 {
 	public static IServiceCollection AddApplication(this IServiceCollection services)
 	{
+		services.AddTransient<IEmailSender, EmailAzureService>();
+
 		var ExecutingAssembly = Assembly.GetExecutingAssembly();
 		services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(ExecutingAssembly));
 		//services.AddAutoMapper(ExecutingAssembly);  ///(Avoid using this!!) Important breaking changes: since 15.0+ registration and purchase is required so you have to use 14.0  https://docs.automapper.io/en/stable/15.0-Upgrade-Guide.html

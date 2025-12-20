@@ -21,7 +21,7 @@ public class AttachmentDto
 		};
 	}
 
-	public static AttachmentDto? MapFromEntity(AttachmentDto? attachment, string baseUrl)
+	public static AttachmentDto? Map(AttachmentDto? attachment, string baseUrl)
 	{
 		return attachment is null ? null : new AttachmentDto
 		{

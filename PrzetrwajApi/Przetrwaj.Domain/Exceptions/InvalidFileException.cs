@@ -3,7 +3,7 @@ using System.Net;
 
 namespace Przetrwaj.Domain.Exceptions;
 
-public class InvalidImageException(string fileName) : BaseException(($@"""{fileName}"" is not an image"))
+public class InvalidFileException(string msg) : BaseException(msg)
 {
 	public override HttpStatusCode HttpStatusCode => HttpStatusCode.NotAcceptable;
 }

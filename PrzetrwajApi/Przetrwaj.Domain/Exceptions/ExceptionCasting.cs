@@ -6,9 +6,22 @@ namespace Przetrwaj.Domain.Exceptions;
 
 public class ExceptionCasting
 {
-	public required string Status { get; set; }
+	public ExceptionCasting()
+	{
+		Status = string.Empty;
+		Error = new ErrorDetails { };
+	}
+	protected ExceptionCasting(ExceptionCasting other)
+	{
+		this.Status = other.Status;
+		this.StatusCode = other.StatusCode;
+		this.Error = other.Error;
+		this.Timestamp = other.Timestamp;
+	}
+
+	public string Status { get; set; }
 	public HttpStatusCode StatusCode { get; set; }
-	public required ErrorDetails Error { get; set; }
+	public ErrorDetails? Error { get; set; }
 	public DateTimeOffset Timestamp { get; set; }
 
 	public static explicit operator ExceptionCasting(BaseException exception)
@@ -45,6 +58,6 @@ public class ExceptionCasting
 
 public class ErrorDetails
 {
-	public required string Code { get; set; }
-	public required string Message { get; set; }
+	public string Code { get; set; }
+	public string Message { get; set; }
 }

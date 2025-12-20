@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.FileProviders;
-using Przetrwaj.Api;
 using Przetrwaj.Application;
+using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture;
@@ -16,10 +15,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string AuthenticationCookie = "cookie";
 
+// Bind the "Email" section to the EmailSettings class
 builder.Services.Configure<EmailSettings>(
 	builder.Configuration.GetSection("Email"));
-
-
+// Bind the "Attachments" section to the AttachmentSettings class
+builder.Services.Configure<AttachmentSettings>(
+	builder.Configuration.GetSection("Attachments")
+);
 
 #region CORS Access-Control-Allow-Origin
 var AllowAllOrigins = "_AllowAllOrigins";
@@ -110,7 +112,6 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddApplication();
 builder.Services.AddPresentation();
-builder.Services.AddTransient<IEmailSender, EmailAzureService>();
 
 
 

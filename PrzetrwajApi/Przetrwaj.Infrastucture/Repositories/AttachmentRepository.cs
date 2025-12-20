@@ -16,12 +16,21 @@ public class AttachmentRepository : IAttachmentRepository
 	{
 		string attachmentsPath = Path.Combine(_webHostEnvironment.ContentRootPath, "Attachments");
 		string filePath = Path.Combine(attachmentsPath, fileName);
-		if(File.Exists(filePath)) return false;
-		using (var fs = File.Create(filePath))
+		if (File.Exists(filePath)) return false;
+		try
 		{
-			FileData.Seek(0, SeekOrigin.Begin);
-			await FileData.CopyToAsync(fs, cancellationToken);
-			await fs.FlushAsync(cancellationToken); //just because
+			using (var fs = File.Create(filePath))
+			{
+				FileData.Seek(0, SeekOrigin.Begin);
+				await FileData.CopyToAsync(fs, cancellationToken);
+				await fs.FlushAsync(cancellationToken); //just because
+			}
+		}
+		catch (Exception)
+		{
+			if (File.Exists(filePath))
+				File.Delete(filePath); //clean-up the file, there was an error or it was cancelled
+			throw;
 		}
 		return true;
 	}

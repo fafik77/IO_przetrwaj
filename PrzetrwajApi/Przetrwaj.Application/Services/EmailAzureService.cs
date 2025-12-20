@@ -2,21 +2,22 @@
 using Azure.Communication.Email;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
+using Przetrwaj.Application.Settings;
 
-namespace Przetrwaj.Api;
+namespace Przetrwaj.Application.Services;
 
 public class EmailAzureService : IEmailSender
 {
+	private EmailSettings AzureEmailSettings { get; }
+	private EmailClient? EmailClient { get; } = null;
+
 	public EmailAzureService(IOptions<EmailSettings> options)
 	{
 		AzureEmailSettings = options.Value;
 		if (string.IsNullOrEmpty(AzureEmailSettings.AzureConnection))
 			return; //do not throw an error at this point, we only injected it
-		this.EmailClient = new EmailClient(AzureEmailSettings.AzureConnection);
+		EmailClient = new EmailClient(AzureEmailSettings.AzureConnection);
 	}
-
-	private EmailSettings AzureEmailSettings { get; }
-	private EmailClient? EmailClient { get; } = null;
 
 	public async Task SendEmailAsync(string email, string subject, string htmlMessage)
 	{

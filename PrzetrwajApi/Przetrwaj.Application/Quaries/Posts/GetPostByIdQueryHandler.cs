@@ -25,7 +25,7 @@ public class GetPostByIdQueryHandler : IQueryHandler<GetPostByIdQuery, PostCompl
 		if (resDto is null) throw new PostNotFoundException(request.Id);
 		//var dto = (PostCompleteDataDto?)res;
 		string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
-		resDto.Attachments = resDto.Attachments.Select(a => AttachmentDto.MapFromEntity(a, HttpPath)).ToList();
+		resDto.Attachments = resDto.Attachments.Select(a => AttachmentDto.Map(a, HttpPath)).ToList();
 		return resDto;
 	}
 }

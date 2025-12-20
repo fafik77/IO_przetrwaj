@@ -9,7 +9,6 @@ using Przetrwaj.Application.Quaries.Posts;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
-using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
@@ -172,9 +171,9 @@ public partial class PostController : Controller
 	[HttpPost("WIP/{id}/Attachment")]
 	[SwaggerOperation("Add Attachments to post (Owner of the post)")]
 	[Authorize(UserRoles.User)]
-	[ProducesResponseType(typeof(IEnumerable<AttachmentDto>), StatusCodes.Status201Created)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddAttachment(string id, AddAttachments attachments, CancellationToken CT)
 	{
@@ -189,15 +188,16 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(req, CT);
-			return Ok(res);
+			return StatusCode((int)res.StatusCode, res);
+			//return Ok(res);
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return NotFound((AddAttachmentsResult)ex);
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.BadRequest)
 		{
-			return BadRequest((ExceptionCasting)ex);
+			return BadRequest((AddAttachmentsResult)ex);
 		}
 	}
 

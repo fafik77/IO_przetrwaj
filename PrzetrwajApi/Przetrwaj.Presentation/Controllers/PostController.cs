@@ -167,8 +167,7 @@ public partial class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	//PN priority low
-	[HttpPost("WIP/{id}/Attachment")]
+	[HttpPost("{id}/Attachment")]
 	[SwaggerOperation("Add Attachments to post (Owner of the post)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status201Created)]
@@ -189,7 +188,6 @@ public partial class PostController : Controller
 		{
 			var res = await _mediator.Send(req, CT);
 			return StatusCode((int)res.StatusCode, res);
-			//return Ok(res);
 		}
 		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
 		{

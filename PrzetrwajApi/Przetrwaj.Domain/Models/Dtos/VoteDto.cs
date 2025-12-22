@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Przetrwaj.Application.Dtos;
+namespace Przetrwaj.Domain.Models.Dtos;
 
 public class VoteDto
 {

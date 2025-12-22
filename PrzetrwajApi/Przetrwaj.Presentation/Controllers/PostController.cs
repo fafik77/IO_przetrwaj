@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
-using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Quaries.Posts;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
+using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
@@ -113,7 +113,7 @@ public partial class PostController : Controller
 	{
 		throw new NotImplementedException();
 	}
-	//KL priority mid
+	//KL priority low or even lower
 	[HttpGet("WIP/{id}/Vote")]
 	[SwaggerOperation("Get user Vote status on Post (User)")]
 	[Authorize(UserRoles.User)]

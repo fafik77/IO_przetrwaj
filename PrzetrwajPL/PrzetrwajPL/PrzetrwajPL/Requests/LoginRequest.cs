@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace PrzetrwajPL
+namespace PrzetrwajPL.Requests
 {
 	public class LoginRequest
 	{
@@ -8,6 +8,7 @@ namespace PrzetrwajPL
 		public string Email { get; set; }
 
 		[Required(ErrorMessage = "Hasło jest wymagane")]
+		[DataType(DataType.Password)]
 		public string Password { get; set; }
 	}
 }

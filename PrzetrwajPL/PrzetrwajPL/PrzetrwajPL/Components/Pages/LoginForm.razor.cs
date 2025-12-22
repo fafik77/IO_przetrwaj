@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
 using PrzetrwajPL.Models;
+using PrzetrwajPL.Requests;
 using System.Security.Claims;
 
 namespace PrzetrwajPL.Components.Pages
@@ -13,7 +14,7 @@ namespace PrzetrwajPL.Components.Pages
 		//[CascadingParameter]
 		//private NavigationManager NavigationManager { get; set; }
 
-		private User? user = null;
+		private UserWithPersonalDataDto? user = null;
 		[SupplyParameterFromForm]
 		public LoginRequest loginRequest { get; set; } = new LoginRequest();
 		private string errorMessage = string.Empty;
@@ -28,7 +29,7 @@ namespace PrzetrwajPL.Components.Pages
 				var response = await HttpClient.PostAsJsonAsync("/Login/email", loginRequest);
 				if (response.IsSuccessStatusCode)
 				{
-					var result = await response.Content.ReadFromJsonAsync<User>();
+					var result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
 					if (result != null)
 					{
 						user = result;
@@ -37,7 +38,7 @@ namespace PrzetrwajPL.Components.Pages
 								new Claim(ClaimTypes.NameIdentifier, user.Id),
 								new Claim(ClaimTypes.Name, user.Name ?? user.Email!), // Use Name for display
 								new Claim(ClaimTypes.Email, user.Email!),
-								new Claim(ClaimTypes.Role, user.Role ?? "User")
+								new Claim(ClaimTypes.Role, user.Role ?? UserRoles.User)
 								// Add other properties like Region, Surname, etc., as custom claims if needed
 							};
 
@@ -53,10 +54,10 @@ namespace PrzetrwajPL.Components.Pages
 				}
 				else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
 				{
-					User? result = null;
+					UserWithPersonalDataDto? result = null;
 					try
 					{
-						result = await response.Content.ReadFromJsonAsync<User>();
+						result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
 						if (result?.Banned == true)
 							errorMessage = $"Twoje konto zosta³o zablokowane przez {result.BannedBy.Name} {result.BannedBy.Surname}. Powód: {result.BanReason}";
 					}

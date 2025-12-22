@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PrzetrwajPL
+namespace PrzetrwajPL.Requests
 {
 	public class RegisterRequest
 	{

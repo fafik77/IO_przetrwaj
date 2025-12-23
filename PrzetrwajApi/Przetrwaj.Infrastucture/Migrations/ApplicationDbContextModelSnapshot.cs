@@ -413,11 +413,45 @@ namespace Przetrwaj.Infrastucture.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("character varying(36)");
 
+                    b.Property<bool>("IsUpvote")
+                        .HasColumnType("boolean");
+
                     b.HasKey("IdPost", "IdUser");
 
                     b.HasIndex("IdUser");
 
                     b.ToTable("Votes", "przetrwaj");
+                });
+
+            modelBuilder.Entity("Przetrwaj.Domain.Models.Dtos.Posts.PostMinimalCategoryRegion", b =>
+                {
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("IdCategory")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("IdPost")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("IdPost");
+
+                    b.Property<int>("IdRegion")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Lat")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Long")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("View_PostMinimal", "przetrwaj");
                 });
 
             modelBuilder.Entity("Przetrwaj.Domain.Entities.CategoryDanger", b =>

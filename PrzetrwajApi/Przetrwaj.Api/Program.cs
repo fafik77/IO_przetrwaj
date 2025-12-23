@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.FileProviders;
-using Przetrwaj.Api;
 using Przetrwaj.Application;
+using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture;
@@ -16,10 +15,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string AuthenticationCookie = "cookie";
 
+// Bind the "Email" section to the EmailSettings class
 builder.Services.Configure<EmailSettings>(
 	builder.Configuration.GetSection("Email"));
-
-
+// Bind the "Attachments" section to the AttachmentSettings class
+builder.Services.Configure<AttachmentSettings>(
+	builder.Configuration.GetSection("Attachments")
+);
 
 #region CORS Access-Control-Allow-Origin
 var AllowAllOrigins = "_AllowAllOrigins";
@@ -110,7 +112,6 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddApplication();
 builder.Services.AddPresentation();
-builder.Services.AddTransient<IEmailSender, EmailAzureService>();
 
 
 
@@ -118,12 +119,16 @@ var app = builder.Build();
 
 #region Attachments
 // Define the physical folder (outside the project root for safety)
-string uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "Attachments");
+string attachmentsPath = Path.Combine(builder.Environment.ContentRootPath, "Attachments");
 // Ensure the directory exists
-if (!Directory.Exists(uploadsPath)) Directory.CreateDirectory(uploadsPath);
+if (!Directory.Exists(attachmentsPath))
+{
+	Console.WriteLine($"Warning! Creating Attachments directory: {attachmentsPath}");
+	Directory.CreateDirectory(attachmentsPath);
+}
 app.UseStaticFiles(new StaticFileOptions     //Allow serving <Image> in requests
 {
-	FileProvider = new PhysicalFileProvider(uploadsPath),
+	FileProvider = new PhysicalFileProvider(attachmentsPath),
 	RequestPath = "/Attachments" // The URL prefix
 });
 #endregion //Attachments

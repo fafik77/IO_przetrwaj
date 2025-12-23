@@ -1,5 +1,5 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
-using Przetrwaj.Application.Dtos;
+using Przetrwaj.Domain.Models.Dtos;
 using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Quaries.Users;

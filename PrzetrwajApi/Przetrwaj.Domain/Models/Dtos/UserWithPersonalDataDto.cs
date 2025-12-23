@@ -1,8 +1,7 @@
 ﻿using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Models.Dtos;
 using System.ComponentModel.DataAnnotations;
 
-namespace Przetrwaj.Application.Dtos;
+namespace Przetrwaj.Domain.Models.Dtos;
 
 public class UserWithPersonalDataDto
 {
@@ -18,6 +17,7 @@ public class UserWithPersonalDataDto
 
 	public bool Banned { get; set; }
 	public string? BanReason { get; set; }
+	public DateTimeOffset? BanDate { get; set; }
 	/// <summary>
 	/// You have to include this yourself when making a Dto
 	/// </summary>
@@ -36,6 +36,7 @@ public class UserWithPersonalDataDto
 			Region = (RegionOnlyDto?)registeredUser.IdRegionNavigation,
 			Banned = registeredUser.Banned,
 			BanReason = registeredUser.BanReason,
+			BanDate = registeredUser.BanDate,
 			TwoFactorEnabled = registeredUser.TwoFactorEnabled,
 			RegistrationDate = registeredUser.RegistrationDate,
 		};

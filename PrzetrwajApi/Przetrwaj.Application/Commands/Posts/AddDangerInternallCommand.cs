@@ -1,6 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
-using Przetrwaj.Application.Dtos.Posts;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Models.Dtos.Posts;
 
 namespace Przetrwaj.Application.Commands.Posts;
 

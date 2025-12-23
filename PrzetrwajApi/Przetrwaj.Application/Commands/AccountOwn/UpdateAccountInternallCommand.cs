@@ -1,5 +1,5 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
-using Przetrwaj.Application.Dtos;
+using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.AccountOwn;
 

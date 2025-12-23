@@ -1,12 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Przetrwaj.Application.Dtos;
+using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
 
-[Route("[controller]")]
+[Route("WIP/[controller]")]
 [ApiController]
 public class StatsController : Controller
 {

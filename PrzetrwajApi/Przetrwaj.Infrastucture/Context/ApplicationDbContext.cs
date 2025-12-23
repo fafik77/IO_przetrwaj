@@ -1,22 +1,34 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Models.Dtos.Posts;
 
 namespace Przetrwaj.Infrastucture.Context;
 
 public class ApplicationDbContext : IdentityDbContext<AppUser>
 {
-	//public DbSet<AppUser> Users { get; set; }
 	public DbSet<Category> Categories { get; set; }
-	// also include DbSets for the derived types if you want to query them directly.
-	public DbSet<CategoryResource> CategoryResources { get; set; }
-	public DbSet<CategoryDanger> CategoryDangers { get; set; }
 
 	public DbSet<Attachment> Attachments { get; set; }
 	public DbSet<Post> Posts { get; set; }
 	public DbSet<Region> Regions { get; set; }
 	public DbSet<UserComment> Comments { get; set; }
 	public DbSet<Vote> Votes { get; set; }
+
+	#region Views and TPH mappings
+	public DbSet<CategoryResource> CategoryResources { get; set; }
+	public DbSet<CategoryDanger> CategoryDangers { get; set; }
+
+	/// <summary>
+	/// Returns only Active Danger Posts
+	/// </summary>
+	public IQueryable<Post> PostsDangerRO => Posts.AsNoTracking().Where(p => p.Active == true && p.Category == CategoryType.Danger);
+	/// <summary>
+	/// Returns only Active Resource Posts
+	/// </summary>
+	public IQueryable<Post> PostsResourcesRO => Posts.AsNoTracking().Where(p => p.Active == true && p.Category == CategoryType.Resource);
+	public DbSet<PostMinimalCategoryRegion> PostMinimalViews { get; set; }
+	#endregion
 
 	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 			: base(options)
@@ -35,9 +47,13 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.HasValue<CategoryResource>(CategoryType.Resource)
 			.HasValue<CategoryDanger>(CategoryType.Danger);
 
-		//builder.Entity<Region>()
-		//	.HasIndex(r => r.Name)
-		//	.IsUnique();
+		builder.Entity<PostMinimalCategoryRegion>(entity =>
+		{
+			entity.HasNoKey(); // Views usually don't have a PK in EF context
+			entity.ToView("View_PostMinimal", "przetrwaj");
+			// Match the property names if they differ from SQL columns
+			entity.Property(v => v.IdPost).HasColumnName("IdPost");
+		});
 
 		// --- 2. Vote Entity Configuration ---
 		// Vote has a composite unique key (IdPost, IdUser) for the 'UniquePair'
@@ -103,6 +119,10 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.WithMany(r => r.Posts)                 // Region has many Posts
 			.HasForeignKey(p => p.IdRegion)         // Foreign Key is IdRegion (int) in Post
 			.OnDelete(DeleteBehavior.Restrict);
+
+		builder.Entity<Post>()
+			.Property(p => p.Category)
+			.IsRequired();
 
 
 		// --- 5. Attachment Entity Configuration ---

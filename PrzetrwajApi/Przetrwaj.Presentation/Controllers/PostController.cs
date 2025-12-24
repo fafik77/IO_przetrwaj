@@ -174,6 +174,8 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[RequestFormLimits(MultipartBodyLengthLimit = 52428800)] //up to 50 MB
+	[RequestSizeLimit(52428800)] //up to 50 MB
 	public async Task<IActionResult> AddAttachment(string id, AddAttachments attachments, CancellationToken CT)
 	{
 		var req = new AddAttachmentsInternal

@@ -43,7 +43,7 @@ internal class PostRepository : IPostRepository
 			var res = await _context.Votes.AddAsync(vote, cancellationToken);
 			return vote;
 		}
-		catch (Exception ex)
+		catch (Exception)
 		{
 			//this Exception (Microsoft.EntityFrameworkCore.DbUpdateException) might only be thrown when performing .SaveChangesAsync()
 			throw new AlreadyVotedException("Already Voted");
@@ -57,7 +57,11 @@ internal class PostRepository : IPostRepository
 
 	public async Task<IEnumerable<Attachment>> GetAttachmentsROAsync(string idPost, CancellationToken cancellationToken = default)
 	{
-		var res = await _context.Attachments.AsNoTracking().Where(a => a.IdPost == idPost).ToListAsync(cancellationToken);
+		idPost = idPost.ToLower();
+		var res = await _context.Attachments
+			.AsNoTracking()
+			.Where(a => a.IdPost == idPost)
+			.ToListAsync(cancellationToken);
 		return res;
 	}
 
@@ -119,6 +123,7 @@ internal class PostRepository : IPostRepository
 	}
 	public async Task<Post?> GetPostWithAttachmentsByIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
+		idPost = idPost.ToLower();
 		var post = await _context.Posts
 			.Include(x => x.Attachments.OrderBy(a => a.OrderInList))    //sort by OrderInList asc
 			.FirstOrDefaultAsync(u => u.IdPost == idPost, cancellationToken);
@@ -126,6 +131,7 @@ internal class PostRepository : IPostRepository
 	}
 	public async Task<Post?> GetRWPostByIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
+		idPost = idPost.ToLower();
 		var post = await _context.Posts
 			.FirstOrDefaultAsync(u => u.IdPost == idPost, cancellationToken);
 		return post;
@@ -190,6 +196,7 @@ internal class PostRepository : IPostRepository
 
 	public async Task<bool> ExistsPostIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
+		idPost = idPost.ToLower();
 		return await _context.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.IdPost == idPost, cancellationToken) != null;
 	}
 }

@@ -24,6 +24,7 @@ public class UserRepository : IUserRepository
 		return res;
 	}
 
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:Use the 'StringComparison' method overloads to perform case-insensitive string comparisons", Justification = "Wrong hint, Postgres DB does not support that")]
 	public async Task<AppUser?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
 	{
 		var res = await _dbContext.Users

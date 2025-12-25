@@ -81,14 +81,30 @@ public partial class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	[HttpPost("WIP/{id}/Comment")]
+	[HttpPost("{id}/Comment")]
 	[SwaggerOperation("Add a comment to the post (User)")]
 	[Authorize(UserRoles.User)]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(CommentDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> AddComment(string id, CancellationToken CT)
+	public async Task<IActionResult> AddComment(string id, AddCommentCommand command, CancellationToken CT)
 	{
-		throw new NotImplementedException();
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		var internalCommand = new AddCommentInternalCommand
+		{
+			Comment = command.Comment,
+			IdPost = id,
+			// Set user from cookie
+			IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+		};
+		try
+		{
+			var res = await _mediator.Send(internalCommand, CT);
+			return CreatedAtAction(nameof(GetById), new { id }, res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
 	}
 
 	//KL priority high

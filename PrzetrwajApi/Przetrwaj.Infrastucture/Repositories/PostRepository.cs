@@ -30,9 +30,10 @@ internal class PostRepository : IPostRepository
 		return attachment;
 	}
 
-	public Task<UserComment> AddCommentAsync(UserComment comment, CancellationToken cancellationToken = default)
+	public async Task<UserComment> AddCommentAsync(UserComment comment, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
+		await _context.Comments.AddAsync(comment, cancellationToken);
+		return comment;
 	}
 
 	public async Task<Vote> AddVoteAsync(Vote vote, CancellationToken cancellationToken = default)
@@ -73,8 +74,21 @@ internal class PostRepository : IPostRepository
 			Description = p.Description,
 			CategoryType = p.Category,
 			Comments = p.Comments
-			.OrderByDescending(x => x.DateCreated)  //sort by Date desc (newest first)
-			.Select(c => (CommentDto)c)
+			.OrderByDescending(x => x.DateCreated)
+			.Select(c => new CommentDto
+			{
+				Comment = c.Comment,
+				DateCreated = c.DateCreated,
+				Autor = c.IdAutorNavigation != null ? new UserGeneralDto
+				{
+					Id = c.IdAutorNavigation.Id,
+					Name = c.IdAutorNavigation.Name ?? "",
+					Surname = c.IdAutorNavigation.Surname ?? "",
+					Region = (RegionOnlyDto?)c.IdAutorNavigation.IdRegionNavigation,
+					RegistrationDate = c.IdAutorNavigation.RegistrationDate,
+					BanDate = c.IdAutorNavigation.BanDate,
+				} : null
+			})
 			.ToList(),
 			DateCreated = p.DateCreated,
 			Region = (RegionOnlyDto?)p.IdRegionNavigation,

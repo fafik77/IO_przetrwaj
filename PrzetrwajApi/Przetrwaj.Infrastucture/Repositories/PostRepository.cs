@@ -188,4 +188,8 @@ internal class PostRepository : IPostRepository
 		throw new NotImplementedException();
 	}
 
+	public async Task<bool> ExistsPostIdAsync(string idPost, CancellationToken cancellationToken = default)
+	{
+		return await _context.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.IdPost == idPost, cancellationToken) != null;
+	}
 }

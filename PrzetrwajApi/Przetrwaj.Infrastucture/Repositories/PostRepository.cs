@@ -197,6 +197,6 @@ internal class PostRepository : IPostRepository
 	public async Task<bool> ExistsPostIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
 		idPost = idPost.ToLower();
-		return await _context.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.IdPost == idPost, cancellationToken) != null;
+		return await _context.Posts.AsNoTracking().Where(p => p.IdPost == idPost).AnyAsync(cancellationToken);
 	}
 }

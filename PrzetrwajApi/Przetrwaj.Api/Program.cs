@@ -66,6 +66,7 @@ builder.Services.AddAuthorization(opt =>
 });
 #endregion
 
+builder.Services.AddMemoryCache(); // for caching Statistics
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // 2. Add Identity services (This is the crucial step)

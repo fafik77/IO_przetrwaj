@@ -7,6 +7,7 @@ using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Exceptions.Users;
 using Przetrwaj.Domain.Models;
+using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.AuthServices;
 
@@ -67,11 +68,14 @@ public class AuthService : IAuthService
 			throw new InvalidLoginException("Bad login attempt");
 
 		if (user.Banned || user.BanDate != null)    //user is banned
-			return user;
-
+		{
+			var bannedBy = await _userRepository.GetByIdAsync(user.BannedById!);
+			var dto = (UserWithPersonalDataDto)user;
+			dto.BannedBy = (UserGeneralDto?)bannedBy!;
+			throw new UserBannedException("User is banned", dto);
+		}
 		var signedIn = await _signInManager.PasswordSignInAsync(user, password, true, true);
 		if (signedIn.Succeeded)
-
 			return user;
 		throw new InvalidLoginException("Bad login attempt");
 	}

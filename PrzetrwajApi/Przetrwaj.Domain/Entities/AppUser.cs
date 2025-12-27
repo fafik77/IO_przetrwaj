@@ -21,6 +21,7 @@ public class AppUser : IdentityUser
 	public string? BannedById { get; set; }
 	public DateTimeOffset RegistrationDate { get; set; } = DateTimeOffset.UtcNow;
 	public bool ModeratorRolePending { get; set; }
+	public DateTimeOffset? ModeratorSince { get; set; }
 
 
 	[ForeignKey(nameof(IdRegion))]

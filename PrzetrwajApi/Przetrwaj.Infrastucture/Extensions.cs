@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Infrastucture.Context;
 using Przetrwaj.Infrastucture.Repositories;
+using Przetrwaj.Infrastucture.Services;
 
 namespace Przetrwaj.Infrastucture
 {
@@ -20,6 +21,7 @@ namespace Przetrwaj.Infrastucture
 			services.AddScoped<ICategoryRepository, CategoryRepository>();
 			services.AddScoped<IPostRepository, PostRepository>();
 			services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+			services.AddScoped<IStatisticsService, StatisticsService>();
 
 			return services;
 		}

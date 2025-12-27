@@ -66,7 +66,8 @@ builder.Services.AddAuthorization(opt =>
 });
 #endregion
 
-builder.Services.AddMemoryCache(); // for caching Statistics
+//builder.Services.AddMemoryCache(); // for caching Statistics
+builder.Services.AddLazyCache(); // for caching Statistics without Cache Stampede
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // 2. Add Identity services (This is the crucial step)

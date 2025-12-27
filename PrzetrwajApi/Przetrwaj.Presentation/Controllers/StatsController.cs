@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Przetrwaj.Application.Quaries.Stats;
 using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -23,6 +24,7 @@ public class StatsController : Controller
 	[ProducesResponseType(typeof(StatisticsDto), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetStatistics(CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		var res = await _mediator.Send(new GetStatisticsQuery(), cancellationToken);
+		return Ok(res);
 	}
 }

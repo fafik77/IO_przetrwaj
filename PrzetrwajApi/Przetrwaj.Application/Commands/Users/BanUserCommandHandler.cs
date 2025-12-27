@@ -36,10 +36,10 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		if (user is null) throw new UserNotFoundException(request.UserIdOrEmail);
 		if (user.Banned || user.BannedById != null) //user was already banned
 		{
-			AppUser? moderatorOld = await _userRepository.GetByIdAsync(user.BannedById, cancellationToken);
-			var dto2 = (UserWithPersonalDataDto)user;
-			dto2.BannedBy = (UserGeneralDto?)moderatorOld; //add Moderator info
-			return dto2;
+			AppUser? moderatorOld = await _userRepository.GetByIdAsync(user.BannedById!, cancellationToken);
+			var dtoUserAlreadyBanned = (UserWithPersonalDataDto)user;
+			dtoUserAlreadyBanned.BannedBy = (UserGeneralDto?)moderatorOld; //add Moderator info
+			return dtoUserAlreadyBanned;
 		}
 		AppUser? moderator = await _userRepository.GetByIdAsync(request.ModeratorId, cancellationToken);
 		if (moderator is null) throw new UserNotFoundException(request.ModeratorId);

@@ -5,7 +5,7 @@ namespace Przetrwaj.Domain.Models.Dtos;
 
 public class UserWithPersonalDataDto
 {
-	public string Id { get; set; }
+	public required string Id { get; set; }
 	[EmailAddress]
 	public string? Email { get; set; }
 	public string? Name { get; set; }

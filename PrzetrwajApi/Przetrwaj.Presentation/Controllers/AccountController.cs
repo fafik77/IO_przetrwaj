@@ -107,7 +107,7 @@ public class AccountController : Controller
 		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(code))
 			return BadRequest((ExceptionCasting)new InvalidConfirmationException("Invalid email confirmation request."));
 
-		var command = new ConfirmEmailCommand { userId = userId, code = code };
+		var command = new ConfirmEmailCommand { UserId = userId, Code = code };
 		try
 		{
 			var res = await _mediator.Send(command, cancellationToken);

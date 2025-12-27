@@ -13,6 +13,6 @@ public class GetResourcesCategoriesQueryHandler
 	public async Task<IEnumerable<CategoryDto>> Handle(GetResourcesCategoriesQuery request, CancellationToken ct)
 	{
 		var list = await _repo.GetResourcesAsync(ct);
-		return list.Select(c => (CategoryDto)c).ToList();
+		return list.Select(c => (CategoryDto)c!).ToList();
 	}
 }

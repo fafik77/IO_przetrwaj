@@ -44,13 +44,14 @@ public class AuthService : IAuthService
 		throw new InvalidDataException("Email confirmation failed.");
 	}
 
-	public async Task<AppUser?> GetUserDetailsAsync(string userIdEmail)
+	public async Task<AppUser> GetUserDetailsAsync(string userIdEmail)
 	{
 		AppUser? user;
-		if (userIdEmail.Contains("@"))
+		if (userIdEmail.Contains('@'))
 			user = await _userRepository.GetByEmailAsync(userIdEmail);
 		else
 			user = await _userRepository.GetByIdAsync(userIdEmail);
+		if (user is null) throw new UserNotFoundException(userIdEmail);
 		return user;
 	}
 
@@ -108,7 +109,7 @@ public class AuthService : IAuthService
 		var relativeUrl = _urlHelper.Action(
 			action: "ConfirmEmail",
 			controller: "Account",
-			values: new ConfirmEmailInfo { userId = user.Id, code = code });
+			values: new ConfirmEmailInfo { UserId = user.Id, Code = code });
 		// Check if relativeUrl is null (route not found)
 		if (string.IsNullOrEmpty(relativeUrl))
 		{   //Email confirmation related errors

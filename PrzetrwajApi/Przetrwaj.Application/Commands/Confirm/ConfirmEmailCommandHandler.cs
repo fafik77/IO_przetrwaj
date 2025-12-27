@@ -19,7 +19,7 @@ public class ConfirmEmailCommandHandler : ICommandHandler<ConfirmEmailCommand, U
 
 	public async Task<UserWithPersonalDataDto> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
 	{
-		var res = await _authService.ConfirmEmailAsync(request.userId, request.code);
+		var res = await _authService.ConfirmEmailAsync(request.UserId, request.Code);
 		return (UserWithPersonalDataDto)res;
 	}
 }

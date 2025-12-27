@@ -20,7 +20,7 @@ namespace Przetrwaj.Application.Commands.Users
 		public async Task<IdentityResult> Handle(MakeModeratorCommand request, CancellationToken cancellationToken)
 		{
 			AppUser? user;
-			if (request.UserIdOrEmail.Contains("@")) //email
+			if (request.UserIdOrEmail.Contains('@')) //email
 				user = await _userManager.FindByEmailAsync(request.UserIdOrEmail);
 			else //id
 				user = await _userManager.FindByIdAsync(request.UserIdOrEmail);

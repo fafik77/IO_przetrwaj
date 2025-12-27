@@ -58,6 +58,6 @@ public class ExceptionCasting
 
 public class ErrorDetails
 {
-	public string Code { get; set; }
-	public string Message { get; set; }
+	public string Code { get; set; } = string.Empty;
+	public string Message { get; set; } = string.Empty;
 }

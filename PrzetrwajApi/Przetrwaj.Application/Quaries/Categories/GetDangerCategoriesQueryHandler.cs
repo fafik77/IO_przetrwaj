@@ -13,6 +13,6 @@ public class GetDangerCategoriesQueryHandler
 	public async Task<IEnumerable<CategoryDto>> Handle(GetDangerCategoriesQuery request, CancellationToken ct)
 	{
 		var list = await _repo.GetDangersAsync(ct);
-		return list.Select(c => (CategoryDto)c).ToList();
+		return list.Select(c => (CategoryDto)c!).ToList();
 	}
 }

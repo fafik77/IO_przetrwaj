@@ -21,6 +21,6 @@ internal class CreateDangerCategoryCommandHandler
 		var cat = new CategoryDanger { Name = request.Name };
 		var e = await _repo.AddAsync(cat, ct);
 		await _uow.SaveChangesAsync(ct);
-		return (CategoryDto)e;
+		return (CategoryDto)e!;
 	}
 }

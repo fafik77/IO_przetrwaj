@@ -73,6 +73,24 @@ public class UserController : Controller
 	}
 
 
+	[HttpPost("MakeModerator")]
+	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin)")]
+	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> AssignModeratorRole(MakeModeratorCommand userInfo, CancellationToken cancellationToken)
+	{
+		if (!ModelState.IsValid) return BadRequest(IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" }));
+		try
+		{
+			var res = await _mediator.Send(userInfo, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return NotFound((ExceptionCasting)ex);
+		}
+	}
 
 
 	[HttpPost("Ban")]

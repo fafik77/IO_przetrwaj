@@ -7,13 +7,13 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
 
-[Route("WIP/[controller]")]
+[Route("[controller]")]
 [ApiController]
-public class StatsController : Controller
+public class StatisticsController : Controller
 {
 	private readonly IMediator _mediator;
 
-	public StatsController(IMediator mediator)
+	public StatisticsController(IMediator mediator)
 	{
 		_mediator = mediator;
 	}

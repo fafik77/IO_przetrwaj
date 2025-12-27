@@ -20,6 +20,7 @@ public class AppUser : IdentityUser
 	[MaxLength(36)]
 	public string? BannedById { get; set; }
 	public DateTimeOffset RegistrationDate { get; set; } = DateTimeOffset.UtcNow;
+	public bool ModeratorRolePending { get; set; }
 
 
 	[ForeignKey(nameof(IdRegion))]

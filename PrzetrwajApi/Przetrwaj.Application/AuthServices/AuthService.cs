@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Auth;
@@ -19,8 +21,9 @@ public class AuthService : IAuthService
 	private readonly IEmailSender _emailSender;
 	private readonly IUrlHelper _urlHelper;
 	private readonly IHttpContextAccessor _httpContextAccessor;
+	private readonly FrontEndSettings _frontEndSettings;
 
-	public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository)
+	public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IOptions<FrontEndSettings> frontEndSettings)
 	{
 		_userManager = userManager;
 		_signInManager = signInManager;
@@ -28,6 +31,7 @@ public class AuthService : IAuthService
 		_urlHelper = urlHelper;
 		_httpContextAccessor = httpContextAccessor;
 		_userRepository = userRepository;
+		_frontEndSettings = frontEndSettings.Value;
 	}
 
 
@@ -35,13 +39,26 @@ public class AuthService : IAuthService
 	{
 		var user = await _userManager.FindByIdAsync(userId);
 		if (user == null)
-			throw new InvalidDataException("User not found.");
+			throw new InvalidConfirmationException("User not found.");
 		var result = await _userManager.ConfirmEmailAsync(user, code);
 
 		if (result.Succeeded)
 			return user;
 
-		throw new InvalidDataException("Email confirmation failed.");
+		throw new InvalidConfirmationException("Email confirmation failed.");
+	}
+
+	public async Task GenerateChangeEmailTokenAsync(AppUser user, string newEmail)
+	{
+		var ChangeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+		ConfirmEmailChangeInfo values = new() { UserId = user.Id, Code = ChangeEmailToken, NewEmail = newEmail };
+		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmailChange", values);
+		// send the email
+		await _emailSender.SendEmailAsync(newEmail, subject: "Potwierdź zmianę swojego adresu e-mail. Przetrwaj.pl",
+			$"<p>{user.Name} właśnie chcesz zmienić swój adres e-mail w serwisie <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> na {newEmail}</p><br>" +
+			$"Potwierdź zmianę swojego adresu e-mail, <a href='{(absoluteUrlString)}'>klikając tutaj</a>." +
+			$"<br>Dopóki tego nie zrobisz, do serwisu będziesz logować się obecnym e-mailem." +
+			$"<br><br><p>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
 	}
 
 	public async Task<AppUser> GetUserDetailsAsync(string userIdEmail)
@@ -96,7 +113,10 @@ public class AuthService : IAuthService
 		var result = await _userManager.CreateAsync(user, register.Password);
 		if (!result.Succeeded)
 		{   // do not expose too much info
-			string errors = string.Join("\n", result.Errors.Where(e => e.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)).Select(e => e.Description).ToList());
+			string errors = string.Join("\n", result.Errors
+				.Where(e => e.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)
+					|| e.Code.Contains("DuplicateEmail", StringComparison.OrdinalIgnoreCase))
+				.Select(e => e.Description).ToList());
 			if (string.IsNullOrEmpty(errors))
 				throw new RegisterException($"Could not register email: {register.Email} with password: {register.Password}.\nTry another email or password");
 			throw new RegisterException(errors);
@@ -104,32 +124,41 @@ public class AuthService : IAuthService
 
 		// 1. Generate the Code
 		var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+		ConfirmEmailInfo values = new() { UserId = user.Id, Code = code };
+		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmail", values);
+		// send the email
+		await _emailSender.SendEmailAsync(register.Email, subject: "Potwierdź swój adres e-mail. Przetrwaj.pl",
+			$"<p>{register.Name} witaj w serwisie <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a></p><br>" +
+			$"Potwierdź swoje konto, <a href='{(absoluteUrlString)}'>klikając tutaj</a>." +
+			$"<br><br><p>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
+
+		return user;
+	}
+
+	private string GenerateEmailConfirmationUrl(string action, object values)
+	{
 		// 2. Generate the relative URL path using IUrlHelper.Action()
 		// This is equivalent to your old 'Url.Action' call
 		var relativeUrl = _urlHelper.Action(
-			action: "ConfirmEmail",
+			action: action,
 			controller: "Account",
-			values: new ConfirmEmailInfo { UserId = user.Id, Code = code });
+			values: values);
 		// Check if relativeUrl is null (route not found)
 		if (string.IsNullOrEmpty(relativeUrl))
 		{   //Email confirmation related errors
-			throw new RegisterException("Could not generate confirmation URL.");
+			throw new InvalidConfirmationException("Could not generate confirmation URL.");
 		}
 		// 3. Get the request scheme and host from HttpContext
 		var request = _httpContextAccessor.HttpContext?.Request;
 		if (request == null)
 		{   //Email confirmation related errors
-			throw new RegisterException("Cannot access HTTP context to build URL.");
+			throw new InvalidConfirmationException("Cannot access HTTP context to build URL.");
 		}
 		var scheme = request.Scheme;
 		var host = request.Host.Value;
 		// 4. Construct the absolute URL string
 		// e.g., "localhost:5001" or "api.example.com"
 		var absoluteUrlString = $"{scheme}://{host}{relativeUrl}";
-		// send the email
-		await _emailSender.SendEmailAsync(register.Email, "Confirm your email",
-			$"Please confirm your account by <a href='{(absoluteUrlString)}'>clicking here</a>.");
-
-		return user;
+		return absoluteUrlString;
 	}
 }

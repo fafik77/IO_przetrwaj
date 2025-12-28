@@ -10,7 +10,6 @@ using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Auth;
-using Przetrwaj.Domain.Exceptions.Users;
 using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
@@ -71,8 +70,9 @@ public class AccountController : Controller
 	[SwaggerOperation("Updates user own account (Owner only)")]
 	[Authorize]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status409Conflict)]
 	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount, CancellationToken cancellationToken)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
@@ -85,15 +85,18 @@ public class AccountController : Controller
 			IdRegion = updateAccount.IdRegion,
 			Name = updateAccount.Name,
 			Surname = updateAccount.Surname,
+			Email = updateAccount.Email,
+			NewPassword = updateAccount.NewPassword,
+			OldPassword = updateAccount.OldPassword,
 		};
 		try
 		{
 			var res = await _mediator.Send(requ, cancellationToken);
 			return Ok(res);
 		}
-		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
+		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 
@@ -113,9 +116,30 @@ public class AccountController : Controller
 			var res = await _mediator.Send(command, cancellationToken);
 			return Ok(res);
 		}
-		catch (Exception ex) when (ex is InvalidDataException or UserNotFoundException)
+		catch (BaseException ex)
 		{
-			return BadRequest((ExceptionCasting)new InvalidConfirmationException("Invalid email confirmation request."));
+			return BadRequest((ExceptionCasting)ex);
+		}
+	}
+
+	[HttpGet("ConfirmEmailChange")]
+	[SwaggerOperation("Confirm Email Change using the code attached in the email")]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> ConfirmEmailChange(string userId, string code, string newEmail, CancellationToken cancellationToken)
+	{
+		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(code) || string.IsNullOrEmpty(newEmail))
+			return BadRequest((ExceptionCasting)new InvalidConfirmationException("Invalid change email confirmation request."));
+
+		var command = new ConfirmEmailChangeCommand { UserId = userId, Code = code, NewEmail = newEmail };
+		try
+		{
+			var res = await _mediator.Send(command, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return BadRequest((ExceptionCasting)ex);
 		}
 	}
 

@@ -38,10 +38,10 @@ public class StatisticsService : IStatisticsService
 			Console.WriteLine("Cache expired. Fetching fresh statistics from Database...");
 
 			// Run the parallel counts
-			var regionsTask = GetCountAsync(ctx => ctx.Regions.LongCountAsync(cancellationToken));
-			var usersTask = GetCountAsync(ctx => ctx.Users.LongCountAsync(cancellationToken));
-			var activeDangersTask = GetCountAsync(ctx => ctx.Posts.LongCountAsync(p => p.Category == CategoryType.Danger && p.Active, cancellationToken));
-			var activeResourcesTask = GetCountAsync(ctx => ctx.Posts.LongCountAsync(p => p.Category == CategoryType.Resource && p.Active, cancellationToken));
+			var regionsTask = GetCountAsync(ctx => ctx.Regions.LongCountAsync());
+			var usersTask = GetCountAsync(ctx => ctx.Users.LongCountAsync());
+			var activeDangersTask = GetCountAsync(ctx => ctx.Posts.LongCountAsync(p => p.Category == CategoryType.Danger && p.Active));
+			var activeResourcesTask = GetCountAsync(ctx => ctx.Posts.LongCountAsync(p => p.Category == CategoryType.Resource && p.Active));
 			//_userManager.GetUsersInRoleAsync(UserRoles.Moderator)
 			var moderatorsTask = GetCountAsync(ctx => ctx.UserRoles
 			.AsNoTracking()
@@ -50,11 +50,9 @@ public class StatisticsService : IStatisticsService
 				r => r.Id,
 				(ur, r) => new { ur, r })
 			.Where(joined => joined.r.Name == UserRoles.Moderator)
-			.LongCountAsync(cancellationToken));
+			.LongCountAsync());
 			//get all of their results
 			await Task.WhenAll(regionsTask, usersTask, activeDangersTask, activeResourcesTask);
-			if (cancellationToken.IsCancellationRequested)
-				throw new TaskCanceledException();
 			//return those results
 			return new StatisticsDto
 			{

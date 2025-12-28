@@ -22,6 +22,10 @@ builder.Services.Configure<EmailSettings>(
 builder.Services.Configure<AttachmentSettings>(
 	builder.Configuration.GetSection("Attachments")
 );
+// Bind the "FrontEnd" section to the FrontEndSettings class
+builder.Services.Configure<FrontEndSettings>(
+	builder.Configuration.GetSection("FrontEnd")
+);
 
 #region CORS Access-Control-Allow-Origin
 var AllowAllOrigins = "_AllowAllOrigins";

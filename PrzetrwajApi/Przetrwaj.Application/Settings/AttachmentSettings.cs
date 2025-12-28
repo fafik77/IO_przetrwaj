@@ -11,4 +11,3 @@ public class AttachmentSettings
 	[Required]
 	public required IEnumerable<string> AllowedTypes { get; set; }
 }
-

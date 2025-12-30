@@ -6,6 +6,7 @@ namespace Przetrwaj.Domain.Abstractions;
 public interface IPostRepository
 {
 	#region Get
+
 	Task<Post> AddAsync(Post item, CancellationToken cancellationToken = default);
 	/// <summary>
 	/// Retrieves a read only post by its unique identifier with all 1st level props filled.
@@ -25,9 +26,11 @@ public interface IPostRepository
 
 	//public void AddComment(string id, CancellationToken cancellationToken = default);
 	//public void AddVote(string id, CancellationToken cancellationToken = default);
-
+	
 	public Task<Attachment> AddAttachmentAsync(Attachment attachment, CancellationToken cancellationToken = default);
 	public Task<Vote> AddVoteAsync(Vote vote, CancellationToken cancellationToken = default);
 	public Task<UserComment> AddCommentAsync(UserComment comment, CancellationToken cancellationToken = default);
 	public void Update(Post post, CancellationToken cancellationToken = default);
+	Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default);
+
 }

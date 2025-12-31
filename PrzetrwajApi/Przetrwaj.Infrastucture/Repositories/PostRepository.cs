@@ -170,7 +170,7 @@ internal class PostRepository : IPostRepository
 				// --- VOTE CALCULATIONS (Executed on Database side) ---
 				VotePositive = p.Votes.Count(v => v.IsUpvote),
 				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
-				VoteSum = p.Votes.Count(),
+				//VoteSum = p.Votes.Count(),
 				//VoteRatio = (p.Votes.Count() > 0)
 				//? ((float)p.Votes.Count(v => v.IsUpvote) / p.Votes.Count() * 100)
 				//: 100
@@ -184,14 +184,51 @@ internal class PostRepository : IPostRepository
 		return await _context.PostMinimalViews.AsNoTracking().Where(p => p.Active == true).ToListAsync(cancellationToken);
 	}
 
-	public Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
+	public async Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
+		var posts = await _context.PostsResourcesRO
+			.Where(p => p.IdRegion == idRegion)
+			.Select(p => new PostOverviewDto
+			{
+				Id = p.IdPost,
+				Title = p.Title,
+				DateCreated = p.DateCreated,
+
+				Category = p.CustomCategory.Length > 0 ? new CategoryDto
+				{
+					IdCategory = p.IdCategory,
+					Type = p.IdCategoryNavigation.Type,
+					Name = p.CustomCategory,
+				}
+				: (CategoryDto?)p.IdCategoryNavigation,
+
+				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
+				{
+					IdRegion = p.IdRegionNavigation.IdRegion,
+					Name = p.IdRegionNavigation.Name
+				} : null,
+
+				VotePositive = p.Votes.Count(v => v.IsUpvote),
+				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
+				//VoteSum = p.Votes.Count(),
+			})
+			.ToListAsync(cancellationToken);
+
+		return posts;
 	}
+
 
 	public void Update(Post post, CancellationToken cancellationToken = default)
 	{
 		throw new NotImplementedException();
+	}
+	public async Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default)
+	{
+		idPost = idPost.ToLower();
+		idUser = idUser.ToLower();
+		return await _context.Votes
+			.AsNoTracking()
+			.FirstOrDefaultAsync(v => v.IdPost == idPost && v.IdUser == idUser, cancellationToken);
 	}
 
 	public async Task<bool> ExistsPostIdAsync(string idPost, CancellationToken cancellationToken = default)

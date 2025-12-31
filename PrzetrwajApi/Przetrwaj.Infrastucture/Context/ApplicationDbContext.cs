@@ -124,6 +124,11 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.Property(p => p.Category)
 			.IsRequired();
 
+		// Add a composite index for Category and Active status (used for: PostsDangerROm, PostsResourcesRO, Statistics)
+		builder.Entity<Post>()
+			.HasIndex(p => new { p.Category, p.Active })	// 2 * 2 = only 4 branching paths (Da, Dn, Ra, Rn)
+			.HasDatabaseName("IX_Post_Category_Active");
+
 
 		// --- 5. Attachment Entity Configuration ---
 

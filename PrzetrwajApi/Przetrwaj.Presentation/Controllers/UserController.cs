@@ -73,11 +73,8 @@ public class UserController : Controller
 	}
 
 
-
-
 	[HttpPost("MakeModerator")]
-	[Authorize(UserRoles.Admin)]
-	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin only)")]
+	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -95,12 +92,14 @@ public class UserController : Controller
 		}
 	}
 
+
 	[HttpPost("Ban")]
 	[Authorize(UserRoles.Moderator)]
-	[SwaggerOperation("Ban a user by Id or Email (Moderator only)")]
+	[SwaggerOperation("Ban a User by Id or Email (Moderator, Admin)")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> Ban(BanUserCommand banUserCommand, CancellationToken cancellationToken)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);

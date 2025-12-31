@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Register;
 using Przetrwaj.Domain.Exceptions;
+using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Users;
 using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
@@ -33,7 +34,7 @@ public partial class RegisterController : Controller
 			var result = await _mediator.Send(model);
 			return Ok(result);
 		}
-		catch (RegisterException ex) //when (ex is  or NotImplementedException or ValidationException)
+		catch (BaseException ex)
 		{
 			return BadRequest((ExceptionCasting)ex);
 		}

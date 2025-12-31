@@ -24,6 +24,6 @@ public class AddRegionCommandHandler : ICommandHandler<AddRegionCommand, RegionO
 
 		await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-		return (RegionOnlyDto)region;
+		return (RegionOnlyDto)region!;
 	}
 }

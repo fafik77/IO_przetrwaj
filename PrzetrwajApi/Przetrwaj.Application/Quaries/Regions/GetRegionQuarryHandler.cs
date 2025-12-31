@@ -19,6 +19,6 @@ public class GetRegionQuarryHandler : IQueryHandler<GetRegionQuarry, RegionOnlyD
 	{
 		var res = await _regionRepository.GetByIdAsync(request.IdRegion, cancellationToken);
 		if (res is null) throw new RegionNotFoundException(request.IdRegion);
-		return (RegionOnlyDto)res;
+		return (RegionOnlyDto)res!;
 	}
 }

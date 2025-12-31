@@ -32,17 +32,15 @@ public class LoginController : Controller
 		try
 		{
 			var result = await _mediator.Send(model);
-			if (result.Banned) return StatusCode(StatusCodes.Status418ImATeapot, result);
-
 			return Ok(result);
 		}
-		catch (BaseException ex) when (ex is InvalidLoginException)
+		catch (UserBannedException ex)
 		{
-			return BadRequest((ExceptionCasting)ex);
+			return StatusCode(StatusCodes.Status418ImATeapot, ex.User);
 		}
-		catch (Exception)
+		catch (BaseException ex)
 		{
-			throw;
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 }

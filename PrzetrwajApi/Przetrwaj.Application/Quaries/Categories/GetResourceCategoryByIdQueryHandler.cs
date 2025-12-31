@@ -12,6 +12,6 @@ internal class GetResourceCategoryByIdQueryHandler
     public async Task<CategoryDto?> Handle(GetResourceCategoryByIdQuery q, CancellationToken ct)
     {
         var e = await _repo.GetResourceByIdAsync(q.IdCategory, ct);
-        return e is null ? null : (CategoryDto)e;
+        return e is null ? null : (CategoryDto?)e;
     }
 }

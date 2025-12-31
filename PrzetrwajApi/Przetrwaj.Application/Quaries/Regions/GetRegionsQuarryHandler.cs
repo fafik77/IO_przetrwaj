@@ -1,8 +1,9 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
+using Przetrwaj.Application.Quaries.RegionQauries;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Models.Dtos;
 
-namespace Przetrwaj.Application.Quaries.RegionQauries;
+namespace Przetrwaj.Application.Quaries.Regions;
 
 public class GetRegionsQuarryHandler : IQueryHandler<GetRegionsQuarry, IEnumerable<RegionOnlyDto>>
 {
@@ -17,9 +18,8 @@ public class GetRegionsQuarryHandler : IQueryHandler<GetRegionsQuarry, IEnumerab
 	public async Task<IEnumerable<RegionOnlyDto>> Handle(GetRegionsQuarry request, CancellationToken cancellationToken)
 	{
 		var res = await _regionRepository.GetAllAsync(cancellationToken);
-		if (res == null) throw new InvalidOperationException("Invalid region quarry");
 		return res
-			.Select(r => (RegionOnlyDto)r)
+			.Select(r => (RegionOnlyDto)r!)
 			.ToList();
 	}
 }

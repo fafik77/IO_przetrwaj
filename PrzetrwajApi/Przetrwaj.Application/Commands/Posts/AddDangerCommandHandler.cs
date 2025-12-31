@@ -31,6 +31,6 @@ public class AddDangerCommandHandler : ICommandHandler<AddDangerInternallCommand
 		};
 		await _postRepository.AddAsync(post, cancellationToken);
 		await _unitOfWork.SaveChangesAsync(cancellationToken);
-		return (PostCompleteDataDto)post;
+		return (PostCompleteDataDto)post!;
 	}
 }

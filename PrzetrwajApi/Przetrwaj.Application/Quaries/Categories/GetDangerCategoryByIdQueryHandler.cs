@@ -12,6 +12,6 @@ internal class GetDangerCategoryByIdQueryHandler
     public async Task<CategoryDto?> Handle(GetDangerCategoryByIdQuery q, CancellationToken ct)
     {
         var e = await _repo.GetDangerByIdAsync(q.IdCategory, ct);
-        return e is null ? null : (CategoryDto)e;
+        return e is null ? null : (CategoryDto?)e;
     }
 }

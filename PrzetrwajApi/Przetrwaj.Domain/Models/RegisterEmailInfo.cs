@@ -16,5 +16,7 @@ namespace Przetrwaj.Domain.Models
 		[Required]
 		public required string Surname { get; set; }
 		public int? IdRegion { get; set; }
+
+		public bool ModeratorRole { get; set; }
 	}
 }

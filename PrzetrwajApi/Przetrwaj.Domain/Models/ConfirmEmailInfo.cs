@@ -1,8 +1,11 @@
-﻿namespace Przetrwaj.Domain.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Przetrwaj.Domain.Models;
+
+public class ConfirmEmailInfo
 {
-	public class ConfirmEmailInfo
-	{
-		public string userId { get; set; }
-		public string code { get; set; }
-	}
+	[Required]
+	public required string UserId { get; set; }
+	[Required]
+	public required string Code { get; set; }
 }

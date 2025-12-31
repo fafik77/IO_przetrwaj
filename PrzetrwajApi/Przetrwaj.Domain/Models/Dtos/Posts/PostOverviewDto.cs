@@ -18,8 +18,9 @@ public class PostOverviewDto
 	///To add all this bellow
 	public long VotePositive { get; set; }
 	public long VoteNegative { get; set; }
-	public long VoteSum { get; set; }
-	public float VoteRatio { get; set; }
+	//public long VoteBalance { get; set; }
+	//public long VoteSum { get; set; }
+	//public float VoteRatio { get; set; }
 
 
 	public static explicit operator PostOverviewDto?(Post? post)

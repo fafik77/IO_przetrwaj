@@ -39,7 +39,7 @@ public partial class PostController : Controller
 			var post = await _mediator.Send(new GetPostByIdQuery { Id = id }, CT);
 			return Ok(post);
 		}
-		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+		catch (BaseException ex)
 		{
 			return NotFound((ExceptionCasting)ex);
 		}
@@ -66,14 +66,14 @@ public partial class PostController : Controller
             var posts = await _mediator.Send(new GetDangerPostsInRegionQuery { IdRegion = id }, CT);
             return Ok(posts);
         }
-        catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (BaseException ex)
         {
             return NotFound((ExceptionCasting)ex);
         }
     }
 
-
-    [HttpGet("Region/{id}/Resource")]
+	//KL Done
+	[HttpGet("Region/{id}/Resource")]
 	[SwaggerOperation("Get all Resource posts in region")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -84,7 +84,7 @@ public partial class PostController : Controller
             var posts = await _mediator.Send(new GetResourcePostsInRegionQuery { IdRegion = id }, CT);
             return Ok(posts);
         }
-        catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (BaseException ex)
         {
             return NotFound((ExceptionCasting)ex);
         }
@@ -110,7 +110,7 @@ public partial class PostController : Controller
 		throw new NotImplementedException();
 	}
 
-	//KL priority high
+	//KL Done
 	[HttpPost("{id}/VotePositive")]
 	[SwaggerOperation("Add a Positive vote to the post (User)")]
 	[Authorize(UserRoles.User)]
@@ -137,13 +137,13 @@ public partial class PostController : Controller
         {
             return Conflict(ex.Vote); // VoteDto z info jaki był poprzedni głos
         }
-        catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (BaseException ex)
         {
             return NotFound((ExceptionCasting)ex);
         }
     }
 
-    //KL priority high
+    //KL Done
     [HttpPost("{id}/VoteNegative")]
 	[SwaggerOperation("Add a Negative vote to the post (User)")]
 	[Authorize(UserRoles.User)]

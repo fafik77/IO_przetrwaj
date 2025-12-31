@@ -5,5 +5,5 @@ namespace Przetrwaj.Application.Commands.AccountOwn;
 
 public class UpdateAccountInternallCommand : UpdateAccountCommand, ICommand<UserWithPersonalDataDto>
 {
-	public string UserId { get; set; }
+	public required string UserId { get; set; }
 }

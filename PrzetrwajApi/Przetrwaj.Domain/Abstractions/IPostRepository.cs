@@ -15,6 +15,7 @@ public interface IPostRepository
 	/// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
 	/// <returns>A task that represents the asynchronous operation. The task result contains the post with the specified identifier</returns>
 	public Task<PostCompleteDataDto?> GetFullROPostByIdAsync(string idPost, CancellationToken cancellationToken = default);
+	public Task<bool> ExistsPostIdAsync(string idPost, CancellationToken cancellationToken = default);
 	public Task<Post?> GetRWPostByIdAsync(string idPost, CancellationToken cancellationToken = default);
 	public Task<Post?> GetPostWithAttachmentsByIdAsync(string idPost, CancellationToken cancellationToken = default);
 	public Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default);

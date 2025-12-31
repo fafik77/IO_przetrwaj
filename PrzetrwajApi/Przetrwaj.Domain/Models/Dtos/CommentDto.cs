@@ -19,5 +19,4 @@ public class CommentDto
 			Autor = (UserGeneralDto?)comment.IdAutorNavigation,
 		};
 	}
-
 }

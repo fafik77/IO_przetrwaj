@@ -19,6 +19,6 @@ public class GetUserByIdQueryHandler : IQueryHandler<GetUserByIdQuery, UserGener
 	{
 		var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
 		if (user is null) throw new UserNotFoundException(request.UserId);
-		return (UserGeneralDto)user;
+		return (UserGeneralDto)user!;
 	}
 }

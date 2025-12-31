@@ -59,39 +59,39 @@ public partial class PostController : Controller
 	[SwaggerOperation("Get all Danger posts in region")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetDangerInRegion(int id, CancellationToken CT)
-    {
-        try
-        {
-            var posts = await _mediator.Send(new GetDangerPostsInRegionQuery { IdRegion = id }, CT);
-            return Ok(posts);
-        }
-        catch (BaseException ex)
-        {
-            return NotFound((ExceptionCasting)ex);
-        }
-    }
+	public async Task<IActionResult> GetDangerInRegion(int id, CancellationToken CT)
+	{
+		try
+		{
+			var posts = await _mediator.Send(new GetDangerPostsInRegionQuery { IdRegion = id }, CT);
+			return Ok(posts);
+		}
+		catch (BaseException ex)
+		{
+			return NotFound((ExceptionCasting)ex);
+		}
+	}
 
 	//KL Done
 	[HttpGet("Region/{id}/Resource")]
 	[SwaggerOperation("Get all Resource posts in region")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetResourceInRegion(int id, CancellationToken CT)
-    {
-        try
-        {
-            var posts = await _mediator.Send(new GetResourcePostsInRegionQuery { IdRegion = id }, CT);
-            return Ok(posts);
-        }
-        catch (BaseException ex)
-        {
-            return NotFound((ExceptionCasting)ex);
-        }
-    }
+	public async Task<IActionResult> GetResourceInRegion(int id, CancellationToken CT)
+	{
+		try
+		{
+			var posts = await _mediator.Send(new GetResourcePostsInRegionQuery { IdRegion = id }, CT);
+			return Ok(posts);
+		}
+		catch (BaseException ex)
+		{
+			return NotFound((ExceptionCasting)ex);
+		}
+	}
 
 
-    [HttpGet("WIP/Authored/{id}")]
+	[HttpGet("WIP/Authored/{id}")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -130,70 +130,70 @@ public partial class PostController : Controller
 	[HttpPost("{id}/VotePositive")]
 	[SwaggerOperation("Add a Positive vote to the post (User)")]
 	[Authorize(UserRoles.User)]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(typeof(VoteDto), StatusCodes.Status409Conflict)] //already voted
-    public async Task<IActionResult> VotePositive(string id, CancellationToken CT)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+	public async Task<IActionResult> VotePositive(string id, CancellationToken CT)
+	{
+		var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
 
-        try
-        {
-            await _mediator.Send(new VoteOnPostCommand
-            {
-                IdPost = id,
-                IdUser = userId,
-                IsUpvote = true
-            }, CT);
+		try
+		{
+			await _mediator.Send(new VoteOnPostCommand
+			{
+				IdPost = id,
+				IdUser = userId,
+				IsUpvote = true
+			}, CT);
 
-            return Ok();
-        }
-        catch (AlreadyVotedException ex)
-        {
-            return Conflict(ex.Vote); // VoteDto z info jaki był poprzedni głos
-        }
-        catch (BaseException ex)
-        {
-            return NotFound((ExceptionCasting)ex);
-        }
-    }
+			return NoContent();
+		}
+		catch (AlreadyVotedException ex)
+		{
+			return Conflict(ex.Vote); // VoteDto z info jaki był poprzedni głos
+		}
+		catch (BaseException ex)
+		{
+			return NotFound((ExceptionCasting)ex);
+		}
+	}
 
-    //KL Done
-    [HttpPost("{id}/VoteNegative")]
+	//KL Done
+	[HttpPost("{id}/VoteNegative")]
 	[SwaggerOperation("Add a Negative vote to the post (User)")]
 	[Authorize(UserRoles.User)]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(typeof(VoteDto), StatusCodes.Status409Conflict)] //already voted
-    public async Task<IActionResult> VoteNegative(string id, CancellationToken CT)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+	public async Task<IActionResult> VoteNegative(string id, CancellationToken CT)
+	{
+		var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
 
-        try
-        {
-            await _mediator.Send(new VoteOnPostCommand
-            {
-                IdPost = id,
-                IdUser = userId,
-                IsUpvote = false
-            }, CT);
+		try
+		{
+			await _mediator.Send(new VoteOnPostCommand
+			{
+				IdPost = id,
+				IdUser = userId,
+				IsUpvote = false
+			}, CT);
 
-            return Ok();
-        }
-        catch (AlreadyVotedException ex)
-        {
-            return Conflict(ex.Vote); // zwraca VoteDto z info jaki był poprzedni głos
-        }
-        catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            return NotFound((ExceptionCasting)ex);
-        }
-    }
+			return NoContent();
+		}
+		catch (AlreadyVotedException ex)
+		{
+			return Conflict(ex.Vote); // zwraca VoteDto z info jaki był poprzedni głos
+		}
+		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+		{
+			return NotFound((ExceptionCasting)ex);
+		}
+	}
 
-    //KL priority low or even lower
-    [HttpGet("WIP/{id}/Vote")]
+	//KL priority low or even lower
+	[HttpGet("WIP/{id}/Vote")]
 	[SwaggerOperation("Get user Vote status on Post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(VoteDto), StatusCodes.Status200OK)]

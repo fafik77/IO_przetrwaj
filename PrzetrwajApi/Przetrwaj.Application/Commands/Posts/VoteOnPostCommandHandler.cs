@@ -18,21 +18,19 @@ public class VoteOnPostCommandHandler : ICommandHandler<VoteOnPostCommand>
 
 	public async Task Handle(VoteOnPostCommand request, CancellationToken cancellationToken)
 	{
-		var postId = request.IdPost.ToLower();
-
 		// 404 jeśli post nie istnieje
-		if (await _postRepository.PostExistsByIdAsync(postId, cancellationToken))
-			throw new PostNotFoundException(postId);
+		if (!await _postRepository.ExistsPostIdAsync(request.IdPost, cancellationToken))
+			throw new PostNotFoundException(request.IdPost);
 
 		// 409 jeśli user już głosował
-		var existing = await _postRepository.GetVoteAsync(postId, request.IdUser, cancellationToken);
-		if (existing is not null)
-			throw new AlreadyVotedException($"{postId}:{request.IdUser}", existing.IsUpvote);
+		var existing = await _postRepository.GetVoteAsync(request.IdPost, request.IdUser, cancellationToken);
+		if (existing != null)
+			throw new AlreadyVotedException($"{request.IdPost}:{request.IdUser}", existing.IsUpvote);
 
 		await _postRepository.AddVoteAsync(new Vote
 		{
-			IdPost = postId,
-			IdUser = request.IdUser,
+			IdPost = request.IdPost.ToLower(),
+			IdUser = request.IdUser.ToLower(),
 			IsUpvote = request.IsUpvote
 		}, cancellationToken);
 

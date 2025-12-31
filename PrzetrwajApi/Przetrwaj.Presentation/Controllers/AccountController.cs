@@ -143,6 +143,26 @@ public class AccountController : Controller
 		}
 	}
 
+	[HttpPost("WIP/ForgotPassword")]
+	[SwaggerOperation("Forgot password, request a reset")]
+	[ProducesResponseType(typeof(UserGeneralDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> ForgotPassword(ForgotPasswordCommand command, CancellationToken cancellationToken)
+	{
+		return StatusCode(statusCode: StatusCodes.Status501NotImplemented);
+		if (!ModelState.IsValid)
+			return BadRequest((ExceptionCasting)ModelState);
+		try
+		{
+			var res = await _mediator.Send(command, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return BadRequest((ExceptionCasting)ex);
+		}
+	}
+
 	[HttpPost("Logout")]
 	[SwaggerOperation("Logout")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]

@@ -12,7 +12,6 @@ using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Net;
 using System.Security.Claims;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -60,9 +59,9 @@ public class AccountController : Controller
 			dto.Role = string.Join(", ", roles);
 			return Ok(dto);
 		}
-		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
+		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 

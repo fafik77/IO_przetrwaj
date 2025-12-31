@@ -41,7 +41,7 @@ public partial class PostController : Controller
 		}
 		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 
@@ -68,7 +68,7 @@ public partial class PostController : Controller
 		}
 		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 
@@ -86,7 +86,7 @@ public partial class PostController : Controller
 		}
 		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 
@@ -151,11 +151,11 @@ public partial class PostController : Controller
 		}
 		catch (AlreadyVotedException ex)
 		{
-			return Conflict(ex.Vote); // VoteDto z info jaki był poprzedni głos
+			return Conflict(ex.Vote);
 		}
 		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 
@@ -184,11 +184,11 @@ public partial class PostController : Controller
 		}
 		catch (AlreadyVotedException ex)
 		{
-			return Conflict(ex.Vote); // zwraca VoteDto z info jaki był poprzedni głos
+			return Conflict(ex.Vote);
 		}
-		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 
@@ -231,7 +231,7 @@ public partial class PostController : Controller
 		}
 		catch (BaseException ex)
 		{
-			return BadRequest((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 
@@ -270,13 +270,9 @@ public partial class PostController : Controller
 			var res = await _mediator.Send(req, CT);
 			return StatusCode((int)res.StatusCode, res);
 		}
-		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+		catch (BaseException ex)
 		{
-			return NotFound((AddAttachmentsResult)ex);
-		}
-		catch (BaseException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.BadRequest)
-		{
-			return BadRequest((AddAttachmentsResult)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 

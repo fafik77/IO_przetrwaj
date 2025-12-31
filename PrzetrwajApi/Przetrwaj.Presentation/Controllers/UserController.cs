@@ -12,7 +12,6 @@ using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Net;
 using System.Security.Claims;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -115,9 +114,9 @@ public class UserController : Controller
 			var res = await _mediator.Send(command, cancellationToken);
 			return Ok(res);
 		}
-		catch (BaseException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
+		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 }

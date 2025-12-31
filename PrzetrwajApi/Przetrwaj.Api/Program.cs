@@ -27,6 +27,11 @@ builder.Services.Configure<FrontEndSettings>(
 	builder.Configuration.GetSection("FrontEnd")
 );
 
+// 1. Add the handler to the container
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+// 2. Add the problem details service (standardizes error responses)
+builder.Services.AddProblemDetails();
+
 #region CORS Access-Control-Allow-Origin
 var AllowAllOrigins = "_AllowAllOrigins";
 builder.Services.AddCors(options =>
@@ -122,6 +127,8 @@ builder.Services.AddPresentation();
 
 
 var app = builder.Build();
+// 3. MUST use the middleware early in the pipeline
+app.UseExceptionHandler();
 
 #region Attachments
 // Define the physical folder (outside the project root for safety)

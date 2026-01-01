@@ -1,52 +1,71 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LazyCache;
+using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture.Context;
 
 namespace Przetrwaj.Infrastucture.Repositories;
 
+
 public class CategoryRepository : ICategoryRepository
 {
 	private readonly ApplicationDbContext _db;
-	public CategoryRepository(ApplicationDbContext db) => _db = db;
+	private readonly IAppCache _cache;
+	private const string CategoryCacheKey = "Categories";
+	private readonly TimeSpan _cacheDuration = TimeSpan.FromHours(24);
 
-
-	public async Task<Category> AddAsync(Category category, CancellationToken ct)
+	public CategoryRepository(ApplicationDbContext db, IAppCache cache)
 	{
-		await _db.Categories.AddAsync(category, ct);
-		return category;
+		_db = db;
+		_cache = cache;
+	}
+
+	// Helper to get the master list
+	private async Task<IEnumerable<Category>> GetAllInternalAsync(CancellationToken ct)
+	{
+		return await _cache.GetOrAddAsync(CategoryCacheKey, async entry =>
+		{
+			entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
+			// Fetching the base type gets all derived types (TPH)
+			return await _db.Categories.AsNoTracking().ToListAsync(ct);
+		});
 	}
 
 	public async Task<IEnumerable<CategoryDanger>> GetDangersAsync(CancellationToken ct)
 	{
-		var list = await _db.CategoryDangers
-			.AsNoTracking()
-			.ToListAsync(ct);
-		return list;
+		var all = await GetAllInternalAsync(ct);
+		// OfType filters and casts the objects in-memory
+		return all.OfType<CategoryDanger>();
 	}
 
 	public async Task<IEnumerable<CategoryResource>> GetResourcesAsync(CancellationToken ct)
 	{
-		var list = await _db.CategoryResources
-			.AsNoTracking()
-			.ToListAsync(ct);
-		return list;
+		var all = await GetAllInternalAsync(ct);
+		return all.OfType<CategoryResource>();
 	}
 
-	public Task<CategoryDanger?> GetDangerByIdAsync(int id, CancellationToken ct)
+	public async Task<CategoryDanger?> GetDangerByIdAsync(int id, CancellationToken ct)
 	{
-		return _db.CategoryDangers
-		   .FirstOrDefaultAsync(c => c.IdCategory == id, ct);
+		var list = await GetDangersAsync(ct);
+		return list.FirstOrDefault(c => c.IdCategory == id);
 	}
 
-	public Task<CategoryResource?> GetResourceByIdAsync(int id, CancellationToken ct)
+	public async Task<CategoryResource?> GetResourceByIdAsync(int id, CancellationToken ct)
 	{
-		return _db.CategoryResources
-		   .FirstOrDefaultAsync(c => c.IdCategory == id, ct);
+		var list = await GetResourcesAsync(ct);
+		return list.FirstOrDefault(c => c.IdCategory == id);
+	}
+
+	public async Task<Category> AddAsync(Category category, CancellationToken ct)
+	{
+		await _db.Categories.AddAsync(category, ct);
+		_cache.Remove(CategoryCacheKey); // Invalidate cache
+		return category;
 	}
 
 	public void Delete(Category category)
 	{
 		_db.Categories.Remove(category);
+		_cache.Remove(CategoryCacheKey); // Invalidate cache
 	}
 }

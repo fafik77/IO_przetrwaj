@@ -11,7 +11,7 @@ public class RegionRepository : IRegionRepository
 {
 	private readonly ApplicationDbContext _dbContext;
 	private readonly IAppCache _cache;
-	private const string RegionsCacheKey = "AllRegionsList";
+	private const string RegionsCacheKey = "Regions";
 	private readonly TimeSpan _cacheDuration = TimeSpan.FromHours(24); // Long duration for static data
 
 	public RegionRepository(ApplicationDbContext dbContext, IAppCache cache)

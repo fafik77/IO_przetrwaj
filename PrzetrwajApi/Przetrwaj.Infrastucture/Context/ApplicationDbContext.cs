@@ -16,9 +16,6 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	public DbSet<Vote> Votes { get; set; }
 
 	#region Views and TPH mappings
-	public DbSet<CategoryResource> CategoryResources { get; set; }
-	public DbSet<CategoryDanger> CategoryDangers { get; set; }
-
 	/// <summary>
 	/// Returns only Active Danger Posts
 	/// </summary>
@@ -126,7 +123,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
 		// Add a composite index for Category and Active status (used for: PostsDangerROm, PostsResourcesRO, Statistics)
 		builder.Entity<Post>()
-			.HasIndex(p => new { p.Category, p.Active })	// 2 * 2 = only 4 branching paths (Da, Dn, Ra, Rn)
+			.HasIndex(p => new { p.Category, p.Active })    // 2 * 2 = only 4 branching paths (Da, Dn, Ra, Rn)
 			.HasDatabaseName("IX_Post_Category_Active");
 
 

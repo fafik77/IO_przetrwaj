@@ -1,12 +1,53 @@
 ﻿@page "/"
 
 <PageTitle>Home</PageTitle>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div style="text-align: center">
 	<h1>Ogólnopolska strona do zgłaszania zagrożeń w twojej okolicy.</h1>
 	<h2>Widzisz zagrożenie? Zgłoś je!</h2>
-	Aktualnie w Polsce śledzimy x zagrożeń, oraz x punktów z zasobami
 </div>
 
+<div class="container">
+    <div class="dropdown" style="text-align: center">
+        <button onclick="chooseRegion()" class="dropbtn">Region <i class="fa fa-caret-down"></i></button>
+        <div id="regionDropdown" class="dropdown-content">
+            <p>Cała Polska</p>
+            <p>Region1</p>
+            <p>Region2</p>
+        </div>
+    </div>
+</div>
+    
+<div class="post">
+    <p>Opis postu</p>
+    <span class="down-vote">4</span>
+    <span class="divide">/</span>
+    <span class="up-vote">10 </span>
+    <span class="time-right">11:01</span>
+</div>
+<div class="post darker">
+    <p>Opis postu</p>
+    <span class="down-vote">10</span>
+    <span class="divide">/</span>
+    <span class="up-vote">20 </span>
+    <span class="time-right">11:01</span>
+</div>
 
+<script>
+    function chooseRegion() {
+        document.getElementById("regionDropdown").classList.toggle("show");
+    }
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+</script>
 

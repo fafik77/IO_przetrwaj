@@ -14,11 +14,10 @@ public class PostArchivingService : BackgroundService
 	private readonly IServiceProvider _services;
 	private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(30); // Check every X Minutes
 
-	public PostArchivingService(ILogger<PostArchivingService> logger, IServiceProvider services, TimeSpan checkInterval)
+	public PostArchivingService(ILogger<PostArchivingService> logger, IServiceProvider services)
 	{
 		_logger = logger;
 		_services = services;
-		_checkInterval = checkInterval;
 	}
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)

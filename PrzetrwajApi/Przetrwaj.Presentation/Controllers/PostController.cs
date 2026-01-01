@@ -91,13 +91,22 @@ public partial class PostController : Controller
 	}
 
 
-	[HttpGet("WIP/Authored/{id}")]
+	[HttpGet("Authored/{id}")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetAllAuthoredBy(string id, CancellationToken CT)
 	{
-		throw new NotImplementedException();
+		var requ = new GetAllAuthoredByQuery { AutorId = id };
+		try
+		{
+			var res = await _mediator.Send(requ, CT);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
 	}
 
 	[HttpPost("{id}/Comment")]
@@ -192,15 +201,28 @@ public partial class PostController : Controller
 		}
 	}
 
-	//KL priority low or even lower
-	[HttpGet("WIP/{id}/Vote")]
+	//KL Done, PN exposed
+	[HttpGet("{id}/Vote")]
 	[SwaggerOperation("Get user Vote status on Post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(VoteDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetVote(string id, CancellationToken CT)
 	{
-		throw new NotImplementedException();
+		var requ = new GetUserVoteQuery
+		{
+			PostId = id,
+			UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!
+		};
+		try
+		{
+			var res = await _mediator.Send(requ, CT);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
 	}
 
 
@@ -211,7 +233,7 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	public async Task<IActionResult> AddDanger(AddDangerCommand newPost, CancellationToken CT)
+	public async Task<IActionResult> AddDanger(AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var postI = new AddDangerInternallCommand
@@ -235,19 +257,39 @@ public partial class PostController : Controller
 		}
 	}
 
-	[HttpPost("WIP/Resource")]
-	[SwaggerOperation("Add a Recource post (Moderator)")]
+	//ToDo: implement CustomCategory checking (allow it only if Category.id/Name == inne)
+	[HttpPost("Resource")]
+	[SwaggerOperation("Add a Resource post (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	public async Task<IActionResult> AddResource(AddAttachments files, CancellationToken CT)
+	public async Task<IActionResult> AddResource(AddPostCommand newPost, CancellationToken CT)
 	{
-		throw new NotImplementedException();
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		var postI = new AddResourceInternallCommand
+		{
+			Title = newPost.Title,
+			Description = newPost.Description,
+			IdCategory = newPost.IdCategory,
+			CustomCategory = newPost.CustomCategory,
+			IdRegion = newPost.IdRegion,
+			// Set user from cookie
+			IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+		};
+		try
+		{
+			var res = await _mediator.Send(postI, CT);
+			return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
 	}
 
 	[HttpPost("{id}/Attachment")]
-	[SwaggerOperation("Add Attachments to post (Owner of the post)")]
+	[SwaggerOperation("Add Attachments to post (Owner of the post)(max 50 MiB request)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status400BadRequest)]
@@ -280,7 +322,7 @@ public partial class PostController : Controller
 	//the only thing is to mark it not Active (Mod only)
 
 
-	[HttpPut("WIP/{id}")]
+	[HttpPut("{id}")]
 	[SwaggerOperation("Mark a post as Not Active (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -288,6 +330,15 @@ public partial class PostController : Controller
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> MarkAsInactive(string id, CancellationToken CT)
 	{
-		throw new NotImplementedException();
+		var requ = new MarkPostAsInactiveCommand { PostId = id };
+		try
+		{
+			await _mediator.Send(requ, CT);
+			return NoContent();
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
 	}
 }

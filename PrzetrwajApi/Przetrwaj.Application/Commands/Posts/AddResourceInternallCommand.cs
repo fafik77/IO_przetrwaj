@@ -4,9 +4,8 @@ using Przetrwaj.Domain.Models.Dtos.Posts;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class AddDangerInternallCommand : AddPostCommand, ICommand<PostCompleteDataDto>
+public class AddResourceInternallCommand : AddPostCommand, ICommand<PostCompleteDataDto>
 {
-	public CategoryType Category { get; set; } = CategoryType.Danger;
+	public CategoryType Category { get; set; } = CategoryType.Resource;
 	public required string IdAutor { get; set; }
 }
-

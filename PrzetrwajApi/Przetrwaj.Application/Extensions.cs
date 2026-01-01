@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Przetrwaj.Application.AuthServices;
@@ -26,6 +25,7 @@ public static class Extensions
 
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddHostedService<UnconfirmedUserCleanupService>();
+		services.AddHostedService<PostArchivingService>();
 		return services;
 	}
 }

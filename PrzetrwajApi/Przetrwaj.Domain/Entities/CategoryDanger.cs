@@ -1,6 +1,6 @@
 ﻿namespace Przetrwaj.Domain.Entities;
 
-public partial class CategoryDanger : Category
+public class CategoryDanger : Category
 {
 	public CategoryDanger() : base()
 	{

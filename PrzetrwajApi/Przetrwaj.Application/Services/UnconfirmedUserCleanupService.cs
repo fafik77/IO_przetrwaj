@@ -6,6 +6,9 @@ using Przetrwaj.Domain.Entities;
 
 namespace Przetrwaj.Application.Services;
 
+/// <summary>
+/// This service removes registered but unconfirmed users after 24h of their registration
+/// </summary>
 public class UnconfirmedUserCleanupService : BackgroundService
 {
 	private readonly ILogger<UnconfirmedUserCleanupService> _logger;

@@ -50,19 +50,32 @@ internal class PostRepository : IPostRepository
 		}
 	}
 
-	public Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default)
+	public async Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<IEnumerable<Attachment>> GetAttachmentsROAsync(string idPost, CancellationToken cancellationToken = default)
-	{
-		idPost = idPost.ToLower();
-		var res = await _context.Attachments
-			.AsNoTracking()
-			.Where(a => a.IdPost == idPost)
+		var posts = await _context.Posts
+			.Where(p => p.Active == true && p.IdAutor == idAuthor.ToLower())
+			.Select(p => new PostOverviewDto
+			{
+				Id = p.IdPost,
+				Title = p.Title,
+				DateCreated = p.DateCreated,
+				Category = p.CustomCategory.Length > 0 ? new CategoryDto
+				{
+					IdCategory = p.IdCategory,
+					Type = p.IdCategoryNavigation.Type,
+					Name = p.CustomCategory,
+				}
+				: (CategoryDto?)p.IdCategoryNavigation,
+				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
+				{
+					IdRegion = p.IdRegionNavigation.IdRegion,
+					Name = p.IdRegionNavigation.Name
+				} : null,
+				VotePositive = p.Votes.Count(v => v.IsUpvote),
+				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
+			})
 			.ToListAsync(cancellationToken);
-		return res;
+		return posts;
 	}
 
 	public async Task<PostCompleteDataDto?> GetFullROPostByIdAsync(string idPost, CancellationToken cancellationToken = default)
@@ -109,7 +122,7 @@ internal class PostRepository : IPostRepository
 			// Fetch only the bool values
 			VotePositive = p.Votes.Count(p => p.IsUpvote),
 			VoteNegative = p.Votes.Count(p => !p.IsUpvote),
-			VoteSum = p.Votes.Count(),
+			//VoteSum = p.Votes.Count(),
 			// Map attachments using the URL logic
 			Attachments = p.Attachments
 			.OrderBy(x => x.OrderInList)    //sort by OrderInList asc
@@ -220,7 +233,14 @@ internal class PostRepository : IPostRepository
 
 	public void Update(Post post, CancellationToken cancellationToken = default)
 	{
-		throw new NotImplementedException();
+		_context.Posts.Update(post);
+	}
+
+	public async Task SetInactiveBulkAsync(IReadOnlyList<string> postIds, CancellationToken cancellationToken = default)
+	{
+		await _context.Posts
+			.Where(p => postIds.Contains(p.IdPost)) // SQL translates this to: WHERE "IdPost" IN (...)
+			.ExecuteUpdateAsync(setters => setters.SetProperty(p => p.Active, false), cancellationToken);
 	}
 	public async Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default)
 	{
@@ -235,5 +255,21 @@ internal class PostRepository : IPostRepository
 	{
 		idPost = idPost.ToLower();
 		return await _context.Posts.AsNoTracking().Where(p => p.IdPost == idPost).AnyAsync(cancellationToken);
+	}
+
+	public async Task<IEnumerable<PostVotesStatusDto>> GetAllWithVotesStatusROAsync(CancellationToken cancellationToken = default)
+	{
+		var posts = await _context.Posts
+			.AsNoTracking()
+			.Where(p => p.Active == true)
+			.Select(p => new PostVotesStatusDto
+			{
+				Id = p.IdPost,
+				Active = p.Active,
+				VotePositive = p.Votes.Count(v => v.IsUpvote),
+				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
+			})
+			.ToListAsync(cancellationToken);
+		return posts;
 	}
 }

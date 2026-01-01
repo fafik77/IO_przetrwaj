@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Przetrwaj.Application.Commands.Posts.Attachments;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class AddDangerCommand
+public class AddPostCommand
 {
 	[Required]
 	[MaxLength(200)]

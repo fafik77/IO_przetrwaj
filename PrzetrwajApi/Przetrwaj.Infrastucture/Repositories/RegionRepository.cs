@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions.RegionException;
 using Przetrwaj.Infrastucture.Context;
 
 namespace Przetrwaj.Infrastucture.Repositories;

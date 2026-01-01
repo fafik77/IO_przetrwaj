@@ -22,10 +22,12 @@ public interface IPostRepository
 	public Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default);
 	public Task<IEnumerable<PostMinimalCategoryRegion>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default);
 	Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default);
+	public Task<IEnumerable<PostVotesStatusDto>> GetAllWithVotesStatusROAsync(CancellationToken cancellationToken = default);
 	#endregion //Get
 
 	public Task<Attachment> AddAttachmentAsync(Attachment attachment, CancellationToken cancellationToken = default);
 	public Task<Vote> AddVoteAsync(Vote vote, CancellationToken cancellationToken = default);
 	public Task<UserComment> AddCommentAsync(UserComment comment, CancellationToken cancellationToken = default);
 	public void Update(Post post, CancellationToken cancellationToken = default);
+	public Task SetInactiveBulkAsync(IReadOnlyList<string> postIds, CancellationToken cancellationToken = default);
 }

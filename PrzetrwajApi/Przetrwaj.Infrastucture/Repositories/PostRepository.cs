@@ -235,6 +235,13 @@ internal class PostRepository : IPostRepository
 	{
 		_context.Posts.Update(post);
 	}
+
+	public async Task SetInactiveBulkAsync(IReadOnlyList<string> postIds, CancellationToken cancellationToken = default)
+	{
+		await _context.Posts
+			.Where(p => postIds.Contains(p.IdPost)) // SQL translates this to: WHERE "IdPost" IN (...)
+			.ExecuteUpdateAsync(setters => setters.SetProperty(p => p.Active, false), cancellationToken);
+	}
 	public async Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default)
 	{
 		idPost = idPost.ToLower();
@@ -248,5 +255,21 @@ internal class PostRepository : IPostRepository
 	{
 		idPost = idPost.ToLower();
 		return await _context.Posts.AsNoTracking().Where(p => p.IdPost == idPost).AnyAsync(cancellationToken);
+	}
+
+	public async Task<IEnumerable<PostVotesStatusDto>> GetAllWithVotesStatusROAsync(CancellationToken cancellationToken = default)
+	{
+		var posts = await _context.Posts
+			.AsNoTracking()
+			.Where(p => p.Active == true)
+			.Select(p => new PostVotesStatusDto
+			{
+				Id = p.IdPost,
+				Active = p.Active,
+				VotePositive = p.Votes.Count(v => v.IsUpvote),
+				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
+			})
+			.ToListAsync(cancellationToken);
+		return posts;
 	}
 }

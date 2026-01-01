@@ -2,7 +2,7 @@
 
 namespace Przetrwaj.Domain.Entities;
 
-public partial class Region
+public class Region
 {
 	[Key]
 	public int IdRegion { get; set; }

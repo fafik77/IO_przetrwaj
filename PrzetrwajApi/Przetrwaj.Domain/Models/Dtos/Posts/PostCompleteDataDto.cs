@@ -21,7 +21,7 @@ public class PostCompleteDataDto
 	///To add all this bellow
 	public long VotePositive { get; set; }
 	public long VoteNegative { get; set; }
-	public long VoteSum { get; set; }
+	//public long VoteSum { get; set; }
 	//public float VoteRatio { get; set; }
 
 	public virtual IEnumerable<CommentDto?>? Comments { get; set; } = [];
@@ -32,9 +32,6 @@ public class PostCompleteDataDto
 	public static explicit operator PostCompleteDataDto?(Post? post)
 	{
 		if (post is null) return null;
-		var pos = post.Votes.Count(v => v.IsUpvote);
-		var neg = post.Votes.Count(v => !v.IsUpvote);
-		long sum = pos + neg;
 		return post is null ? null : new PostCompleteDataDto
 		{
 			Id = post.IdPost,
@@ -48,12 +45,6 @@ public class PostCompleteDataDto
 			DateCreated = post.DateCreated,
 			//Attachments = post.Attachments.Select(a => (AttachmentDto?)a).ToList(),
 			Comments = post.Comments.Select(c => (CommentDto)c).ToList(),
-			VotePositive = pos,
-			VoteNegative = neg,
-			VoteSum = sum,
-			//VoteRatio = sum > 0
-			//	? (float)pos / sum * 100
-			//	: 100
 		};
 	}
 }

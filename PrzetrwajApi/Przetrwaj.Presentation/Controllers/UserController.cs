@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Users;
+using Przetrwaj.Application.Quaries.Posts;
 using Przetrwaj.Application.Quaries.Users;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
@@ -53,13 +54,22 @@ public class UserController : Controller
 	}
 
 
-	[HttpGet("WIP/{id}/Posts")]
+	[HttpGet("{id}/Posts")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetAllPosts(string id, CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		var requ = new GetAllAuthoredByQuery { AutorId = id };
+		try
+		{
+			var res = await _mediator.Send(requ, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
 	}
 
 	[HttpGet("WIP/{id}/Comments")]

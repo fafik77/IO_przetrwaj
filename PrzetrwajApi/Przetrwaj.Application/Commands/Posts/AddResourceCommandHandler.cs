@@ -1,0 +1,35 @@
+﻿using Przetrwaj.Application.Configuration.Commands;
+using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Models.Dtos.Posts;
+
+namespace Przetrwaj.Application.Commands.Posts;
+
+public class AddResourceCommandHandler : ICommandHandler<AddResourceInternallCommand, PostCompleteDataDto>
+{
+	private readonly IPostRepository _postRepository;
+	private readonly IUnitOfWork _unitOfWork;
+
+	public AddResourceCommandHandler(IPostRepository postRepository, IUnitOfWork unitOfWork)
+	{
+		_postRepository = postRepository;
+		_unitOfWork = unitOfWork;
+	}
+
+	public async Task<PostCompleteDataDto> Handle(AddResourceInternallCommand request, CancellationToken cancellationToken)
+	{
+		var post = new Post
+		{
+			Description = request.Description ?? string.Empty,
+			IdAutor = request.IdAutor,
+			Title = request.Title,
+			Category = request.Category,
+			IdRegion = request.IdRegion,
+			CustomCategory = request.CustomCategory ?? string.Empty,
+			IdCategory = request.IdCategory,
+		};
+		await _postRepository.AddAsync(post, cancellationToken);
+		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		return (PostCompleteDataDto)post!;
+	}
+}

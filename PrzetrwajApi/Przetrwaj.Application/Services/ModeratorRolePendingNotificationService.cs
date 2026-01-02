@@ -27,7 +27,7 @@ public class ModeratorRolePendingNotificationService : BackgroundService
 		while (!stoppingToken.IsCancellationRequested)
 		{
 			// 1. Calculate the delay until 08:00
-			var now = DateTime.Now;	//Time is the system time (location dependant) it's not UTC GMT+0
+			var now = DateTime.Now; //Time is the system time (location dependant) it's not UTC GMT+0
 			var nextRunTime = new DateTime(now.Year, now.Month, now.Day, 8, 0, 0);
 			// If it's already past 08:00 today, schedule for tomorrow
 			if (now >= nextRunTime)
@@ -35,7 +35,7 @@ public class ModeratorRolePendingNotificationService : BackgroundService
 			var delay = nextRunTime - now;
 			_logger.LogInformation("Service scheduled. Next run at {time} (Waiting {delay:F1} hours)", nextRunTime, delay.TotalHours);
 			await Task.Delay(delay, stoppingToken);
-			
+
 			_logger.LogInformation("Notification Service working at: {time}", DateTimeOffset.Now);
 			await NotifyAdminsOfPendingModerators(stoppingToken);
 		}
@@ -49,7 +49,7 @@ public class ModeratorRolePendingNotificationService : BackgroundService
 		var _frontEndSettings = scope.ServiceProvider.GetRequiredService<IOptions<FrontEndSettings>>().Value;
 		var _userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
 		//get all users that want to be a Mod
-		var usersForMods = await _userRepository.GetModPendingUsersRWAsync(cancellationToken);
+		var usersForMods = await _userRepository.GetModPendingUsersROAsync(cancellationToken);
 		var usersForModsCount = usersForMods.Count();
 		if (usersForModsCount != 0)
 		{
@@ -61,14 +61,16 @@ public class ModeratorRolePendingNotificationService : BackgroundService
 			sb.Append($"<p>Następujący {usersForModsCount} użytkowników zgłosiło chęć moderacji:</p>");
 			sb.Append("<table border='1' cellpadding='10' style='border-collapse: collapse; width: 100%; font-family: Arial, sans-serif;'>");
 			sb.Append("<tr style='background-color: #f2f2f2;'>");
-			sb.Append("<th>Email</th><th>Nazwa Regionu</th><th>ID Regionu</th>");
+			sb.Append("<th>Email</th><th>Imię</th><th>Nazwisko</th><th>Nazwa Regionu</th><th>ID Regionu</th>");
 			sb.Append("</tr>");
 			foreach (var user in usersForMods)
 			{
 				sb.Append("<tr>");
 				sb.Append($"<td>{user.Email}</td>");
-				sb.Append($"<td>{user.IdRegionNavigation.Name}</td>");
-				sb.Append($"<td>{user.IdRegion}</td>");
+				sb.Append($"<td>{user.Name ?? string.Empty}</td>");
+				sb.Append($"<td>{user.Surname ?? string.Empty}</td>");
+				sb.Append($"<td>{user.RegionName}</td>");
+				sb.Append($"<td>{user.RegionId}</td>");
 				sb.Append("</tr>");
 			}
 			sb.Append("</table>");

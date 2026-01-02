@@ -55,10 +55,10 @@ public class AuthService : IAuthService
 		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmailChange", values);
 		// send the email
 		await _emailSender.SendEmailAsync(newEmail, subject: "Potwierdź zmianę swojego adresu e-mail. Przetrwaj.pl",
-			$"<p>{user.Name} właśnie chcesz zmienić swój adres e-mail w serwisie <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> na {newEmail}</p><br>" +
+			$"<h2>{user.Name} właśnie chcesz zmienić swój adres e-mail w serwisie <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> na {newEmail}</h2><br>" +
 			$"Potwierdź zmianę swojego adresu e-mail, <a href='{(absoluteUrlString)}'>klikając tutaj</a>." +
 			$"<br>Dopóki tego nie zrobisz, do serwisu będziesz logować się obecnym e-mailem." +
-			$"<br><br><p>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
+			$"<br><br><p style='color: gray; font-size: 12px;'>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
 	}
 
 	public async Task<AppUser> GetUserDetailsAsync(string userIdEmail)
@@ -108,6 +108,7 @@ public class AuthService : IAuthService
 			UserName = register.Email, // Typically, UserName is set to the email for login (its enforced unique)
 			IdRegion = register.IdRegion ?? 0,
 			RegistrationDate = DateTimeOffset.UtcNow,
+			ModeratorRolePending = register.ModeratorRole,
 		};
 
 		var result = await _userManager.CreateAsync(user, register.Password);
@@ -128,9 +129,9 @@ public class AuthService : IAuthService
 		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmail", values);
 		// send the email
 		await _emailSender.SendEmailAsync(register.Email, subject: "Potwierdź swój adres e-mail. Przetrwaj.pl",
-			$"<p>{register.Name} witaj w serwisie <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a></p><br>" +
+			$"<h2>{register.Name} witaj w serwisie <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a></h2><br>" +
 			$"Potwierdź swoje konto, <a href='{(absoluteUrlString)}'>klikając tutaj</a>." +
-			$"<br><br><p>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
+			$"<br><br><p style='color: gray; font-size: 12px;'>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
 
 		return user;
 	}

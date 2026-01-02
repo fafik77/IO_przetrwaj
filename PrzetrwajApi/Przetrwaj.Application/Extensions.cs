@@ -15,6 +15,7 @@ public static class Extensions
 	public static IServiceCollection AddApplication(this IServiceCollection services)
 	{
 		services.AddTransient<IEmailSender, EmailAzureService>();
+		services.AddTransient<IEmailSenderMultiple, EmailAzureService>();
 
 		var ExecutingAssembly = Assembly.GetExecutingAssembly();
 		services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(ExecutingAssembly));
@@ -26,6 +27,7 @@ public static class Extensions
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddHostedService<UnconfirmedUserCleanupService>();
 		services.AddHostedService<PostArchivingService>();
+		services.AddHostedService<ModeratorRolePendingNotificationService>();
 		return services;
 	}
 }

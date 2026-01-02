@@ -24,12 +24,12 @@ public class UserRepository : IUserRepository
 		return res;
 	}
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:Use the 'StringComparison' method overloads to perform case-insensitive string comparisons", Justification = "Wrong hint, Postgres DB does not support that")]
 	public async Task<AppUser?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
 	{
+		id = id.ToLower();
 		var res = await _dbContext.Users
 			.Include(u => u.IdRegionNavigation)
-			.FirstOrDefaultAsync(u => u.Id == id.ToLower(), cancellationToken);
+			.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 		return res;
 	}
 
@@ -40,5 +40,14 @@ public class UserRepository : IUserRepository
 			.Include(u => u.IdRegionNavigation)
 			.FirstOrDefaultAsync(u => u.NormalizedEmail == normEmail, cancellationToken);
 		return res;
+	}
+
+	public async Task<IEnumerable<AppUser>> GetModPendingUsersRWAsync(CancellationToken cancellationToken = default)
+	{
+		var users = await _dbContext.Users.
+			Where(u => u.ModeratorRolePending && u.EmailConfirmed && !u.Banned)
+			.Include(u => u.IdRegionNavigation)
+			.ToListAsync(cancellationToken);
+		return users;
 	}
 }

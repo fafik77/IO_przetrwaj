@@ -1,0 +1,28 @@
+﻿@page "/ConfirmEmail"
+@using System.Net
+@inject NavigationManager Navigation
+@inject HttpClient HttpClient
+
+<div class="container mt-5 text-center">
+	@if (_isProcessing)
+	{
+		<div class="spinner-border text-primary" role="status"></div>
+		<p class="mt-3">Weryfikowanie adresu e-mail...</p>
+	}
+	else if (_isSuccess)
+	{
+		<div class="alert alert-success">
+			<h4>Konto potwierdzone!</h4>
+			<p>Twój e-mail został zweryfikowany. Możesz się teraz zalogować.</p>
+			<a href="/login" class="btn btn-primary">Zaloguj się</a>
+		</div>
+	}
+	else
+	{
+		<div class="alert alert-danger">
+			<h4>Błąd weryfikacji</h4>
+			<p>@_errorMessage</p>
+		</div>
+	}
+</div>
+

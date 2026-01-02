@@ -58,7 +58,7 @@ public class ModeratorRolePendingNotificationService : BackgroundService
 			// 1. Build the HTML Table
 			var sb = new StringBuilder();
 			sb.Append("<h2>Oczekujący na rolę Moderatora</h2>");
-			sb.Append($"<p>Następujący użytkownicy({usersForModsCount} użytkowników) zgłosili chęć moderacji:</p>");
+			sb.Append($"<p>Następujący {usersForModsCount} użytkowników zgłosiło chęć moderacji:</p>");
 			sb.Append("<table border='1' cellpadding='10' style='border-collapse: collapse; width: 100%; font-family: Arial, sans-serif;'>");
 			sb.Append("<tr style='background-color: #f2f2f2;'>");
 			sb.Append("<th>Email</th><th>Nazwa Regionu</th><th>ID Regionu</th>");

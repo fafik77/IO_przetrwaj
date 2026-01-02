@@ -138,6 +138,14 @@ public class AuthService : IAuthService
 
 	private string GenerateEmailConfirmationUrl(string action, object values)
 	{
+		if (!string.IsNullOrEmpty(_frontEndSettings.Url))
+		{
+			var relativeUrlFront = _urlHelper.Action(
+				action: "confirm-email",
+				values: values);
+			var urlFront = $"{_frontEndSettings.Url}{relativeUrlFront}";
+			return urlFront;
+		}
 		// 2. Generate the relative URL path using IUrlHelper.Action()
 		// This is equivalent to your old 'Url.Action' call
 		var relativeUrl = _urlHelper.Action(

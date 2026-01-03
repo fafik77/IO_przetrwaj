@@ -6,6 +6,8 @@ public class RegionOnlyDto
 {
 	public int IdRegion { get; set; }
 	public required string Name { get; set; }
+	public double Lat { get; set; }
+	public double Long { get; set; }
 
 
 	public static explicit operator RegionOnlyDto?(Region region)
@@ -14,6 +16,8 @@ public class RegionOnlyDto
 		{
 			IdRegion = region.IdRegion,
 			Name = region.Name,
+			Lat = region.Lat,
+			Long = region.Long,
 		};
 	}
 }

@@ -1,27 +1,255 @@
-﻿@page "/post"
+﻿@page "/post/{Id}"
+
+@rendermode InteractiveServer
+@inject HttpClient HttpClient
+@using PrzetrwajPL;
+@using PrzetrwajPL.Models;
+@using PrzetrwajPL.Models.Posts;
 
 <div class="container">
-	<div class="postCont">
-		<span class="name">Imie</span>
-		<span class="city">Miasto</span>
-		<span class="time">12:00</span>
-		<span class="date">12.03.2001</span>
-		<h2>Opis postu</h2>
-		<p>Treść postu</p>
-		<button class="upVoteButt">23</button>
-		<button class="downVoteButt">4</button>
-		<p> </p>
-	</div>
-	
-	<button class="commentButt">Dodaj komentarz</button>
-	<div class="comments">
-		<span class="commentName">Komentujący</span>
-		<span class="commentTime">12:00</span>
-		<span class="commentDate">26.12.2002</span>
-		<span class="commentText">Treść komentarza</span>
-	</div>
+    @if (isLoading)
+    {
+        <p style="text-align:center">Ładowanie szczegółów posta...</p>
+    }
+    else if (post == null)
+    {
+        <p style="text-align:center">Nie znaleziono posta.</p>
+    }
+    else
+    {
+        <div class="postCont">
+            @*Nagłówek: Autor, Region, Data *@
+            <div class="header-info">
+                @if (post.Author != null)
+                {
+                    <span class="name">@post.Author.Name @post.Author.Surname</span>
+                }
+
+                @if (post.Region != null)
+                {
+                    <span class="city">@post.Region.Name</span>
+                }
+
+                <div style="float: right;">
+                    <span class="time">@post.DateCreated.ToString("HH:mm")</span>
+                    <span class="date">@post.DateCreated.ToString("dd.MM.yyyy")</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+
+            <h2>@post.Title</h2>
+
+            @*Opis*@
+            <p class="post-content">@post.Description</p>
+
+            @*Zdjęcie*@
+            @if (post.Attachments != null && post.Attachments.Any())
+            {
+                var Image = post.Attachments.FirstOrDefault();
+                if (Image != null && !string.IsNullOrEmpty(Image.FileURL))
+                {
+                    <div class="post-image">
+                        <img src="@Image.FileURL" alt=@Image.AlternateDescription />
+                    </div>
+                }
+            }
+
+            @*Głosy*@
+            <div class="vote-section">
+                <AuthorizeView>
+                    <NotAuthorized>
+                        @* Przycisk Pozytywny *@
+                        <button class="upVoteButt"
+                                @onclick="VotePositive" disabled>
+                            <i class="fa fa-arrow-up"></i> @post.VotePositive
+                        </button>
+
+                        @* Przycisk Negatywny *@
+                        <button class="downVoteButt"
+                                @onclick="VoteNegative" disabled>
+                            <i class="fa fa-arrow-down"></i> @post.VoteNegative
+                        </button>
+                    </NotAuthorized>
+                    <Authorized>
+                        @* Przycisk Pozytywny *@
+                        <button class="upVoteButt"
+                                @onclick="VotePositive" disabled="@isVoting">
+                            <i class="fa fa-arrow-up"></i> @post.VotePositive
+                        </button>
+
+                        @* Przycisk Negatywny *@
+                        <button class="downVoteButt"
+                                @onclick="VoteNegative" disabled="@isVoting">
+                            <i class="fa fa-arrow-down"></i> @post.VoteNegative
+                        </button>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+
+        @*Komentarze*@
+        <div class="comments-section">
+            <button class="commentButt" @onclick="ToggleCommentForm">
+                @(showCommentForm ? "Anuluj" : "Dodaj komentarz")
+            </button>
+
+            @if (showCommentForm)
+            {
+                <div class="add-comment-box">
+                    <textarea @bind="newCommentContent" placeholder="Wpisz treść komentarza..." class="form-control"></textarea>
+                    <button class="btn-send" @onclick="SubmitComment" disabled="@isSendingComment">Wyślij</button>
+                </div>
+            }
+
+            <h3>Komentarze (@(post.Comments?.Count() ?? 0))</h3>
+
+            @if (post.Comments != null && post.Comments.Any())
+            {
+                @foreach (var comment in post.Comments)
+                {
+                    if (comment != null)
+                    {
+                        <div class="comments">
+                            <div class="comment-header">
+                                @if ((comment.Author) == null || (comment.Author.Name) == " ")
+                                {
+                                    <span class="commentName">Anonymus</span>
+                                }
+                                else
+                                {
+                                    <span class="commentName">@comment.Author</span>
+                                }
+                                <span class="commentDate">@comment.DateCreated.ToString("dd.MM.yyyy HH:mm")</span>
+                                <div style="clear: both;"></div>
+                            </div>
+                            <span class="commentText">@comment.Comment</span>
+                        </div>
+                    }
+                }
+            }
+            else
+            {
+                <p>Brak komentarzy.</p>
+            }
+        </div>
+    }
 </div>
 
 @code {
+    [Parameter]
+    public string Id { get; set; }
 
+    private PostCompleteDataDto? post;
+    private bool isLoading = true;
+    private bool isVoting = false;
+
+    private bool showCommentForm = false;
+    private bool isSendingComment = false;
+    private string newCommentContent = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        try
+        {
+            post = await HttpClient.GetFromJsonAsync<PostCompleteDataDto>($"/Post/{Id}");
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task VotePositive()
+    {
+        if (isVoting) return;
+        isVoting = true;
+
+        try
+        {
+            var response = await HttpClient.PostAsync($"/Post/{Id}/VotePositive", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Odśwież dane posta, żeby zaktualizować liczniki
+                await LoadData();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Błąd głosowania: " + ex.Message);
+        }
+        finally
+        {
+            isVoting = false;
+        }
+    }
+
+    private async Task VoteNegative()
+    {
+        if (isVoting) return;
+        isVoting = true;
+
+        try
+        {
+            var response = await HttpClient.PostAsync($"/Post/{Id}/VoteNegative", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadData();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Błąd głosowania: " + ex.Message);
+        }
+        finally
+        {
+            isVoting = false;
+        }
+    }
+
+    private void ToggleCommentForm() => showCommentForm = !showCommentForm;
+
+    private async Task SubmitComment()
+    {
+        if (string.IsNullOrWhiteSpace(newCommentContent)) return;
+        isSendingComment = true;
+
+        try
+        {
+            var commentBody = new { Content = newCommentContent };
+
+            var response = await HttpClient.PostAsJsonAsync($"/Post/{Id}/Comment", commentBody);
+
+            if (response.IsSuccessStatusCode)
+            {
+                newCommentContent = "";
+                showCommentForm = false;
+                await LoadData(); // Odśwież post, żeby zobaczyć nowy komentarz
+            }
+            else {
+                Console.WriteLine("Błąd serwera przy dodawaniu komentarza." + response.StatusCode);
+			}
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Błąd dodawania komentarza: " + ex.Message);
+        }
+        finally
+        {
+            isSendingComment = false;
+        }
+    }
 }

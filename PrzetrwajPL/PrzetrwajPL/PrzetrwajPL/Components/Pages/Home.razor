@@ -49,8 +49,7 @@ else
     @foreach (var post in posts)
     {
         <div class="post">
-            @*<a href="/post/@post.Id">@post.Title</a>*@
-            <a href="/post">@post.Title</a>
+            <a href="/post/@post.Id">@post.Title</a>
             <span class="down-vote">@post.VoteNegative</span>
             <span class="divide">/</span>
             <span class="up-vote">@post.VotePositive</span>

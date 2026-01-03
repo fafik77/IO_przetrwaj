@@ -93,3 +93,13 @@
     float: right;
     color: #aaa;
 }
+
+.post a {
+    text-decoration: none;
+    color: black;
+}
+    .post a::after {
+        content: "";
+        clear: both;
+        display: table;
+    }

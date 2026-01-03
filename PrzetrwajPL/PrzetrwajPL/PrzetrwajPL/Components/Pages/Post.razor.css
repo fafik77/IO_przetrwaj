@@ -1,0 +1,67 @@
+﻿.name {
+    float: left;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+.city {
+    float: left;
+}
+.date {
+    float: left;
+}
+.time {
+    float: left;
+}
+
+.container {
+    display: inline-block;
+    margin-top: 12px;
+}
+.postCont {
+    margin-bottom: 12px;
+}
+.comments {
+
+}
+
+.commentName {
+    float: left;
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 6px;
+}
+.commentTime {
+    float: left;
+}
+.commentDate {
+    float: left;
+}
+.coomentText {
+
+}
+
+.upVoteButt {
+    color: #27d950;
+    border-radius: 6px;
+    border: none;
+    background-color: #dedede;
+    width: 10%;
+    float: left;
+    margin-right: 8px;
+}
+.downVoteButt {
+    color: #ff3421;
+    border-radius: 6px;
+    border: none;
+    background-color: #dedede;
+    width: 10%;
+    float: left;
+}
+.commentButt {
+    color: white;
+    background-color: #0094ff;
+    border: none;
+    border-radius: 6px;
+    width: 30%;
+}

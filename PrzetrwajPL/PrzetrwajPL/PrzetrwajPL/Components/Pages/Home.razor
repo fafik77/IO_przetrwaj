@@ -1,5 +1,11 @@
 ﻿@page "/"
 
+@rendermode InteractiveServer
+@inject HttpClient HttpClient
+@using PrzetrwajPL;
+@using PrzetrwajPL.Models;
+@using PrzetrwajPL.Models.Posts;
+
 <PageTitle>Home</PageTitle>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div style="text-align: center">
@@ -9,45 +15,107 @@
 
 <div class="container">
     <div class="dropdown" style="text-align: center">
-        <button onclick="chooseRegion()" class="dropbtn">Region <i class="fa fa-caret-down"></i></button>
-        <div id="regionDropdown" class="dropdown-content">
-            <p>Cała Polska</p>
-            <p>Region1</p>
-            <p>Region2</p>
+        <button @onclick="ToggleDropdown" class="dropbtn">@SelectedRegionName <i class="fa fa-caret-down"></i></button>
+        <div class="@(isDropdownOpen ? "dropdown-content show" : "dropdown-content")">
+            @if (regions == null)
+            {
+                <p style="color: gray; font-weight:bold;">Ładuje...</p>
+			}
+            else if (regions.Count == 0)
+            {
+                <p style="color: gray; font-weight:bold;">Brak regionów</p>
+			}
+            else
+            {
+                @foreach (var region in regions)
+                {
+                    <p @onclick="() => FilterByRegion(region.IdRegion, region.Name)">@region.Name</p>
+                }
+            }
         </div>
     </div>
 </div>
     
-<div class="post">
-    <a href="/post">Opis postu</a>
-    <span class="down-vote">4</span>
-    <span class="divide">/</span>
-    <span class="up-vote">10 </span>
-    <span class="time-right">11:01</span>
-</div>
-<div class="post darker">
-    <p>Opis postu</p>
-    <span class="down-vote">10</span>
-    <span class="divide">/</span>
-    <span class="up-vote">20 </span>
-    <span class="time-right">11:01</span>
-</div>
+@if (posts == null)
+{
+    <p style="text-align: center; margin-top: 20px;">Ładowanie postów...</p>
+}
+else if (posts.Count == 0)
+{
+    <p style="text-align: center; margin-top: 20px;">Brak postów w wybranym regionie.</p>
+}
+else
+{
+    @foreach (var post in posts)
+    {
+        <div class="post">
+            @*<a href="/post/@post.Id">@post.Title</a>*@
+            <a href="/post">@post.Title</a>
+            <span class="down-vote">@post.VoteNegative</span>
+            <span class="divide">/</span>
+            <span class="up-vote">@post.VotePositive</span>
+            <span class="time-right">@post.DateCreated.ToString("dd.MM.yyyy HH:mm")</span>
+        </div>
+    }
+}
 
-<script>
-    function chooseRegion() {
-        document.getElementById("regionDropdown").classList.toggle("show");
-    }
-    window.onclick = function(event) {
-      if (!event.target.matches('.dropbtn')) {
-        var dropdowns = document.getElementsByClassName("dropdown-content");
-        var i;
-        for (i = 0; i < dropdowns.length; i++) {
-          var openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains('show')) {
-            openDropdown.classList.remove('show');
-          }
+@code {
+    private bool isDropdownOpen = false;
+    private List<RegionOnlyDto>? regions;
+    private List<PostOverviewDto>? posts;
+    private UserGeneralDto? currentUser;
+    private string SelectedRegionName = "Wybierz Region";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRegions();
+
+        if (currentUser != null && currentUser.Region != null)
+        {
+            await FilterByRegion(currentUser.Region.IdRegion, currentUser.Region.Name);
         }
-      }
+        else
+        {
+            await FilterByRegion(0, "Polska");
+        }
     }
-</script>
+
+    // Pobieranie listy regionów
+    private async Task LoadRegions()
+    {
+        try
+        {
+            regions = await HttpClient.GetFromJsonAsync<List<RegionOnlyDto>>("/Region");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd pobierania regionów: {ex.Message}");
+        }
+    }
+
+    // Filtrowanie po regionie
+    private async Task FilterByRegion(int? regionId, string? regionName)
+    {
+        isDropdownOpen = false; // Zamknij menu po wyborze
+        posts = null; // Pokaż ładowanie
+
+        try
+        {
+            SelectedRegionName = regionName ?? "Region";
+            // Pobieramy zagrożenia z danego regionu
+            posts = await HttpClient.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd pobierania postów regionu: {ex.Message}");
+            posts = new List<PostOverviewDto>(); // Pusta lista w razie błędu
+        }
+    }
+
+    // Obsługa dropdowna
+    private void ToggleDropdown()
+    {
+        isDropdownOpen = !isDropdownOpen;
+    }
+}
 

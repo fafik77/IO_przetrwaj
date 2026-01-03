@@ -14,6 +14,7 @@ namespace Przetrwaj.Presentation.Controllers;
 
 [ApiController]
 [Route("Category/Resource")]
+
 [Produces("application/json")]
 public class ResourceCategoriesController : ControllerBase
 {
@@ -24,7 +25,7 @@ public class ResourceCategoriesController : ControllerBase
 	[HttpPost]
 	[Authorize(UserRoles.Moderator)]
 	[Consumes("application/json")]
-	[SwaggerOperation("Create a Resource category (Moderator only)")]
+	[SwaggerOperation("Create a Resource category (Moderator)")]
 	[ProducesResponseType(typeof(CategoryDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<ActionResult<CategoryDto>> Create([FromBody] CreateResourceCategoryCommand cmd, CancellationToken ct)
@@ -32,6 +33,19 @@ public class ResourceCategoriesController : ControllerBase
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
 		return CreatedAtAction(nameof(GetById), new { id = created.IdCategory }, created);
+	}
+
+	[HttpPost("many")]
+	[Authorize(UserRoles.Moderator)]
+	[Consumes("application/json")]
+	[SwaggerOperation("Create many Resource categories (Moderator)")]
+	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	public async Task<ActionResult<CategoryDto>> Create([FromBody] CreateResourceCategoriesCommand cmd, CancellationToken ct)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		var created = await _mediator.Send(cmd, ct);
+		return CreatedAtAction(nameof(GetById), created);
 	}
 
 
@@ -57,7 +71,7 @@ public class ResourceCategoriesController : ControllerBase
 
 	[HttpDelete("{id:int}")]
 	[Authorize(UserRoles.Moderator)]
-	[SwaggerOperation("Delete Resource category by id (Moderator only)")]
+	[SwaggerOperation("Delete Resource category by id (Moderator)")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Delete(int id, CancellationToken ct)

@@ -23,6 +23,7 @@ namespace Przetrwaj.Presentation.Controllers;
 /// </summary>
 [Route("[controller]")]
 [ApiController]
+[Produces("application/json")]
 public class AccountController : Controller
 {
 	//private const string AuthenticationCookie = "cookie";

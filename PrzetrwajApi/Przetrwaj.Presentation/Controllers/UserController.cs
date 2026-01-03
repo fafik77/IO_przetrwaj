@@ -24,6 +24,7 @@ namespace Przetrwaj.Presentation.Controllers;
 /// </summary>
 [Route("[controller]")]
 [ApiController]
+[Produces("application/json")]
 public class UserController : Controller
 {
 	private readonly UserManager<AppUser> _userManager;

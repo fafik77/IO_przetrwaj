@@ -12,6 +12,7 @@ namespace Przetrwaj.Presentation.Controllers;
 
 [Route("[controller]")]
 [ApiController]
+[Produces("application/json")]
 public partial class RegisterController : Controller
 {
 	private readonly IMediator _mediator;

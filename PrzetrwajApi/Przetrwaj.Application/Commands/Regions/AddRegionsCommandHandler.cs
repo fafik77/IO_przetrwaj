@@ -19,11 +19,11 @@ public class AddRegionsCommandHandler : ICommandHandler<AddRegionsCommand, IEnum
 	public async Task<IEnumerable<RegionOnlyDto>> Handle(AddRegionsCommand request, CancellationToken cancellationToken)
 	{
 		var regions = (List<Region>)request;
-		regions.ForEach(
-			async region => await _regionRepository.AddAsync(region, cancellationToken)
-		);
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
-
+		foreach (var region in regions)
+		{
+			await _regionRepository.AddAsync(region, cancellationToken);
+		}
+		await _unitOfWork.SaveChangesAsync(cancellationToken);	//this could throw
 		return regions
 			.Select(r => (RegionOnlyDto)r!)
 			.ToList();

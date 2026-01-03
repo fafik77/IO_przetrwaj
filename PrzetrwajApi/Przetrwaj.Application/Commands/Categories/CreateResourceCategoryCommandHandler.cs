@@ -5,22 +5,21 @@ using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Categories;
 
-internal class CreateResourceCategoryCommandHandler
-    : ICommandHandler<CreateResourceCategoryCommand, CategoryDto>
+public class CreateResourceCategoryCommandHandler : ICommandHandler<CreateResourceCategoryCommand, CategoryDto>
 {
-    private readonly ICategoryRepository _repo;
-    private readonly IUnitOfWork _uow;
+	private readonly ICategoryRepository _repo;
+	private readonly IUnitOfWork _uow;
 
-    public CreateResourceCategoryCommandHandler(ICategoryRepository repo, IUnitOfWork uow)
-    {
-        _repo = repo; _uow = uow;
-    }
+	public CreateResourceCategoryCommandHandler(ICategoryRepository repo, IUnitOfWork uow)
+	{
+		_repo = repo; _uow = uow;
+	}
 
-    public async Task<CategoryDto> Handle(CreateResourceCategoryCommand request, CancellationToken ct)
-    {
-		var cat = new CategoryResource { Name= request.Name };
-        var e = await _repo.AddAsync(cat, ct);
-        await _uow.SaveChangesAsync(ct);
-        return (CategoryDto)e!;
-    }
+	public async Task<CategoryDto> Handle(CreateResourceCategoryCommand request, CancellationToken ct)
+	{
+		var category = (CategoryResource)request;
+		await _repo.AddAsync(category, ct);
+		await _uow.SaveChangesAsync(ct);    //this could throw
+		return (CategoryDto)category!;
+	}
 }

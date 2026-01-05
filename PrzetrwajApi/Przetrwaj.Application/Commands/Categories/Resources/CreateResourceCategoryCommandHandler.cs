@@ -3,7 +3,7 @@ using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos;
 
-namespace Przetrwaj.Application.Commands.Categories;
+namespace Przetrwaj.Application.Commands.Categories.Resources;
 
 public class CreateResourceCategoryCommandHandler : ICommandHandler<CreateResourceCategoryCommand, CategoryDto>
 {

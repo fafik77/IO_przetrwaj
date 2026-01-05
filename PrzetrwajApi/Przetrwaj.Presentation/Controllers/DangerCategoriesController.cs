@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Przetrwaj.Application.Commands.Categories;
+using Przetrwaj.Application.Commands.Categories.Dangers;
 using Przetrwaj.Application.Quaries.Categories;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Exceptions;
+using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Categories;
 using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
@@ -33,6 +34,28 @@ public class DangerCategoriesController : Controller
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
 		return CreatedAtAction(nameof(GetById), new { id = created.IdCategory }, created);
+	}
+
+	[HttpPut]
+	[Authorize(UserRoles.Moderator)]
+	[Consumes("application/json")]
+	[SwaggerOperation("Update a Danger category (Moderator)")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	public async Task<IActionResult> Update([FromBody] UpdateDangerCategoryCommand cmd, CancellationToken ct)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		try
+		{
+			await _mediator.Send(cmd, ct);
+			return NoContent();
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
 	}
 
 	[HttpPost("many")]

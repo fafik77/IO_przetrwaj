@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using System.ComponentModel.DataAnnotations;
 
-namespace Przetrwaj.Application.Commands.Categories;
+namespace Przetrwaj.Application.Commands.Categories.Resources;
 
 public class DeleteResourceCategoryCommand : ICommand<bool>
 {

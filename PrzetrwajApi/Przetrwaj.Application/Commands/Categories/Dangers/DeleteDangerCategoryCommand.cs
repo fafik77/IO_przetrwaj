@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using System.ComponentModel.DataAnnotations;
 
-namespace Przetrwaj.Application.Commands.Categories;
+namespace Przetrwaj.Application.Commands.Categories.Dangers;
 
 public class DeleteDangerCategoryCommand : ICommand<bool>
 {

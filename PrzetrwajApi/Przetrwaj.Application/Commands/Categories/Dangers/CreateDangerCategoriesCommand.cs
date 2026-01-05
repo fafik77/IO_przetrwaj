@@ -3,7 +3,7 @@ using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos;
 using System.ComponentModel.DataAnnotations;
 
-namespace Przetrwaj.Application.Commands.Categories;
+namespace Przetrwaj.Application.Commands.Categories.Dangers;
 
 public class CreateDangerCategoriesCommand : ICommand<IEnumerable<CategoryDto>>
 {

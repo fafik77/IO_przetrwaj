@@ -3,7 +3,7 @@ using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos;
 
-namespace Przetrwaj.Application.Commands.Categories;
+namespace Przetrwaj.Application.Commands.Categories.Dangers;
 
 internal class CreateDangerCategoriesCommandHandler : ICommandHandler<CreateDangerCategoriesCommand, IEnumerable<CategoryDto>>
 {

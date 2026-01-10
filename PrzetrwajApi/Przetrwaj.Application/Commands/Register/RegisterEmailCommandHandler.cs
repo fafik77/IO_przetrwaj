@@ -6,14 +6,12 @@ namespace Przetrwaj.Application.Commands.Register;
 
 internal class RegisterEmailCommandHandler : ICommandHandler<RegisterEmailCommand, UserWithPersonalDataDto>
 {
-	private readonly IUserRepository _userRepository;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IAuthService _authService;
 
-	public RegisterEmailCommandHandler(IUnitOfWork unitOfWork, IUserRepository userRepository, IAuthService authService)
+	public RegisterEmailCommandHandler(IUnitOfWork unitOfWork, IAuthService authService)
 	{
 		_unitOfWork = unitOfWork;
-		_userRepository = userRepository;
 		_authService = authService;
 	}
 
@@ -23,6 +21,10 @@ internal class RegisterEmailCommandHandler : ICommandHandler<RegisterEmailComman
 		// After this line, userToAdd is a tracked entity with a generated PasswordHash.
 		var userToAdd = await _authService.RegisterUserByEmailAsync(request);
 		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		if(userToAdd.ModeratorRolePending) //user wants to be a Moderator
+		{
+			Console.WriteLine($"ModeratorRolePending: {userToAdd.Email}");
+		}
 		var dto = (UserWithPersonalDataDto)userToAdd;
 		return dto;
 	}

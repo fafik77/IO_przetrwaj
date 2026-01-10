@@ -23,9 +23,9 @@ namespace Przetrwaj.Presentation.Controllers;
 /// </summary>
 [Route("[controller]")]
 [ApiController]
+[Produces("application/json")]
 public class AccountController : Controller
 {
-	//private const string AuthenticationCookie = "cookie";
 	private readonly IMediator _mediator;
 	private readonly SignInManager<AppUser> _signInManager;
 	private readonly IAuthService _authService;
@@ -41,8 +41,8 @@ public class AccountController : Controller
 
 
 	[HttpGet]
-	[SwaggerOperation("Gets user own details (Owner only)")]
 	[Authorize]
+	[SwaggerOperation("Gets user own details (Owner only)")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetUserOwnInfo()
@@ -66,8 +66,8 @@ public class AccountController : Controller
 	}
 
 	[HttpPut]
-	[SwaggerOperation("Updates user own account (Owner only)")]
 	[Authorize]
+	[SwaggerOperation("Updates user own account (Owner only)")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]

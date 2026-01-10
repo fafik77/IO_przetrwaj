@@ -75,7 +75,7 @@ builder.Services.AddAuthorization(opt =>
 });
 #endregion
 
-//builder.Services.AddMemoryCache(); // for caching Statistics
+builder.Services.AddMemoryCache(); // for caching banned users (data is per user not per app)
 builder.Services.AddLazyCache(); // for caching Statistics without Cache Stampede
 builder.Services.AddInfrastructure(builder.Configuration);
 

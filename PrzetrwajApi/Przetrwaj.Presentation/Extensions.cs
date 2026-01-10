@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Przetrwaj.Application.ValidationPipeline;
 
 namespace Przetrwaj.Presentation;
 
@@ -34,6 +33,7 @@ public static class Extensions
 
 		//the order matters
 		app.UseAuthentication();
+		app.UseMiddleware<BanMiddleware>();
 		app.UseAuthorization();
 
 		app.MapControllers();

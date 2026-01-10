@@ -24,6 +24,7 @@ namespace Przetrwaj.Presentation.Controllers;
 /// </summary>
 [Route("[controller]")]
 [ApiController]
+[Produces("application/json")]
 public class UserController : Controller
 {
 	private readonly UserManager<AppUser> _userManager;
@@ -49,7 +50,7 @@ public class UserController : Controller
 		}
 		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 
@@ -97,7 +98,23 @@ public class UserController : Controller
 		}
 		catch (BaseException ex)
 		{
-			return NotFound((ExceptionCasting)ex);
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
+	}
+
+	[HttpGet("ModeratorPending")]
+	[SwaggerOperation("Gets users with Moderator Pending status (Admin)")]
+	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
+	public async Task<IActionResult> GetModeratorPending(CancellationToken cancellationToken)
+	{
+		try
+		{
+			var res = await _mediator.Send(new GetModeratorPendingQuery(), cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
 		}
 	}
 

@@ -15,6 +15,7 @@ namespace Przetrwaj.Presentation.Controllers;
 
 [Route("[controller]")]
 [ApiController]
+[Produces("application/json")]
 public class RegionController : Controller
 {
 	private readonly IMediator _mediator;
@@ -62,6 +63,19 @@ public class RegionController : Controller
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var res = await _mediator.Send(region, cancellationToken);
 		return CreatedAtAction(nameof(GetById), new { id = res.IdRegion }, res);
+	}
+
+	[HttpPost("many")]
+	[SwaggerOperation("Add many Regions (Moderator)")]
+	[Authorize(UserRoles.Moderator)]
+	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	public async Task<IActionResult> AddRegions([FromBody] AddRegionsCommand regions, CancellationToken cancellationToken)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		var res = await _mediator.Send(regions, cancellationToken);
+		return CreatedAtAction(nameof(GetById), res);
 	}
 
 	[HttpPut]

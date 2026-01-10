@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Przetrwaj.Application.Commands.Categories;
+using Przetrwaj.Application.Commands.Categories.Resources;
 using Przetrwaj.Application.Quaries.Categories;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Exceptions;
+using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Categories;
 using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
@@ -14,6 +15,7 @@ namespace Przetrwaj.Presentation.Controllers;
 
 [ApiController]
 [Route("Category/Resource")]
+
 [Produces("application/json")]
 public class ResourceCategoriesController : ControllerBase
 {
@@ -24,7 +26,7 @@ public class ResourceCategoriesController : ControllerBase
 	[HttpPost]
 	[Authorize(UserRoles.Moderator)]
 	[Consumes("application/json")]
-	[SwaggerOperation("Create a Resource category (Moderator only)")]
+	[SwaggerOperation("Create a Resource category (Moderator)")]
 	[ProducesResponseType(typeof(CategoryDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<ActionResult<CategoryDto>> Create([FromBody] CreateResourceCategoryCommand cmd, CancellationToken ct)
@@ -32,6 +34,41 @@ public class ResourceCategoriesController : ControllerBase
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
 		return CreatedAtAction(nameof(GetById), new { id = created.IdCategory }, created);
+	}
+
+	[HttpPut]
+	[Authorize(UserRoles.Moderator)]
+	[Consumes("application/json")]
+	[SwaggerOperation("Update a Resource category (Moderator)")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	public async Task<IActionResult> Update([FromBody] UpdateResourceCategoryCommand cmd, CancellationToken ct)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		try
+		{
+			await _mediator.Send(cmd, ct);
+			return NoContent();
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
+	}
+
+	[HttpPost("many")]
+	[Authorize(UserRoles.Moderator)]
+	[Consumes("application/json")]
+	[SwaggerOperation("Create many Resource categories (Moderator)")]
+	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	public async Task<ActionResult<CategoryDto>> Create([FromBody] CreateResourceCategoriesCommand cmd, CancellationToken ct)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		var created = await _mediator.Send(cmd, ct);
+		return CreatedAtAction(nameof(GetById), created);
 	}
 
 
@@ -57,7 +94,7 @@ public class ResourceCategoriesController : ControllerBase
 
 	[HttpDelete("{id:int}")]
 	[Authorize(UserRoles.Moderator)]
-	[SwaggerOperation("Delete Resource category by id (Moderator only)")]
+	[SwaggerOperation("Delete Resource category by id (Moderator)")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> Delete(int id, CancellationToken ct)

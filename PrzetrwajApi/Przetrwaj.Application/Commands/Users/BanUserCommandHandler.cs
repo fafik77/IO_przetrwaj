@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Users;
+using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Users;
@@ -14,18 +16,18 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 	private readonly IUserRepository _userRepository;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly UserManager<AppUser> _userManager;
+	private readonly IBanCache _banCache;
 
-	public BanUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
+	public BanUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, UserManager<AppUser> userManager, IBanCache banCache)
 	{
 		_userRepository = userRepository;
 		_unitOfWork = unitOfWork;
 		_userManager = userManager;
+		_banCache = banCache;
 	}
-
 
 	public async Task<UserWithPersonalDataDto> Handle(BanUserInternallCommand request, CancellationToken cancellationToken)
 	{
-		//bool isSelf = false;
 		AppUser? user;
 		// 1. Get the ID of the currently logged-in user
 		// The ClaimTypes.NameIdentifier holds the user's Id from the Identity system.
@@ -43,7 +45,7 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		}
 		AppUser? moderator = await _userRepository.GetByIdAsync(request.ModeratorId, cancellationToken);
 		if (moderator is null) throw new UserNotFoundException(request.ModeratorId);
-		
+
 		bool moderatorIsAdmin = await _userManager.IsInRoleAsync(moderator, UserRoles.Admin);
 		var userRoles = await _userManager.GetRolesAsync(user);
 		if (userRoles.Contains(UserRoles.Admin) || (moderatorIsAdmin && userRoles.Contains(UserRoles.Moderator)))
@@ -56,8 +58,12 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		user.BanReason = request.Reason;
 		user.BannedById = request.ModeratorId;
 		user.Banned = true;
+		// This is the key line to invalidate logged in user cookie or other tokens:
+		await _userManager.UpdateSecurityStampAsync(user);
 
 		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		// cache ban info
+		_banCache.BanUser(user.Id);
 
 		var dto = (UserWithPersonalDataDto)user;
 		dto.BannedBy = (UserGeneralDto?)moderator; //add Moderator info

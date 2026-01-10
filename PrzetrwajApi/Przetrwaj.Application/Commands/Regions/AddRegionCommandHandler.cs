@@ -19,7 +19,7 @@ public class AddRegionCommandHandler : ICommandHandler<AddRegionCommand, RegionO
 
 	public async Task<RegionOnlyDto> Handle(AddRegionCommand request, CancellationToken cancellationToken)
 	{
-		var region = new Region { Name = request.RegionName };
+		var region = (Region)request;
 		await _regionRepository.AddAsync(region, cancellationToken);
 
 		await _unitOfWork.SaveChangesAsync(cancellationToken);

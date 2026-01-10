@@ -20,9 +20,11 @@ public class UpdateRegionCommandHandler : ICommandHandler<UpdateRegionCommand>
 	{
 		var regionToUpdate = await _regionRepository.GetByIdAsync(request.IdRegion);
 		if (regionToUpdate == null) throw new RegionNotFoundException(request.IdRegion);
-		
+
 		regionToUpdate.Name = request.Name;
-		
+		regionToUpdate.Lat = request.Lat;
+		regionToUpdate.Long = request.Long;
+
 		_regionRepository.Update(regionToUpdate);
 		await _unitOfWork.SaveChangesAsync(cancellationToken);
 	}

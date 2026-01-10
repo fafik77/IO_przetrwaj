@@ -56,16 +56,22 @@ public class CategoryRepository : ICategoryRepository
 		return list.FirstOrDefault(c => c.IdCategory == id);
 	}
 
-	public async Task<Category> AddAsync(Category category, CancellationToken ct)
+
+	public async Task AddAsync(Category item, CancellationToken cancellationToken)
 	{
-		await _db.Categories.AddAsync(category, ct);
+		await _db.Categories.AddAsync(item, cancellationToken);
 		_cache.Remove(CategoryCacheKey); // Invalidate cache
-		return category;
 	}
 
 	public void Delete(Category category)
 	{
 		_db.Categories.Remove(category);
+		_cache.Remove(CategoryCacheKey); // Invalidate cache
+	}
+
+	public void Update(Category item)
+	{
+		_db.Categories.Update(item);
 		_cache.Remove(CategoryCacheKey); // Invalidate cache
 	}
 }

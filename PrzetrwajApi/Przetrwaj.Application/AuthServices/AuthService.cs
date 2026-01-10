@@ -50,15 +50,21 @@ public class AuthService : IAuthService
 
 	public async Task GenerateChangeEmailTokenAsync(AppUser user, string newEmail)
 	{
+		// 1. Generate the Code
 		var ChangeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
 		ConfirmEmailChangeInfo values = new() { UserId = user.Id, Code = ChangeEmailToken, NewEmail = newEmail };
 		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmailChange", values);
 		// send the email
-		await _emailSender.SendEmailAsync(newEmail, subject: "Potwierdź zmianę swojego adresu e-mail. Przetrwaj.pl",
-			$"<h2>{user.Name} właśnie chcesz zmienić swój adres e-mail w serwisie <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> na {newEmail}</h2><br>" +
-			$"Potwierdź zmianę swojego adresu e-mail, <a href='{(absoluteUrlString)}'>klikając tutaj</a>." +
-			$"<br>Dopóki tego nie zrobisz, do serwisu będziesz logować się obecnym e-mailem." +
-			$"<br><br><p style='color: gray; font-size: 12px;'>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
+		await _emailSender.SendEmailAsync(newEmail, subject: "Potwierdź zmianę adresu e-mail - Przetrwaj.pl",
+		$@"<h2>Witaj {user.Name}!</h2>
+        <p>Otrzymaliśmy prośbę o zmianę adresu e-mail na: <strong>{newEmail}</strong>.</p>
+        <div style='margin: 30px 0;'>
+            <a href='{absoluteUrlString}' 
+               style='background-color: #007bff; color: white; padding: 15px 25px; text-decoration: none; font-size: 18px; border-radius: 5px; display: inline-block;'>
+               Potwierdź zmianę e-maila
+            </a>
+        </div>
+        <p>Dopóki nie klikniesz w przycisk, Twój obecny adres pozostanie aktywny.</p>");
 	}
 
 	public async Task<AppUser> GetUserDetailsAsync(string userIdEmail)
@@ -129,21 +135,32 @@ public class AuthService : IAuthService
 		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmail", values);
 		// send the email
 		await _emailSender.SendEmailAsync(register.Email, subject: "Potwierdź swój adres e-mail. Przetrwaj.pl",
-			$"<h2>{register.Name} witaj w serwisie <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a></h2><br>" +
-			$"Potwierdź swoje konto, <a href='{(absoluteUrlString)}'>klikając tutaj</a>." +
+			$"<h2>{register.Name} witaj w serwisie Przetrwaj.pl</h2><br>" +
+			$@"<p>Potwierdź swoje konto, klikając w poniższy przycisk:</p>
+<div style='text-align: center; margin: 30px 0;'>
+    <a href='{absoluteUrlString}' 
+       style='background-color: #28a745; 
+              color: white; 
+              padding: 15px 25px; 
+              text-decoration: none; 
+              font-size: 18px; 
+              font-weight: bold; 
+              border-radius: 5px; 
+              display: inline-block;'>
+        Potwierdź konto
+    </a>
+</div>" +
 			$"<br><br><p style='color: gray; font-size: 12px;'>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
 
 		return user;
 	}
 
-	private string GenerateEmailConfirmationUrl(string action, object values)
+	private string GenerateEmailConfirmationUrl(string action, ConfirmEmailInfo values)
 	{
 		if (!string.IsNullOrEmpty(_frontEndSettings.Url))
 		{
-			var relativeUrlFront = _urlHelper.Action(
-				action: "confirm-email",
-				values: values);
-			var urlFront = $"{_frontEndSettings.Url}{relativeUrlFront}";
+			var baseUrl = $"{_frontEndSettings.Url}/{action}";
+			var urlFront = values.ToQueryString(baseUrl);
 			return urlFront;
 		}
 		// 2. Generate the relative URL path using IUrlHelper.Action()

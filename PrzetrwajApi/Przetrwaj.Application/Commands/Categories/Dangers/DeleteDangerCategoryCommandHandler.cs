@@ -1,4 +1,4 @@
-﻿using Przetrwaj.Application.Commands.Categories;
+﻿using Przetrwaj.Application.Commands.Categories.Dangers;
 using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 

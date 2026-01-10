@@ -27,7 +27,9 @@ public class RegionRepository : IRegionRepository
 		{
 			entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
 			// IMPORTANT: Use AsNoTracking because these objects will live in RAM
-			return await _dbContext.Regions.AsNoTracking().ToListAsync(ct);
+			return await _dbContext.Regions.AsNoTracking()
+				.OrderBy(o => o.Name.ToLower())
+				.ToListAsync(ct);
 		});
 	}
 

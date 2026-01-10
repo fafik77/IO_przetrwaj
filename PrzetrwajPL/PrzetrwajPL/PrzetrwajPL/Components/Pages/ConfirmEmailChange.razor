@@ -1,0 +1,28 @@
+﻿@page "/ConfirmEmailChange"
+@using System.Net
+@inject NavigationManager Navigation
+@inject HttpClient HttpClient
+
+<div class="container mt-5 text-center">
+	@if (_status == LoadingStatus.Processing)
+	{
+		<div class="spinner-border text-primary"></div>
+		<p class="mt-3">Aktualizowanie adresu e-mail...</p>
+	}
+	else if (_status == LoadingStatus.Success)
+	{
+		<div class="alert alert-success">
+			<h4>Adres e-mail został zmieniony!</h4>
+			<p>Możesz teraz używać <strong>@NewEmail</strong> do logowania.</p>
+			<a href="/login" class="btn btn-primary">Zaloguj się ponownie</a>
+		</div>
+	}
+	else
+	{
+		<div class="alert alert-danger">
+			<h4>Błąd zmiany e-maila</h4>
+			<p>@_errorMessage</p>
+		</div>
+	}
+</div>
+

@@ -20,9 +20,8 @@ namespace PrzetrwajPL.Requests
 		[Required(ErrorMessage = "Hasło jest wymagane")]
 		[Compare(otherProperty: nameof(Password), ErrorMessage = "Hasła nie są takie same !")]
 		public string ConfirmPassword { get; set; }
-
-		public string Role { get; set; }
-
-		public string Region { get; set; }
+		[Range(0, int.MaxValue, ErrorMessage = "Region jest wymagany")]
+		public int IdRegion { get; set; } = -1;
+		public bool ModeratorRole { get; set; } = false;
 	}
 }

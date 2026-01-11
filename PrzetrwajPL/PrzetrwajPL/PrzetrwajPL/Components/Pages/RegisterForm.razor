@@ -4,6 +4,7 @@
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @using PrzetrwajPL;
+@using PrzetrwajPL.Components.Pages.Components
 @using PrzetrwajPL.Models
 
 <div class="container">
@@ -36,12 +37,22 @@
 		<InputText @bind-Value="registerRequest.ConfirmPassword" type="password" id="password" placeholder="Powtórz hasło" class="form-control"/>
 			<ValidationMessage For="@(() => registerRequest.ConfirmPassword)" style="color:red; font-size: 12px;" /><br />
 
-		<label>
-			<input type="checkbox" checked="checked" name="ifUser"> Użytkownik
-			</label>
-		<label>
-			<input type="checkbox" name="ifModerator"> Moderator
-		</label><br /><br />
+		<label>Twoja lokalizacja:</label><br />
+		<RegionPicker SelectedRegionIdChanged="@(id => registerRequest.IdRegion = id)" />
+		<ValidationMessage For="@(() => registerRequest.IdRegion)" style="color:red; font-size: 12px;" />
+
+		<label>Zarejestruj się jako:</label><br />
+		<InputRadioGroup @bind-Value="registerRequest.ModeratorRole">
+			<div class="role-selection">
+				<label class="me-3">
+					<InputRadio Value="false" /> Użytkownik
+				</label>
+				<label>
+					<InputRadio Value="true" /> Moderator (Wymaga zatwierdzenia)
+				</label>
+			</div>
+		</InputRadioGroup>
+		<br />
 
 		<button type="submit" disabled="@isLoading">
 			@if (isLoading)

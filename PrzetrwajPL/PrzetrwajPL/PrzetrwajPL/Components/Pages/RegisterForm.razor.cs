@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.WebUtilities;
 using PrzetrwajPL.Models;
 using PrzetrwajPL.Requests;
 
@@ -6,10 +7,11 @@ namespace PrzetrwajPL.Components.Pages
 {
 	public partial class RegisterForm
 	{
-		private UserWithPersonalDataDto user = new();
+		//private UserWithPersonalDataDto user = new();
 		private RegisterRequest registerRequest = new();
 		private string errorMessage = string.Empty;
 		private bool isLoading = false;
+		//private string selectedRegionDisplay = "Wybierz swój region";
 
 		private async Task HandleRegister()
 		{
@@ -28,12 +30,21 @@ namespace PrzetrwajPL.Components.Pages
 					var result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
 					if (result != null)
 					{
-						//Po rejestracji wymagane jest potwierdzenie emaila a potem zalogowanie -PN
-						NavigationManager.NavigateTo("/", forceLoad: true);
+						// Prepare the query parameters for the success page
+						var queryParams = new Dictionary<string, string?>
+						{
+							["Name"] = registerRequest.Name,
+							["Email"] = registerRequest.Email
+						};
+						// Build the URL: /registration-success?Name=Jan&Email=jan@example.com
+						var successUrl = QueryHelpers.AddQueryString("/registration-success", queryParams);
+						// Redirect the user
+						NavigationManager.NavigateTo(successUrl);
 					}
 					else
 					{
-						errorMessage = "Nieprawid³owa odpowiedŸ z serwera.";
+						var errorResult = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
+						errorMessage = errorResult?.Error?.Message ?? "Wyst¹pi³ nieoczekiwany b³¹d.";
 					}
 				}
 				else

@@ -18,18 +18,29 @@ public partial class RegionPicker
 	protected override async Task OnInitializedAsync()
 	{
 		//moved to OnAfterRenderAsync
-		SelectedRegionName = "�adowanie region�w";
+		SelectedRegionName = "Ładowanie regionów";
 	}
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			regions = await HttpClient.GetFromJsonAsync<List<RegionOnlyDto>>("/Region");
-			SelectedRegionName = "Wybierz Region";
-			// If a default ID was passed from parent, find its name immediately
-			if (SelectedRegionId != -1)
+			try
 			{
-				await PickRegion(SelectedRegionId);
+				regions = await HttpClient.GetFromJsonAsync<List<RegionOnlyDto>>("/Region");
+				SelectedRegionName = "Wybierz Region";
+				// If a default ID was passed from parent, find its name immediately
+				if (SelectedRegionId != -1)
+				{
+					await PickRegion(SelectedRegionId);
+				}
+			}
+			catch (Exception)
+			{
+				SelectedRegionName = "Błąd połączenia";
+			}
+			finally
+			{
+				StateHasChanged();
 			}
 		}
 	}

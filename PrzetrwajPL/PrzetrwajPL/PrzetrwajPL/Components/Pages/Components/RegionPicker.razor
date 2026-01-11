@@ -1,0 +1,26 @@
+@using PrzetrwajPL.Models
+@inject HttpClient HttpClient
+
+<div class="container">
+	<div class="dropdown" style="text-align: center">
+		<button type="button" @onclick="ToggleDropdown" class="dropbtn">
+			@SelectedRegionName <i class="fa fa-caret-down"></i>
+		</button>
+		<div class="@(isDropdownOpen ? "dropdown-content show" : "dropdown-content")">
+			@if (regions == null)
+			{
+				<p style="color: gray; font-weight:bold; padding: 10px;">£aduje...</p>
+			}
+			else
+			{
+				@foreach (var region in regions)
+				{
+					<p @onclick="() => SelectRegion(region.IdRegion, region.Name)">@region.Name</p>
+				}
+			}
+		</div>
+	</div>
+</div>
+
+
+

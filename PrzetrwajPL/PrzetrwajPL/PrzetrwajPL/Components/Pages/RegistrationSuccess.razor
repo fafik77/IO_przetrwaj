@@ -1,0 +1,35 @@
+﻿@page "/registration-success"
+
+<div class="container mt-5">
+	<div class="card shadow-sm p-5 text-center border-0">
+		<div class="mb-4">
+			<i class="bi bi-envelope-check text-success" style="font-size: 4rem;"></i>
+		</div>
+
+		<h2 class="mb-3">Dziękujemy za rejestrację, @Name!</h2>
+
+		<p class="lead mb-4">
+			Na adres <strong>@Email</strong> wysłaliśmy link aktywacyjny.
+			Potwierdź swój adres e-mail, aby móc się zalogować.
+		</p>
+
+		<hr class="my-4" />
+
+		<div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+			<a href="/login" class="btn btn-primary btn-lg px-4 gap-3">
+				Przejdź do logowania
+			</a>
+			<a href="/" class="btn btn-outline-secondary btn-lg px-4">
+				Strona główna
+			</a>
+		</div>
+	</div>
+</div>
+
+@code {
+	[SupplyParameterFromQuery]
+	public string? Name { get; set; }
+
+	[SupplyParameterFromQuery]
+	public string? Email { get; set; }
+}

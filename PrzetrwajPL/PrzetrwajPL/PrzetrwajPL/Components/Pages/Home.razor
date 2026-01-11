@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 @inject HttpClient HttpClient
 @using PrzetrwajPL;
+@using PrzetrwajPL.Components.Pages.Components
 @using PrzetrwajPL.Models;
 @using PrzetrwajPL.Models.Posts;
 
@@ -13,29 +14,8 @@
 	<h2>Widzisz zagrożenie? Zgłoś je!</h2>
 </div>
 
-<div class="container">
-    <div class="dropdown" style="text-align: center">
-        <button @onclick="ToggleDropdown" class="dropbtn">@SelectedRegionName <i class="fa fa-caret-down"></i></button>
-        <div class="@(isDropdownOpen ? "dropdown-content show" : "dropdown-content")">
-            @if (regions == null)
-            {
-                <p style="color: gray; font-weight:bold;">Ładuje...</p>
-			}
-            else if (regions.Count == 0)
-            {
-                <p style="color: gray; font-weight:bold;">Brak regionów</p>
-			}
-            else
-            {
-                @foreach (var region in regions)
-                {
-                    <p @onclick="() => FilterByRegion(region.IdRegion, region.Name)">@region.Name</p>
-                }
-            }
-        </div>
-    </div>
-</div>
-    
+<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(id => FilterByRegion(id, ""))" />
+
 @if (posts == null)
 {
     <p style="text-align: center; margin-top: 20px;">Ładowanie postów...</p>
@@ -59,49 +39,37 @@ else
 }
 
 @code {
-    private bool isDropdownOpen = false;
-    private List<RegionOnlyDto>? regions;
-    private List<PostOverviewDto>? posts;
-    private UserGeneralDto? currentUser;
-    private string SelectedRegionName = "Wybierz Region";
+	private RegionPicker myRegionPicker; // The RegionPicker reference
+	private List<PostOverviewDto>? posts;
+	private UserGeneralDto? currentUser;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadRegions();
+	protected override async Task OnInitializedAsync()
+	{
+		//moved to OnAfterRenderAsync as we need `myRegionPicker` to exist
+	}
 
-        if (currentUser != null && currentUser.Region != null)
-        {
-            await FilterByRegion(currentUser.Region.IdRegion, currentUser.Region.Name);
-        }
-        else
-        {
-            await FilterByRegion(0, "Polska");
-        }
-    }
-
-    // Pobieranie listy regionów
-    private async Task LoadRegions()
-    {
-        try
-        {
-            regions = await HttpClient.GetFromJsonAsync<List<RegionOnlyDto>>("/Region");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Błąd pobierania regionów: {ex.Message}");
-        }
-    }
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			if (currentUser != null && currentUser.Region != null)
+			{
+				await myRegionPicker.PickRegion(currentUser.Region.IdRegion);
+			}
+			else
+			{
+				await myRegionPicker.PickRegion(0);
+			}
+		}
+	}
 
     // Filtrowanie po regionie
     private async Task FilterByRegion(int? regionId, string? regionName)
     {
-        isDropdownOpen = false; // Zamknij menu po wyborze
         posts = null; // Pokaż ładowanie
 
         try
         {
-            SelectedRegionName = regionName ?? "Region";
-            // Pobieramy zagrożenia z danego regionu
             posts = await HttpClient.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
         }
         catch (Exception ex)
@@ -109,12 +77,6 @@ else
             Console.WriteLine($"Błąd pobierania postów regionu: {ex.Message}");
             posts = new List<PostOverviewDto>(); // Pusta lista w razie błędu
         }
-    }
-
-    // Obsługa dropdowna
-    private void ToggleDropdown()
-    {
-        isDropdownOpen = !isDropdownOpen;
     }
 }
 

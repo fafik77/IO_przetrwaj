@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using PrzetrwajPL;
 using PrzetrwajPL.Components;
 
 
@@ -11,6 +12,7 @@ builder.Services.AddRazorComponents()
 	.AddInteractiveWebAssemblyComponents();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/") });
 
+#region Auth
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 	.AddCookie(options =>
 	{
@@ -18,9 +20,22 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 		options.Cookie.MaxAge = TimeSpan.FromHours(6);
 		options.LoginPath = "/login";
 	});
-builder.Services.AddAuthorization();
-builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorization(opt =>
+{
+	// User+ : Requires either User, Moderator, or Admin
+	opt.AddPolicy(UserRoles.User, policy =>
+		policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin));
 
+	// Moderator+ : Requires either Moderator or Admin
+	opt.AddPolicy(UserRoles.Moderator, policy =>
+		policy.RequireRole(UserRoles.Moderator, UserRoles.Admin));
+
+	// Admin only
+	opt.AddPolicy(UserRoles.Admin, policy =>
+		policy.RequireRole(UserRoles.Admin));
+});
+builder.Services.AddCascadingAuthenticationState();
+#endregion //Auth
 
 var app = builder.Build();
 

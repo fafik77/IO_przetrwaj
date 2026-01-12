@@ -13,6 +13,13 @@
 	<h1>Ogólnopolska strona do zgłaszania zagrożeń w twojej okolicy.</h1>
 	<h2>Widzisz zagrożenie? Zgłoś je!</h2>
 </div>
+<AuthorizeView>
+    <Authorized>
+        <div class="add-post-box">
+            <a href="/addPost">Dodaj Post</a>
+        </div>
+    </Authorized>
+</AuthorizeView>
 
 <div class="filters">
     <RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(regionId => FilterByRegion(regionId, "", myTypePicker?.SelectedTypeId ?? 0))" />
@@ -107,7 +114,12 @@ else
                 }
             }
 
-            posts = tempPosts;
+            if(tempPosts != null)
+            {
+                posts = tempPosts.OrderByDescending(p => p.VoteNegative == 0 ? (double)p.VotePositive 
+                : (double)p.VotePositive/(double)p.VoteNegative).ToList();
+			}
+            
         }
         catch (Exception ex)
         {

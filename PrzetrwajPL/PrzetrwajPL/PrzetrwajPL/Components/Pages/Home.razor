@@ -14,7 +14,11 @@
 	<h2>Widzisz zagrożenie? Zgłoś je!</h2>
 </div>
 
-<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(id => FilterByRegion(id, ""))" />
+<div>
+    <RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(regionId => FilterByRegion(regionId, "", myTypePicker?.SelectedTypeId ?? 0))" />
+    <TypePicker @ref="myTypePicker" SelectedTypeIdChanged="@(typeId => FilterByRegion(myRegionPicker?.SelectedRegionId ?? 0, "", typeId))" />
+</div>
+
 
 @if (posts == null)
 {
@@ -39,42 +43,75 @@ else
 }
 
 @code {
-	private RegionPicker myRegionPicker; // The RegionPicker reference
-	private List<PostOverviewDto>? posts;
-	private UserGeneralDto? currentUser;
+    private RegionPicker myRegionPicker; // The RegionPicker reference
+    private TypePicker myTypePicker;
+    private List<PostOverviewDto>? posts;
+    private UserGeneralDto? currentUser;
 
-	protected override async Task OnInitializedAsync()
-	{
-		//moved to OnAfterRenderAsync as we need `myRegionPicker` to exist
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        //moved to OnAfterRenderAsync as we need `myRegionPicker` to exist
+    }
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender)
-		{
-			if (currentUser != null && currentUser.Region != null)
-			{
-				await myRegionPicker.PickRegion(currentUser.Region.IdRegion);
-			}
-			else
-			{
-				await myRegionPicker.PickRegion(0);
-			}
-		}
-	}
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (currentUser != null && currentUser.Region != null)
+            {
+                await myRegionPicker.PickRegion(currentUser.Region.IdRegion);
+            }
+            else
+            {
+                await myRegionPicker.PickRegion(0);
+            }
+        }
+    }
 
     // Filtrowanie po regionie
-    private async Task FilterByRegion(int? regionId, string? regionName)
+    private async Task FilterByRegion(int? regionId, string? regionName, int? typeId)
     {
         posts = null; // Pokaż ładowanie
+        var tempPosts = new List<PostOverviewDto>();
 
         try
         {
-            posts = await HttpClient.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
+            if(typeId == 0 || typeId == 2)
+            {
+                try
+                {
+                    var dangers = await HttpClient.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
+                    if (dangers != null)
+                    {
+                        tempPosts.AddRange(dangers);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Błąd pobierania postów zagrożeń regionu: {ex.Message}");
+                }
+            }
+            if (typeId == 1 || typeId == 2)
+            {
+                try
+                {
+                    var resources = await HttpClient.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Resource");
+                    if (resources != null)
+                    {
+                        tempPosts.AddRange(resources);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Błąd pobierania postów zasobów regionu: {ex.Message}");
+                }
+            }
+
+            posts = tempPosts;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Błąd pobierania postów regionu: {ex.Message}");
+            Console.WriteLine($"Błąd: {ex.Message}");
             posts = new List<PostOverviewDto>(); // Pusta lista w razie błędu
         }
     }

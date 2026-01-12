@@ -1,0 +1,31 @@
+﻿@using PrzetrwajPL.Models
+@inject HttpClient HttpClient
+
+<div class="container">
+	<div class="dropdown" style="text-align: center">
+		<button type="button"
+				@onclick="ToggleDropdown"
+				class="dropbtn @(types == null ? "loading-state" : "")">
+			@SelectedTypeName
+
+			@if (types != null)
+			{
+				<i class="fa fa-caret-down ms-2"></i>
+			}
+		</button>
+
+		<div class="@(isDropdownOpen ? "dropdown-content show" : "dropdown-content")">
+			@if (types == null)
+			{
+				<p style="color: gray; font-weight:bold; padding: 10px;">Ładuje...</p>
+			}
+			else
+			{
+				@foreach (var type in types)
+				{
+					<p @onclick="() => SelectType(types.IndexOf(type), type)">@type</p>
+				}
+			}
+		</div>
+	</div>
+</div>

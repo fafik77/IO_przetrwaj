@@ -185,6 +185,11 @@
                 // Odśwież dane posta, żeby zaktualizować liczniki
                 await LoadData();
             }
+            else
+			{
+				Console.WriteLine("Błąd serwera przy głosowaniu." + response.StatusCode);
+                Console.WriteLine(response.Headers.Location);
+            }
         }
         catch (Exception ex)
         {
@@ -241,6 +246,7 @@
             }
             else {
                 Console.WriteLine("Błąd serwera przy dodawaniu komentarza." + response.StatusCode);
+                Console.WriteLine(response.Headers.Location);
 			}
         }
         catch (Exception ex)

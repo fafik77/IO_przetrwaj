@@ -13,13 +13,19 @@
 	<h1>Ogólnopolska strona do zgłaszania zagrożeń w twojej okolicy.</h1>
 	<h2>Widzisz zagrożenie? Zgłoś je!</h2>
 </div>
-<AuthorizeView>
+<div class="add-post-box">
+   <AuthorizeView Policy="@UserRoles.User">
     <Authorized>
-        <div class="add-post-box">
-            <a href="/addPost">Dodaj Post</a>
-        </div>
+            <a href="/addPost">Dodaj Post o Zagrożeniu</a>
     </Authorized>
 </AuthorizeView>
+    <AuthorizeView Policy="@UserRoles.Moderator">
+    <Authorized>
+            <a href="/addPost">Dodaj Post o Zasobie</a>
+    </Authorized>
+</AuthorizeView>
+</div>
+
 
 <div class="filters">
     <RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(regionId => FilterByRegion(regionId, "", myTypePicker?.SelectedTypeId ?? 0))" />

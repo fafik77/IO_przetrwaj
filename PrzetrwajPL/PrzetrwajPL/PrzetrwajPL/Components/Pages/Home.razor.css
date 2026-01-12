@@ -7,7 +7,8 @@
     background-color: #f7f7f7;
     border-radius: 4px;
     padding: 15px 15px 10px 20px;
-    margin: 10px 170px;
+    margin: 10px auto;
+    width: 74%;
 }
 
     .post:nth-child(2n+1) {
@@ -51,3 +52,12 @@
         clear: both;
         display: table;
     }
+
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 15px auto 20px auto;
+    align-items: center;
+    width: 100%;
+}

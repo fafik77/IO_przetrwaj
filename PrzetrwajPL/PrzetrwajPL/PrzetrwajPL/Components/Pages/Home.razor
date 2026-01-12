@@ -14,7 +14,7 @@
 	<h2>Widzisz zagrożenie? Zgłoś je!</h2>
 </div>
 
-<div>
+<div class="filters">
     <RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(regionId => FilterByRegion(regionId, "", myTypePicker?.SelectedTypeId ?? 0))" />
     <TypePicker @ref="myTypePicker" SelectedTypeIdChanged="@(typeId => FilterByRegion(myRegionPicker?.SelectedRegionId ?? 0, "", typeId))" />
 </div>

@@ -102,6 +102,31 @@ public class UserController : Controller
 		}
 	}
 
+	[HttpPost("MakeAdmin")]
+	[SwaggerOperation("Grant Admin role to user by Id or Email (Admin)")]
+	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> AssignAdminRole(MakeAdminCommand request, CancellationToken cancellationToken)
+	{
+		if (!ModelState.IsValid) return BadRequest(IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" }));
+		try
+		{
+			var internallReq = new MakeAdminInternallCommand
+			{
+				Id = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+				Password = request.Password,
+				UserIdOrEmail = request.UserIdOrEmail,
+			};
+			var res = await _mediator.Send(internallReq, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
+	}
+
 	[HttpGet("ModeratorPending")]
 	[SwaggerOperation("Gets users with Moderator Pending status (Admin)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]

@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Caching.Memory;
 using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Users;
-using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Users;
@@ -40,7 +38,8 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		{
 			AppUser? moderatorOld = await _userRepository.GetByIdAsync(user.BannedById!, cancellationToken);
 			var dtoUserAlreadyBanned = (UserWithPersonalDataDto)user;
-			dtoUserAlreadyBanned.BannedBy = (UserGeneralDto?)moderatorOld; //add Moderator info
+			if (dtoUserAlreadyBanned.BanInfo != null)
+				dtoUserAlreadyBanned.BanInfo.BannedBy = (UserGeneralDto?)moderatorOld; //add Moderator info
 			return dtoUserAlreadyBanned;
 		}
 		AppUser? moderator = await _userRepository.GetByIdAsync(request.ModeratorId, cancellationToken);
@@ -66,7 +65,8 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		_banCache.BanUser(user.Id);
 
 		var dto = (UserWithPersonalDataDto)user;
-		dto.BannedBy = (UserGeneralDto?)moderator; //add Moderator info
+		if (dto.BanInfo != null)
+			dto.BanInfo.BannedBy = (UserGeneralDto?)moderator; //add Moderator info
 		return dto;
 	}
 }

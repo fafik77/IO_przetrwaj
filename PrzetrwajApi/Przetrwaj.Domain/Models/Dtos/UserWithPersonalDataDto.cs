@@ -16,12 +16,13 @@ public class UserWithPersonalDataDto
 	public DateTimeOffset RegistrationDate { get; set; }
 
 	public bool Banned { get; set; }
-	public string? BanReason { get; set; }
-	public DateTimeOffset? BanDate { get; set; }
 	/// <summary>
-	/// You have to include this yourself when making a Dto
+	/// You have to include `BannedBy` yourself when making a Dto
 	/// </summary>
-	public UserGeneralDto? BannedBy { get; set; }
+	public BanInfo? BanInfo { get; set; }
+	//public string? BanReason { get; set; }
+	//public DateTimeOffset? BanDate { get; set; }
+	//public UserGeneralDto? BannedBy { get; set; }
 
 
 	public static explicit operator UserWithPersonalDataDto(AppUser registeredUser)
@@ -35,8 +36,14 @@ public class UserWithPersonalDataDto
 			Surname = registeredUser.Surname ?? "",
 			Region = (RegionOnlyDto?)registeredUser.IdRegionNavigation,
 			Banned = registeredUser.Banned,
-			BanReason = registeredUser.BanReason,
-			BanDate = registeredUser.BanDate,
+			BanInfo = registeredUser.Banned ? new BanInfo
+			{
+				Banned = true,
+				BanReason = registeredUser.BanReason ?? string.Empty,
+				BanDate = registeredUser.BanDate,
+				BannedById = registeredUser.BannedById ?? string.Empty,
+				BannedBy = null,
+			} : null,
 			TwoFactorEnabled = registeredUser.TwoFactorEnabled,
 			RegistrationDate = registeredUser.RegistrationDate,
 		};

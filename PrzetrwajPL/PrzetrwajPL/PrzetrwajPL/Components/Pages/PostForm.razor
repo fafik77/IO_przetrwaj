@@ -1,6 +1,84 @@
 ﻿@page "/addPost"
-<h3>PostForm</h3>
+@rendermode InteractiveServer
+
+@namespace PrzetrwajPL.Components.Pages.Components
+@using PrzetrwajPL.Requests
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<h3>Dodaj nowe zagrożenie</h3>
+
+<EditForm Model="@model" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Tytuł</label>
+        <InputText class="form-control" @bind-Value="model.Title" />
+    </div>
+
+    <div class="mb-3">
+        <label>Opis</label>
+        <InputTextArea class="form-control" @bind-Value="model.Description" />
+    </div>
+
+    <div class="mb-3">
+        <label>Kategoria</label>
+        <TypePicker @bind-SelectedTypeId="model.IdCategory" />
+    </div>
+
+    <div class="mb-3">
+        <label>Własna kategoria (opcjonalnie)</label>
+        <InputText class="form-control" @bind-Value="model.CustomCategory" />
+    </div>
+
+    <div class="mb-3">
+        <label>Region</label>
+        <RegionPicker @bind-SelectedRegionId="model.IdRegion" />
+    </div>
+
+    <button class="btn btn-primary" type="submit">Dodaj post</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger mt-3">@error</div>
+}
+
+@if (success)
+{
+    <div class="alert alert-success mt-3">Post został dodany!</div>
+}
 
 @code {
+    private AddPostCommand model = new() { Title = "" };
+    private string? error;
+    private bool success = false;
 
+    private async Task HandleSubmit()
+    {
+        error = null;
+        success = false;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/Post/Danger", model);
+                
+            if (response.IsSuccessStatusCode)
+            {
+                success = true;
+                await Task.Delay(1000);
+                Nav.NavigateTo("/");
+            }
+            else
+            {
+                var msg = await response.Content.ReadAsStringAsync(); 
+                error = $"Nie udało się dodać posta. Kod: {response.StatusCode}, odpowiedź: {msg}";
+            }
+        }
+        catch (Exception ex)
+        {
+            error = $"Błąd połączenia: {ex.Message}";
+        }
+    }
 }

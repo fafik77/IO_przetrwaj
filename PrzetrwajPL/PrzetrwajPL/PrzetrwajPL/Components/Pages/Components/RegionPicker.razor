@@ -1,39 +1,37 @@
+@namespace PrzetrwajPL.Components.Pages.Components
 @using PrzetrwajPL.Models
 @inject HttpClient HttpClient
 
 <div class="container">
-	<div class="dropdown" style="text-align: center">
-		<button type="button" 
-			@onclick="ToggleDropdown" 
-			class="dropbtn @(regions == null ? "loading-state" : "")"
-			disabled="@(regions == null)">
-			@if (regions == null)
-			{
-				<i class="fa fa-refresh fa-spin me-2"></i>
-			}
-			@SelectedRegionName
-		
-			@if (regions != null)
-			{
-				<i class="fa fa-caret-down ms-2"></i>
-			}
-		</button>
+    <div class="dropdown" style="text-align: center">
+        <button type="button"
+                @onclick="ToggleDropdown"
+                class="dropbtn @(regions == null ? "loading-state" : "")"
+                disabled="@(regions == null)">
+            @if (regions == null)
+            {
+                <i class="fa fa-refresh fa-spin me-2"></i>
+            }
+            @SelectedRegionName
 
-		<div class="@(isDropdownOpen ? "dropdown-content show" : "dropdown-content")">
-			@if (regions == null)
-			{
-				<p style="color: gray; font-weight:bold; padding: 10px;">Ładuje...</p>
-			}
-			else
-			{
-				@foreach (var region in regions)
-				{
-					<p @onclick="() => SelectRegion(region.IdRegion, region.Name)">@region.Name</p>
-				}
-			}
-		</div>
-	</div>
+            @if (regions != null)
+            {
+                <i class="fa fa-caret-down ms-2"></i>
+            }
+        </button>
+
+        <div class="@(isDropdownOpen ? "dropdown-content show" : "dropdown-content")">
+            @if (regions == null)
+            {
+                <p style="color: gray; font-weight:bold; padding: 10px;">Ładuje...</p>
+            }
+            else
+            {
+                @foreach (var region in regions)
+                {
+                    <p @onclick="() => SelectRegion(region.IdRegion, region.Name)">@region.Name</p>
+                }
+            }
+        </div>
+    </div>
 </div>
-
-
-

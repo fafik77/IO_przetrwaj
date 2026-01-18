@@ -1,7 +1,7 @@
 ﻿@page "/post/{Id}"
 
 @rendermode InteractiveServer
-@inject HttpClient HttpClient
+@inject IHttpClientFactory ClientFactory
 @using PrzetrwajPL;
 @using PrzetrwajPL.Models;
 @using PrzetrwajPL.Models.Posts;
@@ -158,8 +158,8 @@
         isLoading = true;
         try
         {
-            post = await HttpClient.GetFromJsonAsync<PostCompleteDataDto>($"/Post/{Id}");
-
+			var client = ClientFactory.CreateClient("ServerAPI");
+			post = await client.GetFromJsonAsync<PostCompleteDataDto>($"/Post/{Id}");
         }
         catch (Exception ex)
         {
@@ -177,8 +177,9 @@
         isVoting = true;
 
         try
-        {
-            var response = await HttpClient.PostAsync($"/Post/{Id}/VotePositive", null);
+		{
+			var client = ClientFactory.CreateClient("ServerAPI");
+			var response = await client.PostAsync($"/Post/{Id}/VotePositive", null);
 
             if (response.IsSuccessStatusCode)
             {
@@ -207,8 +208,9 @@
         isVoting = true;
 
         try
-        {
-            var response = await HttpClient.PostAsync($"/Post/{Id}/VoteNegative", null);
+		{
+			var client = ClientFactory.CreateClient("ServerAPI");
+			var response = await client.PostAsync($"/Post/{Id}/VoteNegative", null);
 
             if (response.IsSuccessStatusCode)
             {
@@ -233,10 +235,11 @@
         isSendingComment = true;
 
         try
-        {
+		{
+			var client = ClientFactory.CreateClient("ServerAPI");
             var commentBody = new { Content = newCommentContent };
 
-            var response = await HttpClient.PostAsJsonAsync($"/Post/{Id}/Comment", commentBody);
+			var response = await client.PostAsJsonAsync($"/Post/{Id}/Comment", commentBody);
 
             if (response.IsSuccessStatusCode)
             {

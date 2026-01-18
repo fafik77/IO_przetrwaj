@@ -24,7 +24,8 @@ namespace PrzetrwajPL.Components.Pages
 			errorMessage = string.Empty;
 			try
 			{
-				var response = await HttpClient.PostAsJsonAsync("/Register/email", registerRequest);
+				var client = ClientFactory.CreateClient("ServerAPI");
+				var response = await client.PostAsJsonAsync("/Register/email", registerRequest);
 				if (response.IsSuccessStatusCode)
 				{
 					var result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();

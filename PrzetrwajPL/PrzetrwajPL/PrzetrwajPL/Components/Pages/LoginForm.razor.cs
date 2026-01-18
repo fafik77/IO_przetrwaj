@@ -26,7 +26,8 @@ namespace PrzetrwajPL.Components.Pages
 			errorMessage = string.Empty;
 			try
 			{
-				var response = await HttpClient.PostAsJsonAsync("/Login/email", loginRequest);
+				var client = ClientFactory.CreateClient("ServerAPI");
+				var response = await client.PostAsJsonAsync("/Login/email", loginRequest);
 				if (response.IsSuccessStatusCode)
 				{
 					var result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
@@ -63,19 +64,14 @@ namespace PrzetrwajPL.Components.Pages
 						errorMessage = "Nieprawid³owa odpowiedŸ z serwera.";
 					}
 				}
+				else if (response.StatusCode == (System.Net.HttpStatusCode)StatusCodes.Status418ImATeapot)
+				{
+					var bannedUser = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
+					errorMessage = $"Twoje konto zosta³o zablokowane przez {bannedUser.BannedBy.Name} {bannedUser.BannedBy.Surname}. Powód: {bannedUser.BanReason}";
+				}
 				else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
 				{
-					UserWithPersonalDataDto? result = null;
-					try
-					{
-						result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
-						if (result?.Banned == true)
-							errorMessage = $"Twoje konto zosta³o zablokowane przez {result.BannedBy.Name} {result.BannedBy.Surname}. Powód: {result.BanReason}";
-					}
-					catch (Exception ex)
-					{
-						errorMessage = "Nieprawid³owy email lub has³o.";
-					}
+					errorMessage = "Nieprawid³owy email lub has³o.";
 				}
 				else
 				{

@@ -10,7 +10,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents()
 	.AddInteractiveWebAssemblyComponents();
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/") });
+builder.Services.AddHttpClient("ServerAPI", client => 
+{
+	client.BaseAddress =
+	new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/");
+	//new Uri("https://localhost:7072/");
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+	// This allows the client to send and receive cookies automatically
+	UseCookies = true,
+	// Warning: On Blazor Server, sharing one CookieContainer in a Singleton 
+	// can lead to users seeing each other's sessions. 
+	// For InteractiveServer, the browser handles cookies naturally.
+	//CookieContainer = new System.Net.CookieContainer(),
+	//Credentials = System.Net.CredentialCache.DefaultCredentials
+});
 
 #region Auth
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

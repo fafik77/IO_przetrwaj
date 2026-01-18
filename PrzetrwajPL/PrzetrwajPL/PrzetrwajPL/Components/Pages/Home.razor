@@ -1,7 +1,7 @@
 ﻿@page "/"
 
 @rendermode InteractiveServer
-@inject HttpClient HttpClient
+@inject IHttpClientFactory ClientFactory
 @using PrzetrwajPL;
 @using PrzetrwajPL.Components.Pages.Components
 @using PrzetrwajPL.Models;
@@ -93,7 +93,8 @@ else
             {
                 try
                 {
-                    var dangers = await HttpClient.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
+					var client = ClientFactory.CreateClient("ServerAPI");
+					var dangers = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
                     if (dangers != null)
                     {
                         tempPosts.AddRange(dangers);
@@ -107,8 +108,9 @@ else
             if (typeId == 1 || typeId == 2)
             {
                 try
-                {
-                    var resources = await HttpClient.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Resource");
+				{
+					var client = ClientFactory.CreateClient("ServerAPI");
+					var resources = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Resource");
                     if (resources != null)
                     {
                         tempPosts.AddRange(resources);

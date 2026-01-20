@@ -64,7 +64,8 @@ builder.Services.AddAuthorization(opt =>
 	// Policy 1: User+ access (can add posts ...)
 	opt.AddPolicy(UserRoles.User, policy =>
 	{   // this is an or gate
-		policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin);
+		policy.RequireAuthenticatedUser(); //any registered user with any role that is able to log in
+		//policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin);
 	});
 
 	// Policy 2: Moderator+ access

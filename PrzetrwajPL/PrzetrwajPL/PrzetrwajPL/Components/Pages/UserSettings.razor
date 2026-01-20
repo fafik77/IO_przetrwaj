@@ -1,0 +1,79 @@
+﻿@page "/settings"
+
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager NavigationManager
+@using PrzetrwajPL;
+@using PrzetrwajPL.Models
+@using PrzetrwajPL.Components.Pages.Components
+@using PrzetrwajPL.Requests
+
+<div class="container">
+	<div class="inContainer">
+		<h2 style="text-align:center; font-weight:bold;">Ustawienia użytkownika</h2>
+	<p>Tu możesz zmienić swoje ustawienia użytkownika.</p>
+	<EditForm Model="@userUpdateRequest" OnValidSubmit="HandleUpdate" FormName="updateForm">
+		<label for="name">Imie:</label><br />
+			<InputText @bind-Value="userUpdateRequest.Name" id="name" placeholder="Podaj imie" class="form-control" /><br /><br />
+
+		<label for="surname">Nazwisko:</label><br />
+			<InputText @bind-Value="userUpdateRequest.Surname" id="surname" placeholder="Podaj nazwisko" class="form-control" /><br /><br />
+
+		<label for="email">Email:</label><br />
+			<InputText @bind-Value="userUpdateRequest.Email" id="email" placeholder="Podaj email" class="form-control" /><br /><br />
+
+		<label for="region">Twoja lokalizacja:</label><br />
+			<div class="picker">
+				<RegionPicker SelectedRegionIdChanged="@(id => userUpdateRequest.IdRegion = id)" /><br /><br />
+			</div>
+
+		@* <label for="oldPassword">Stare hasło</label>
+		<InputText type="password" class="form-control" />
+
+		<label for="newPassword">Nowe hasło</label>
+		<InputText type="password" class="form-control" /> *@
+
+		<button type="submit" disabled="@isLoading">
+			@if (isLoading)
+			{
+				<span>Zapisuje zmiany...</span>
+			}
+			else
+			{
+				<span>Zapisz zmiany</span>
+			}
+		</button><br /><br />
+	</EditForm>
+	</div>
+</div>
+
+
+@code {
+	public UpdateAccountCommand userUpdateRequest { get; set; } = new UpdateAccountCommand();
+	private bool isLoading = false;
+
+	private async Task HandleUpdate()
+	{
+		isLoading = true;
+		try
+		{
+			var client = ClientFactory.CreateClient("API");
+			var response = await client.PutAsJsonAsync("api/account/update", userUpdateRequest);
+			if (response.IsSuccessStatusCode)
+			{
+				NavigationManager.NavigateTo("/");
+			}
+			else
+			{
+				// Handle error response
+			}
+		}
+		catch (Exception ex)
+		{
+			// Handle exception
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+}

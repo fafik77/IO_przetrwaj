@@ -45,12 +45,14 @@
             @*Zdjęcie*@
             @if (post.Attachments != null && post.Attachments.Any())
             {
-                var Image = post.Attachments.FirstOrDefault();
-                if (Image != null && !string.IsNullOrEmpty(Image.FileURL))
+                foreach (var Image in post.Attachments)
                 {
-                    <div class="post-image">
-                        <img src="@Image.FileURL" alt=@Image.AlternateDescription />
-                    </div>
+                    if (Image != null && !string.IsNullOrEmpty(Image.FileURL))
+                    {
+                        <div class="post-image">
+                            <img src="@Image.FileURL" alt=@Image.AlternateDescription />
+                        </div>
+                    }
                 }
             }
 
@@ -90,9 +92,13 @@
 
         @*Komentarze*@
         <div class="comments-section">
-            <button class="commentButt" @onclick="ToggleCommentForm">
-                @(showCommentForm ? "Anuluj" : "Dodaj komentarz")
-            </button>
+            <AuthorizeView>
+                <Authorized>
+                    <button class="commentButt" @onclick="ToggleCommentForm">
+                        @(showCommentForm ? "Anuluj" : "Dodaj komentarz")
+                    </button>
+                </Authorized>
+            </AuthorizeView>
 
             @if (showCommentForm)
             {

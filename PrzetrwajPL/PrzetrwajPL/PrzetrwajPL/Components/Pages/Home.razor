@@ -28,8 +28,13 @@
 
 
 <div class="filters">
-    <RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(regionId => FilterByRegion(regionId, "", myTypePicker?.SelectedTypeId ?? 0))" />
-    <TypePicker @ref="myTypePicker" SelectedTypeIdChanged="@(typeId => FilterByRegion(myRegionPicker?.SelectedRegionId ?? 0, "", typeId))" />
+    <div class="picker">
+        <RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(regionId => FilterByRegion(regionId, "", myTypePicker?.SelectedTypeId ?? 0))" />
+    </div>
+    <div class="picker">
+        <TypePicker @ref="myTypePicker" SelectedTypeIdChanged="@(typeId => FilterByRegion(myRegionPicker?.SelectedRegionId ?? 0, "", typeId))" />
+    </div>
+    
 </div>
 
 

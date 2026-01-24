@@ -62,13 +62,13 @@
                     <NotAuthorized>
                         @* Przycisk Pozytywny *@
                         <button class="upVoteButt"
-                                @onclick="VotePositive" disabled>
+                                @onclick="VotePositive" disabled="@hasVoted">
                             <i class="fa fa-arrow-up"></i> @post.VotePositive
                         </button>
 
                         @* Przycisk Negatywny *@
                         <button class="downVoteButt"
-                                @onclick="VoteNegative" disabled>
+                                @onclick="VoteNegative" disabled="@hasVoted">
                             <i class="fa fa-arrow-down"></i> @post.VoteNegative
                         </button>
                     </NotAuthorized>
@@ -149,6 +149,7 @@
     private PostCompleteDataDto? post;
     private bool isLoading = true;
     private bool isVoting = false;
+    private bool hasVoted = false;
 
     private bool showCommentForm = false;
     private bool isSendingComment = false;

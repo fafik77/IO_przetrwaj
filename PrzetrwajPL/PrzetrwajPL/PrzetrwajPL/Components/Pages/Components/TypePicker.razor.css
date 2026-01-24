@@ -23,7 +23,7 @@
     margin: 0;
     display: inline-block;
     width: 220px;
-    float: left;
+    /*float: left;*/
 }
 
 .dropdown-content {

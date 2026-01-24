@@ -44,6 +44,8 @@ div p {
     white-space: pre-wrap;
 }
 
-.picker {
-    margin: auto;
+.picker-conteiner {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }

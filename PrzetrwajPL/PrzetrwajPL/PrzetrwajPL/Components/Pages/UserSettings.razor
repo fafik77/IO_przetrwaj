@@ -6,12 +6,21 @@
 @using PrzetrwajPL.Models
 @using PrzetrwajPL.Components.Pages.Components
 @using PrzetrwajPL.Requests
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Authentication.Cookies;
+@using Microsoft.AspNetCore.Components;
+@using System.Security.Claims;
 
 <div class="container">
 	<div class="inContainer">
 		<h2 style="text-align:center; font-weight:bold;">Ustawienia użytkownika</h2>
 	<p>Tu możesz zmienić swoje ustawienia użytkownika.</p>
 	<EditForm Model="@userUpdateRequest" OnValidSubmit="HandleUpdate" FormName="updateForm">
+		<DataAnnotationsValidator />
+		@if (!string.IsNullOrEmpty(errorMessage))
+		{
+			<div class="alert alert-danger pre-wrap" role="alert" style="color: black; text-align:center;">@errorMessage</div>
+		}
 		<label for="name">Imie:</label><br />
 			<InputText @bind-Value="userUpdateRequest.Name" id="name" placeholder="Podaj imie" class="form-control" /><br /><br />
 
@@ -22,15 +31,18 @@
 			<InputText @bind-Value="userUpdateRequest.Email" id="email" placeholder="Podaj email" class="form-control" /><br /><br />
 
 		<label for="region">Twoja lokalizacja:</label><br />
-			<div class="picker">
-				<RegionPicker SelectedRegionIdChanged="@(id => userUpdateRequest.IdRegion = id)" /><br /><br />
-			</div>
+			<div class="picker-conteiner">
+				<div class="picker">
+					<RegionPicker SelectedRegionIdChanged="@(id => userUpdateRequest.IdRegion = id)" />
+				</div>
+			</div><br /><br />
 
-		@* <label for="oldPassword">Stare hasło</label>
-		<InputText type="password" class="form-control" />
+		<label for="oldPassword">Stare hasło</label>
+			<InputText type="password" @bind-Value="userUpdateRequest.NewPassword" id="newPassword" placeholder="Podaj nowe hasło" class="form-control" /><br /><br />
 
 		<label for="newPassword">Nowe hasło</label>
-		<InputText type="password" class="form-control" /> *@
+			<InputText type="password" @bind-Value="userUpdateRequest.OldPassword" id="oldPassword" placeholder="Podaj stare hasło" class="form-control" /><br /><br />
+			<ValidationMessage For="@(() => userUpdateRequest.OldPassword)" style="color:red; font-size: 12px;" /><br />
 
 		<button type="submit" disabled="@isLoading">
 			@if (isLoading)
@@ -48,28 +60,30 @@
 
 
 @code {
-	public UpdateAccountCommand userUpdateRequest { get; set; } = new UpdateAccountCommand();
+	private UpdateAccountCommand userUpdateRequest { get; set; } = new UpdateAccountCommand();
 	private bool isLoading = false;
+	private string errorMessage = string.Empty;
 
 	private async Task HandleUpdate()
 	{
 		isLoading = true;
 		try
 		{
-			var client = ClientFactory.CreateClient("API");
-			var response = await client.PutAsJsonAsync("api/account/update", userUpdateRequest);
+			var client = ClientFactory.CreateClient("ServerAPI");
+			var response = await client.PutAsJsonAsync("/Account", userUpdateRequest);
 			if (response.IsSuccessStatusCode)
 			{
 				NavigationManager.NavigateTo("/");
 			}
 			else
 			{
-				// Handle error response
+				var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
+				errorMessage = errorText?.Error.Message;
 			}
 		}
 		catch (Exception ex)
 		{
-			// Handle exception
+			errorMessage = $"Błąd połączenia: {ex.Message}";
 		}
 		finally
 		{

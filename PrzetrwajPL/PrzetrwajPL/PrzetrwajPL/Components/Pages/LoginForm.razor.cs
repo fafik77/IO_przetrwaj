@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
+using Przetrwaj.Domain.Models;
 using PrzetrwajPL.Models;
 using PrzetrwajPL.Requests;
 using System.Security.Claims;
@@ -12,8 +13,6 @@ namespace PrzetrwajPL.Components.Pages
 	{
 		[CascadingParameter]
 		private HttpContext? httpContext { get; set; }
-		//[CascadingParameter]
-		//private NavigationManager NavigationManager { get; set; }
 
 		private UserWithPersonalDataDto? user = null;
 		[SupplyParameterFromForm]
@@ -21,35 +20,15 @@ namespace PrzetrwajPL.Components.Pages
 		private string errorMessage = string.Empty;
 		private bool isLoading = false;
 
-		private string GoogleLoginUrl => $"{ClientFactory.CreateClient("ServerAPI").BaseAddress}Login/google";
-
-		protected override async Task OnInitializedAsync()
+		private string GoogleLoginUrl
 		{
-			var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-			if (authState.User.Identity.IsAuthenticated)
+			get
 			{
-				// The cookie is now in the browser, so this call will work!
-				var client = ClientFactory.CreateClient("ServerAPI");
-				var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("Account/");
-				await LoginUser(user);
+				var apiPath = $"{ClientFactory.CreateClient("ServerAPI").BaseAddress}Login/google";
+				var currentUri = NavigationManager.BaseUri;
+				// Encode the URI so it can be passed safely in a query string
+				return $"{apiPath}?returnUrl={Uri.EscapeDataString(currentUri)}";
 			}
-			await base.OnInitializedAsync();
-		}
-
-		protected override async Task OnAfterRenderAsync(bool firstRender)
-		{
-			if (firstRender)
-			{
-				var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-				if (authState.User.Identity.IsAuthenticated)
-				{
-					// The cookie is now in the browser, so this call will work!
-					var client = ClientFactory.CreateClient("ServerAPI");
-					var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("Account/");
-					await LoginUser(user);
-				}
-			}
-			await base.OnAfterRenderAsync(firstRender);
 		}
 
 		private async Task HandleLogin()
@@ -62,21 +41,23 @@ namespace PrzetrwajPL.Components.Pages
 				var response = await client.PostAsJsonAsync("/Login/email", loginRequest);
 				if (response.IsSuccessStatusCode)
 				{
-					var result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
-					await LoginUser(result);
+					var result = await response.Content.ReadFromJsonAsync<JwtTokenDto>();
+
+					httpContext.Response.Redirect($"/account/signin?token={result.Token}");
+					//await LoginUser(result);
 				}
 				else if (response.StatusCode == (System.Net.HttpStatusCode)StatusCodes.Status418ImATeapot)
 				{
-					var bannedUser = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
-					errorMessage = $"Twoje konto zosta這 zablokowane przez {bannedUser.BannedBy.Name} {bannedUser.BannedBy.Surname}. Pow鏚: {bannedUser.BanReason}";
+					var BanInfo = await response.Content.ReadFromJsonAsync<BanInfo>();
+					errorMessage = $"Twoje konto zosta這 zablokowane przez {BanInfo.BannedBy.Name} {BanInfo.BannedBy.Surname}. Pow鏚: {BanInfo.BanReason}";
 				}
 				else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
 				{
+					var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
 					errorMessage = "Nieprawid這wy email lub has這.";
 				}
 				else
 				{
-					var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
 					errorMessage = "Nieprawid這wy email lub has這.";
 				}
 			}
@@ -103,6 +84,7 @@ namespace PrzetrwajPL.Components.Pages
 								new Claim(ClaimTypes.NameIdentifier, user.Id),
 								new Claim(ClaimTypes.Name, user.Name ?? user.Email!), // Use Name for display
 								new Claim(ClaimTypes.Email, user.Email!),
+								new Claim("Region", user.Region.Id.ToString() ?? ""),
 							};
 			// Split the roles string (e.g., "User,Moderator") and add each as a separate claim
 			if (!string.IsNullOrWhiteSpace(user.Role))

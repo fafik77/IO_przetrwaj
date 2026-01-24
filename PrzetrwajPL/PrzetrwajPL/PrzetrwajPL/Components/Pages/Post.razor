@@ -5,6 +5,7 @@
 @using PrzetrwajPL;
 @using PrzetrwajPL.Models;
 @using PrzetrwajPL.Models.Posts;
+@using PrzetrwajPL.Requests
 
 <div class="container">
     @if (isLoading)
@@ -143,109 +144,109 @@
 </div>
 
 @code {
-    [Parameter]
-    public string Id { get; set; }
+	[Parameter]
+	public string Id { get; set; }
 
-    private PostCompleteDataDto? post;
-    private bool isLoading = true;
-    private bool isVoting = false;
+	private PostCompleteDataDto? post;
+	private bool isLoading = true;
+	private bool isVoting = false;
 
-    private bool showCommentForm = false;
-    private bool isSendingComment = false;
-    private string newCommentContent = "";
+	private bool showCommentForm = false;
+	private bool isSendingComment = false;
+	private string newCommentContent = "";
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadData();
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
 
-    private async Task LoadData()
-    {
-        isLoading = true;
-        try
-        {
+	private async Task LoadData()
+	{
+		isLoading = true;
+		try
+		{
 			var client = ClientFactory.CreateClient("ServerAPI");
 			post = await client.GetFromJsonAsync<PostCompleteDataDto>($"/Post/{Id}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Błąd: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Błąd: {ex.Message}");
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
 
-    private async Task VotePositive()
-    {
-        if (isVoting) return;
-        isVoting = true;
+	private async Task VotePositive()
+	{
+		if (isVoting) return;
+		isVoting = true;
 
-        try
+		try
 		{
 			var client = ClientFactory.CreateClient("ServerAPI");
 			var response = await client.PostAsync($"/Post/{Id}/VotePositive", null);
 
-            if (response.IsSuccessStatusCode)
-            {
-                // Odśwież dane posta, żeby zaktualizować liczniki
-                await LoadData();
-            }
-            else
+			if (response.IsSuccessStatusCode)
+			{
+				// Odśwież dane posta, żeby zaktualizować liczniki
+				await LoadData();
+			}
+			else
 			{
 				Console.WriteLine("Błąd serwera przy głosowaniu." + response.StatusCode);
-                Console.WriteLine(response.Headers.Location);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Błąd głosowania: " + ex.Message);
-        }
-        finally
-        {
-            isVoting = false;
-        }
-    }
+				Console.WriteLine(response.Headers.Location);
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("Błąd głosowania: " + ex.Message);
+		}
+		finally
+		{
+			isVoting = false;
+		}
+	}
 
-    private async Task VoteNegative()
-    {
-        if (isVoting) return;
-        isVoting = true;
+	private async Task VoteNegative()
+	{
+		if (isVoting) return;
+		isVoting = true;
 
-        try
+		try
 		{
 			var client = ClientFactory.CreateClient("ServerAPI");
 			var response = await client.PostAsync($"/Post/{Id}/VoteNegative", null);
 
-            if (response.IsSuccessStatusCode)
-            {
-                await LoadData();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Błąd głosowania: " + ex.Message);
-        }
-        finally
-        {
-            isVoting = false;
-        }
-    }
+			if (response.IsSuccessStatusCode)
+			{
+				await LoadData();
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("Błąd głosowania: " + ex.Message);
+		}
+		finally
+		{
+			isVoting = false;
+		}
+	}
 
-    private void ToggleCommentForm() => showCommentForm = !showCommentForm;
+	private void ToggleCommentForm() => showCommentForm = !showCommentForm;
 
-    private async Task SubmitComment()
-    {
-        if (string.IsNullOrWhiteSpace(newCommentContent)) return;
-        isSendingComment = true;
+	private async Task SubmitComment()
+	{
+		if (string.IsNullOrWhiteSpace(newCommentContent)) return;
+		isSendingComment = true;
 
-        try
+		try
 		{
 			var client = ClientFactory.CreateClient("ServerAPI");
-            var commentBody = new { Content = newCommentContent };
+			var commentNew = new AddCommentCommand { Comment = newCommentContent };
 
-			var response = await client.PostAsJsonAsync($"/Post/{Id}/Comment", commentBody);
+			var response = await client.PostAsJsonAsync($"/Post/{Id}/Comment", commentNew);
 
             if (response.IsSuccessStatusCode)
             {

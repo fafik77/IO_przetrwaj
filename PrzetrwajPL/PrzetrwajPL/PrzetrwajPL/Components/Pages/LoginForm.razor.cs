@@ -38,9 +38,20 @@ namespace PrzetrwajPL.Components.Pages
 								new Claim(ClaimTypes.NameIdentifier, user.Id),
 								new Claim(ClaimTypes.Name, user.Name ?? user.Email!), // Use Name for display
 								new Claim(ClaimTypes.Email, user.Email!),
-								new Claim(ClaimTypes.Role, user.Role ?? UserRoles.User)
-								// Add other properties like Region, Surname, etc., as custom claims if needed
 							};
+						// Split the roles string (e.g., "User,Moderator") and add each as a separate claim
+						if (!string.IsNullOrWhiteSpace(user.Role))
+						{
+							var roles = user.Role.Split(',', StringSplitOptions.RemoveEmptyEntries);
+							foreach (var role in roles)
+							{
+								claims.Add(new Claim(ClaimTypes.Role, role.Trim())); // remember to trim
+							}
+						}
+						else
+						{
+							claims.Add(new Claim(ClaimTypes.Role, UserRoles.User));
+						}
 
 						var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 						var userPrincipal = new ClaimsPrincipal(identity);

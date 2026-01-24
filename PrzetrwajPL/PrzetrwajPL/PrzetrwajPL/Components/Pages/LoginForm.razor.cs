@@ -5,6 +5,7 @@ using PrzetrwajPL.Models;
 using PrzetrwajPL.Requests;
 using System.Security.Claims;
 
+
 namespace PrzetrwajPL.Components.Pages
 {
 	public partial class LoginForm
@@ -20,6 +21,37 @@ namespace PrzetrwajPL.Components.Pages
 		private string errorMessage = string.Empty;
 		private bool isLoading = false;
 
+		private string GoogleLoginUrl => $"{ClientFactory.CreateClient("ServerAPI").BaseAddress}Login/google";
+
+		protected override async Task OnInitializedAsync()
+		{
+			var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+			if (authState.User.Identity.IsAuthenticated)
+			{
+				// The cookie is now in the browser, so this call will work!
+				var client = ClientFactory.CreateClient("ServerAPI");
+				var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("Account/");
+				await LoginUser(user);
+			}
+			await base.OnInitializedAsync();
+		}
+
+		protected override async Task OnAfterRenderAsync(bool firstRender)
+		{
+			if (firstRender)
+			{
+				var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+				if (authState.User.Identity.IsAuthenticated)
+				{
+					// The cookie is now in the browser, so this call will work!
+					var client = ClientFactory.CreateClient("ServerAPI");
+					var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("Account/");
+					await LoginUser(user);
+				}
+			}
+			await base.OnAfterRenderAsync(firstRender);
+		}
+
 		private async Task HandleLogin()
 		{
 			isLoading = true;
@@ -31,38 +63,7 @@ namespace PrzetrwajPL.Components.Pages
 				if (response.IsSuccessStatusCode)
 				{
 					var result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
-					if (result != null)
-					{
-						user = result;
-						var claims = new List<Claim>
-							{
-								new Claim(ClaimTypes.NameIdentifier, user.Id),
-								new Claim(ClaimTypes.Name, user.Name ?? user.Email!), // Use Name for display
-								new Claim(ClaimTypes.Email, user.Email!),
-							};
-						// Split the roles string (e.g., "User,Moderator") and add each as a separate claim
-						if (!string.IsNullOrWhiteSpace(user.Role))
-						{
-							var roles = user.Role.Split(',', StringSplitOptions.RemoveEmptyEntries);
-							foreach (var role in roles)
-							{
-								claims.Add(new Claim(ClaimTypes.Role, role.Trim())); // remember to trim
-							}
-						}
-						else
-						{
-							claims.Add(new Claim(ClaimTypes.Role, UserRoles.User));
-						}
-
-						var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-						var userPrincipal = new ClaimsPrincipal(identity);
-						await httpContext.SignInAsync(userPrincipal); //make cookie
-						httpContext.Response.Redirect("/"); //use this method to redirect user, as the NavigateTo does throw an exception
-					}
-					else
-					{
-						errorMessage = "Nieprawid≥owa odpowiedü z serwera.";
-					}
+					await LoginUser(result);
 				}
 				else if (response.StatusCode == (System.Net.HttpStatusCode)StatusCodes.Status418ImATeapot)
 				{
@@ -87,6 +88,40 @@ namespace PrzetrwajPL.Components.Pages
 			{
 				isLoading = false;
 			}
+		}
+
+		private async Task LoginUser(UserWithPersonalDataDto? userToLogin)
+		{
+			if (userToLogin == null)
+			{
+				errorMessage = "Nieprawid≥owa odpowiedü z serwera.";
+				return;
+			}
+			user = userToLogin;
+			var claims = new List<Claim>
+							{
+								new Claim(ClaimTypes.NameIdentifier, user.Id),
+								new Claim(ClaimTypes.Name, user.Name ?? user.Email!), // Use Name for display
+								new Claim(ClaimTypes.Email, user.Email!),
+							};
+			// Split the roles string (e.g., "User,Moderator") and add each as a separate claim
+			if (!string.IsNullOrWhiteSpace(user.Role))
+			{
+				var roles = user.Role.Split(',', StringSplitOptions.RemoveEmptyEntries);
+				foreach (var role in roles)
+				{
+					claims.Add(new Claim(ClaimTypes.Role, role.Trim())); // remember to trim
+				}
+			}
+			else
+			{
+				claims.Add(new Claim(ClaimTypes.Role, UserRoles.User));
+			}
+
+			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+			var userPrincipal = new ClaimsPrincipal(identity);
+			await httpContext.SignInAsync(userPrincipal); //make cookie
+			httpContext.Response.Redirect("/"); //use this method to redirect user, as the NavigateTo does throw an exception
 		}
 	}
 }

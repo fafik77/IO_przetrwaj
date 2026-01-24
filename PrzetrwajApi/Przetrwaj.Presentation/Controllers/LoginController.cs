@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Commands.Login;
+using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Auth;
@@ -16,10 +18,12 @@ namespace Przetrwaj.Presentation.Controllers;
 public class LoginController : Controller
 {
 	private readonly IMediator _mediator;
+	private readonly FrontEndSettings _frontEndSettings;
 
-	public LoginController(IMediator mediator)
+	public LoginController(IMediator mediator, IOptions<FrontEndSettings> options)
 	{
 		_mediator = mediator;
+		_frontEndSettings = options.Value;
 	}
 
 	[HttpPost("email")]
@@ -64,15 +68,15 @@ public class LoginController : Controller
 		try
 		{
 			var result = await _mediator.Send(new GoogleLoginResponseCommand());
-			return Ok(result);
+			return Redirect($"{_frontEndSettings.Url}/");
 		}
 		catch (UserBannedException ex)
 		{
-			return StatusCode(StatusCodes.Status418ImATeapot, ex.User);
+			return Redirect($"{_frontEndSettings.Url}/login-error/banned");
 		}
 		catch (BaseException ex)
 		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+			return Redirect($"{_frontEndSettings.Url}/login-error/failed");
 		}
 	}
 }

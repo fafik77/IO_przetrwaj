@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -26,6 +27,12 @@ builder.Services.Configure<AttachmentSettings>(
 builder.Services.Configure<FrontEndSettings>(
 	builder.Configuration.GetSection("FrontEnd")
 );
+// Bind the "OAuth" section to the OAuth class
+builder.Services.Configure<OAuth>(
+	builder.Configuration.GetSection("OAuth")
+);
+/// the bound "OAuth" section
+var oauthSettings = builder.Configuration.GetSection("OAuth").Get<OAuth>();
 
 // 1. Add the handler to the container
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -56,7 +63,14 @@ builder.Services.AddCors(options =>
 
 #region Auth
 builder.Services.AddAuthentication(AuthenticationCookie)
-	.AddCookie(AuthenticationCookie);
+	.AddCookie(AuthenticationCookie)
+	.AddGoogle(options =>
+	{
+		options.ClientId = oauthSettings?.Google?.ClientId ?? string.Empty;
+		options.ClientSecret = oauthSettings?.Google?.ClientSecret ?? string.Empty;
+		// This maps the Google claim to the standard .NET NameIdentifier
+		options.SignInScheme = IdentityConstants.ExternalScheme;
+	});
 //.AddIdentityCookies();
 // cookie for multiple .Net apps https://learn.microsoft.com/en-us/aspnet/core/security/cookie-sharing?view=aspnetcore-9.0
 builder.Services.AddAuthorization(opt =>
@@ -157,6 +171,11 @@ app.UseStaticFiles(new StaticFileOptions     //Allow serving <Image> in requests
 
 app.UseCors(AllowAllOrigins);
 app.UsePresentation();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+	ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 //app.MapPost("login/email", () => "login email");
 //app.MapPost("login/google", () => "login google");

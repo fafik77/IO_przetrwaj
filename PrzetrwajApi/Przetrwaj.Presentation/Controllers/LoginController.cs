@@ -27,12 +27,43 @@ public class LoginController : Controller
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status418ImATeapot)]
-	public async Task<IActionResult> LoginWithEmail([FromBody] LoginEmailCommand model)
+	public async Task<IActionResult> EmailLogin([FromBody] LoginEmailCommand model)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		try
 		{
 			var result = await _mediator.Send(model);
+			return Ok(result);
+		}
+		catch (UserBannedException ex)
+		{
+			return StatusCode(StatusCodes.Status418ImATeapot, ex.User);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
+	}
+
+	[HttpGet("google")]
+	[SwaggerOperation("Login using Google gmail")]
+	public async Task<IActionResult> GoogleLogin()
+	{
+		var redirectUrl = Url.Action("GoogleResponse");
+		if (redirectUrl is null) return NotFound("GoogleResponse endpoint not found");
+		var command = new GoogleLoginCommand(redirectUrl);
+		var properties = await _mediator.Send(command);
+		return Challenge(properties, "Google");
+	}
+
+	[HttpGet("google-response")]
+	[SwaggerOperation("Login using Google gmail. Redirects back to frontend")]
+	[ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
+	public async Task<IActionResult> GoogleResponse()
+	{
+		try
+		{
+			var result = await _mediator.Send(new GoogleLoginResponseCommand());
 			return Ok(result);
 		}
 		catch (UserBannedException ex)

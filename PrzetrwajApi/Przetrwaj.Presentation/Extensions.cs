@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Przetrwaj.Application.ValidationPipeline;
 
 namespace Przetrwaj.Presentation;
@@ -11,7 +13,31 @@ public static class Extensions
 	{
 		services.AddEndpointsApiExplorer();
 		//services.AddOpenApi();
-		services.AddSwaggerGen(swagger => swagger.EnableAnnotations());
+		services.AddSwaggerGen(options =>
+		{
+			options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme()
+			{
+				Name = "Authorization",
+				In = ParameterLocation.Header,
+				Type = SecuritySchemeType.Http,
+				Scheme = JwtBearerDefaults.AuthenticationScheme
+			});
+			options.EnableAnnotations();
+			options.AddSecurityRequirement(new OpenApiSecurityRequirement
+			{
+				{
+					new OpenApiSecurityScheme
+					{
+						Reference = new OpenApiReference
+						{
+							Type = ReferenceType.SecurityScheme,
+							Id = JwtBearerDefaults.AuthenticationScheme
+						}
+					},
+					Array.Empty<string>()
+				}
+			});
+		});
 
 		services.AddControllers();
 

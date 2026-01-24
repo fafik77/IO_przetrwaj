@@ -11,7 +11,8 @@ public class UserWithPersonalDataDto
 	public string? Name { get; set; }
 	public string? Surname { get; set; }
 	public RegionOnlyDto? Region { get; set; }
-	public string? Role { get; set; }
+	//public string? Role { get; set; }
+	public IEnumerable<string> Roles { get; set; } = [];
 	public bool TwoFactorEnabled { get; set; }
 	public DateTimeOffset RegistrationDate { get; set; }
 
@@ -32,9 +33,11 @@ public class UserWithPersonalDataDto
 			Id = registeredUser.Id,
 			Email = registeredUser.Email,
 			Name = registeredUser.Name ?? "",
-			//Role = string.Join(", ", registeredUser.clai.ToList()),
+			//Role = string.Join(", ", Roles),
 			Surname = registeredUser.Surname ?? "",
-			Region = (RegionOnlyDto?)registeredUser.IdRegionNavigation,
+			Region = registeredUser.IdRegionNavigation is null
+				? new RegionOnlyDto { Id = registeredUser.IdRegion, Name = string.Empty }
+				: (RegionOnlyDto?)registeredUser.IdRegionNavigation,
 			Banned = registeredUser.Banned,
 			BanInfo = registeredUser.Banned ? new BanInfo
 			{

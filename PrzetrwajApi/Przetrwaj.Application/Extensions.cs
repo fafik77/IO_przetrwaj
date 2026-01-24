@@ -28,6 +28,7 @@ public static class Extensions
 		services.AddHostedService<UnconfirmedUserCleanupService>();
 		services.AddHostedService<PostArchivingService>();
 		services.AddHostedService<ModeratorRolePendingNotificationService>();
+		services.AddSingleton<IJwtService, JwtService>();
 		return services;
 	}
 }

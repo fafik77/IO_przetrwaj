@@ -62,7 +62,7 @@ public class RegionController : Controller
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var res = await _mediator.Send(region, cancellationToken);
-		return CreatedAtAction(nameof(GetById), new { id = res.IdRegion }, res);
+		return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
 	}
 
 	[HttpPost("many")]

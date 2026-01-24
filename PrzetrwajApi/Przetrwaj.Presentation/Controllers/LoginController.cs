@@ -41,7 +41,7 @@ public class LoginController : Controller
 		}
 		catch (UserBannedException ex)
 		{
-			return StatusCode(StatusCodes.Status418ImATeapot, ex.User);
+			return StatusCode(StatusCodes.Status418ImATeapot, ex.BanInfo);
 		}
 		catch (BaseException ex)
 		{
@@ -53,7 +53,7 @@ public class LoginController : Controller
 	[SwaggerOperation("Login using Google gmail")]
 	public async Task<IActionResult> GoogleLogin(string? returnUrl = null)
 	{
-		if(string.IsNullOrEmpty(returnUrl))
+		if (string.IsNullOrEmpty(returnUrl))
 			returnUrl = Request.Headers.Referer.ToString();
 
 		var redirectUrl = Url.Action("GoogleResponse", new { returnUrl });
@@ -65,7 +65,7 @@ public class LoginController : Controller
 
 	[HttpGet("google-response")]
 	[SwaggerOperation("Login using Google gmail. Redirects back to frontend")]
-	[ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
+	[ProducesResponseType(StatusCodes.Status302Found)]
 	public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
 	{
 		// SECURITY CHECK: Ensure the URL is local or from allowed domains
@@ -73,18 +73,19 @@ public class LoginController : Controller
 		{
 			returnUrl = _frontEndSettings.Url; // Fallback to frontEnd Url
 		}
+		if (!returnUrl.EndsWith("/")) returnUrl += "/";
 		try
 		{
 			var result = await _mediator.Send(new GoogleLoginResponseCommand());
-			return Redirect($"{returnUrl}/");
+			return Redirect($"{returnUrl}login-callback?token={result.Token}");
 		}
 		catch (UserBannedException ex)
 		{
-			return Redirect($"{returnUrl}/login-error/banned");
+			return Redirect($"{returnUrl}login-error/banned?info={Uri.EscapeDataString(ex.BanInfo.ToString())}");
 		}
 		catch (BaseException ex)
 		{
-			return Redirect($"{returnUrl}/login-error/failed");
+			return Redirect($"{returnUrl}login-error/failed");
 		}
 	}
 

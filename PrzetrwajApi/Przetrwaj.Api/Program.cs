@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
 using Przetrwaj.Application;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
@@ -11,6 +13,7 @@ using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture;
 using Przetrwaj.Infrastucture.Context;
 using Przetrwaj.Presentation;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,15 +58,48 @@ builder.Services.AddCors(options =>
 			)
 			.AllowAnyHeader()
 			.AllowAnyMethod()
-			.AllowCredentials()
-			;
+			.AllowCredentials();
+		});
+	options.AddPolicy(name: AllowAllOrigins,
+		policy =>
+		{
+			policy.
+			AllowAnyOrigin()
+			.AllowAnyHeader()
+			.AllowAnyMethod();
 		});
 });
 #endregion
 
 #region Auth
-builder.Services.AddAuthentication(AuthenticationCookie)
-	.AddCookie(AuthenticationCookie)
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
+builder.Services.AddAuthentication(
+	options =>
+	{
+		options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+		options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+		options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+	})
+	.AddCookie(AuthenticationCookie, options =>
+	{
+		options.Cookie.Name = AuthenticationCookie;
+	})
+	.AddJwtBearer(options =>
+	{
+		options.IncludeErrorDetails = true;
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			IssuerSigningKey = new SymmetricSecurityKey(key),
+			ValidIssuer = jwtSettings["Issuer"],
+			ValidAudience = jwtSettings["Audience"],
+			ClockSkew = TimeSpan.FromSeconds(5),
+			ValidateIssuerSigningKey = true,
+			ValidateIssuer = true,
+			ValidateLifetime = true,
+			ValidateAudience = true,
+		};
+	})
 	.AddGoogle(options =>
 	{
 		options.ClientId = oauthSettings?.Google?.ClientId ?? string.Empty;
@@ -79,7 +115,7 @@ builder.Services.AddAuthorization(opt =>
 	opt.AddPolicy(UserRoles.User, policy =>
 	{   // this is an or gate
 		policy.RequireAuthenticatedUser(); //any registered user with any role that is able to log in
-		//policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin);
+										   //policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin);
 	});
 
 	// Policy 2: Moderator+ access
@@ -102,7 +138,7 @@ builder.Services.AddMemoryCache(); // for caching banned users (data is per user
 builder.Services.AddLazyCache(); // for caching Statistics without Cache Stampede
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// 2. Add Identity services (This is the crucial step)
+// Add Identity services (This is the crucial step)
 // It registers UserManager<AppUser>, SignInManager<AppUser>, and other core Identity services.
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
@@ -131,6 +167,24 @@ builder.Services.ConfigureApplicationCookie(options =>
 	//options.LoginPath = "/Identity/Account/Login";
 	//options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 	options.SlidingExpiration = true;
+
+	options.Events.OnRedirectToLogin = context =>
+	{
+		// Instead of redirecting to /Account/Login, return 401
+		context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+		return Task.CompletedTask;
+	};
+	options.Events.OnRedirectToAccessDenied = context =>
+	{
+		// Instead of redirecting to AccessDenied, return 403
+		context.Response.StatusCode = StatusCodes.Status403Forbidden;
+		return Task.CompletedTask;
+	};
+});
+builder.Services.AddAuthentication(options =>   //re-apply JWT as default
+{
+	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 });
 
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -140,7 +194,7 @@ builder.Services.AddScoped<IUrlHelper>(x =>
 	var factory = x.GetRequiredService<IUrlHelperFactory>();
 	return factory.GetUrlHelper(actionContext!);
 });
-// You almost certainly already have this for accessing HttpContext anywhere:
+// have this for accessing HttpContext anywhere
 builder.Services.AddHttpContextAccessor();
 
 
@@ -150,7 +204,8 @@ builder.Services.AddPresentation();
 
 
 var app = builder.Build();
-// 3. MUST use the middleware early in the pipeline
+
+// MUST use the middleware early in the pipeline
 app.UseExceptionHandler();
 
 #region Attachments
@@ -169,7 +224,8 @@ app.UseStaticFiles(new StaticFileOptions     //Allow serving <Image> in requests
 });
 #endregion //Attachments
 
-app.UseCors(AllowAllOrigins);
+app.UseRouting(); // Added this explicitly beffore UseCors (New .Net thing)
+app.UseCors(AllowPrzetrwajOrigins);
 app.UsePresentation();
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions

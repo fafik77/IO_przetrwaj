@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
-using Przetrwaj.Domain.Models.Dtos;
+using Przetrwaj.Domain.Models;
 
 namespace Przetrwaj.Application.Commands.Login;
 
-public class GoogleLoginResponseCommand : ICommand<UserWithPersonalDataDto>
+public class GoogleLoginResponseCommand : ICommand<JwtTokenDto>
 { }

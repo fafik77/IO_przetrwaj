@@ -93,6 +93,6 @@ public class LoginController : Controller
 	private bool IsUrlSafe(string url)
 	{
 		// Check if it starts with front-end domain or is a local path
-		return url.StartsWith(_frontEndSettings.Url) || url.StartsWith("/");
+		return url.StartsWith(_frontEndSettings.Url) || url.StartsWith("https://localhost:");
 	}
 }

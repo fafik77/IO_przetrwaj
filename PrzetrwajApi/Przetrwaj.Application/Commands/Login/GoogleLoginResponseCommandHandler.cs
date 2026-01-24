@@ -68,6 +68,7 @@ public class GoogleLoginResponseCommandHandler : ICommandHandler<GoogleLoginResp
 		var dtoUser = (UserWithPersonalDataDto)user;
 		var rolesUser = await _userManager.GetRolesAsync(user);
 		dtoUser.Role = string.Join(", ", rolesUser);
+		await _signInManager.SignInAsync(user, isPersistent: true);
 		if (user.Banned || user.BanDate != null)    //user is banned
 		{
 			var bannedBy = await _userManager.FindByIdAsync(user.BannedById!);

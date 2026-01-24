@@ -7,7 +7,7 @@ using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Auth;
-using Przetrwaj.Domain.Models.Dtos;
+using Przetrwaj.Domain.Models;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -28,9 +28,9 @@ public class LoginController : Controller
 
 	[HttpPost("email")]
 	[SwaggerOperation("Login using email. 418 with info if user is banned")]
-	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status418ImATeapot)]
+	[ProducesResponseType(typeof(BanInfo), StatusCodes.Status418ImATeapot)]
 	public async Task<IActionResult> EmailLogin([FromBody] LoginEmailCommand model)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);

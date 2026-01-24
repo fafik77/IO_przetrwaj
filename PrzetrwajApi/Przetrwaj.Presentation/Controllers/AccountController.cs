@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.AccountOwn;
 using Przetrwaj.Application.Commands.Confirm;
+using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
@@ -56,7 +57,7 @@ public class AccountController : Controller
 			var user = await _authService.GetUserDetailsAsync(currentUserId);
 			var dto = (UserWithPersonalDataDto)user;
 			var roles = await _userManager.GetRolesAsync(user);
-			dto.Role = string.Join(", ", roles);
+			dto.Roles = roles;
 			return Ok(dto);
 		}
 		catch (BaseException ex)

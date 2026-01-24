@@ -96,7 +96,7 @@ public class AuthService : IAuthService
 			var bannedBy = await _userRepository.GetByIdAsync(user.BannedById!);
 			var dto = (UserWithPersonalDataDto)user;
 			if (dto.BanInfo != null) dto.BanInfo.BannedBy = (UserGeneralDto?)bannedBy!;
-			throw new UserBannedException("User is banned", dto);
+			throw new UserBannedException("User is banned", dto.BanInfo);
 		}
 		var signedIn = await _signInManager.PasswordSignInAsync(user, password, true, true);
 		if (signedIn.Succeeded)

@@ -68,7 +68,7 @@ internal class PostRepository : IPostRepository
 				: (CategoryDto?)p.IdCategoryNavigation,
 				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
 				{
-					IdRegion = p.IdRegionNavigation.IdRegion,
+					Id = p.IdRegionNavigation.IdRegion,
 					Name = p.IdRegionNavigation.Name
 				} : null,
 				VotePositive = p.Votes.Count(v => v.IsUpvote),
@@ -177,7 +177,7 @@ internal class PostRepository : IPostRepository
 				: (CategoryDto?)p.IdCategoryNavigation,
 				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
 				{
-					IdRegion = p.IdRegionNavigation.IdRegion,
+					Id = p.IdRegionNavigation.IdRegion,
 					Name = p.IdRegionNavigation.Name
 				} : null,
 				// --- VOTE CALCULATIONS (Executed on Database side) ---
@@ -217,7 +217,7 @@ internal class PostRepository : IPostRepository
 
 				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
 				{
-					IdRegion = p.IdRegionNavigation.IdRegion,
+					Id = p.IdRegionNavigation.IdRegion,
 					Name = p.IdRegionNavigation.Name
 				} : null,
 

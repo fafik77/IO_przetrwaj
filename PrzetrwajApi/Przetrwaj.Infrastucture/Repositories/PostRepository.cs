@@ -155,7 +155,7 @@ internal class PostRepository : IPostRepository
 	{
 		var posts = await _context.PostsDangerRO
 			//.Where(p => p.Active == true && p.Category == CategoryType.Danger) //Posts without the pre-filtered(mapping) to PostsDanger
-			.Where(p => p.IdRegion == idRegion)
+			.Where(p => p.IdRegion == idRegion || p.IdRegion == 0)
 			.Select(p => new PostOverviewDto
 			{
 				Id = p.IdPost,
@@ -200,7 +200,7 @@ internal class PostRepository : IPostRepository
 	public async Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
 	{
 		var posts = await _context.PostsResourcesRO
-			.Where(p => p.IdRegion == idRegion)
+			.Where(p => p.IdRegion == idRegion || p.IdRegion == 0)
 			.Select(p => new PostOverviewDto
 			{
 				Id = p.IdPost,

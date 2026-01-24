@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Przetrwaj.Application.AuthServices;
 using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
@@ -29,11 +28,12 @@ public class UpdateAccountCommandHandler : ICommandHandler<UpdateAccountInternal
 		string ChangeEmailToken = string.Empty;
 		request.UserId = request.UserId.ToLower();
 		var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+		bool userHasPassword = await _userManager.HasPasswordAsync(user);
 		if (user is null) throw new UserNotFoundException(request.UserId);
 		if (request.IdRegion != null) user.IdRegion = (int)request.IdRegion;
 		if (!string.IsNullOrEmpty(request.Name)) user.Name = request.Name;
 		if (!string.IsNullOrEmpty(request.Surname)) user.Surname = request.Surname;
-		if (!string.IsNullOrEmpty(request.OldPassword))
+		if (userHasPassword && !string.IsNullOrEmpty(request.OldPassword))
 		{
 			//change password requires old password
 			if (!string.IsNullOrEmpty(request.NewPassword))
@@ -66,6 +66,38 @@ public class UpdateAccountCommandHandler : ICommandHandler<UpdateAccountInternal
 				}
 			}
 		}
+		else if (userHasPassword == false)
+		{
+			//set password
+			if (!string.IsNullOrEmpty(request.NewPassword))
+			{
+				var identResult = await _userManager.AddPasswordAsync(user, request.NewPassword);
+				if (!identResult.Succeeded)
+				{
+					string errors = string.Join("\n", identResult.Errors
+						.Where(e => e.Code.Contains("Password", StringComparison.OrdinalIgnoreCase))
+						.Select(e => e.Description).ToList());
+					if (string.IsNullOrEmpty(errors))
+						throw new AccountUpdateException($"Could not update password: {request.NewPassword}.\nTry another password");
+					throw new AccountUpdateException(errors);
+				}
+			}
+			//change email
+			if (!string.IsNullOrEmpty(request.Email))
+			{
+				var normName = _userManager.NormalizeName(request.Email)!;
+				var normOldName = user.NormalizedUserName;
+				if (normName != normOldName)
+				{
+					//check if email is unique
+					var emailExists = await _userManager.FindByNameAsync(normName);
+					if (emailExists != null) throw new UserAlreadyExistsException(request.Email ?? request.UserId);
+					//now generate a token and send an email
+					await _authService.GenerateChangeEmailTokenAsync(user, request.Email);
+				}
+			}
+		}
+
 		try
 		{
 			await _unitOfWork.SaveChangesAsync(cancellationToken); //this line can throw on email (yes when not unique)

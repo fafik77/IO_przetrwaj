@@ -1,0 +1,25 @@
+﻿@page "/login-callback"
+@using PrzetrwajPL.Security
+@rendermode InteractiveServer
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthProvider
+
+@code {
+	[Parameter, SupplyParameterFromQuery] 
+	public string? Token { get; set; }
+	[CascadingParameter]
+	private HttpContext? httpContext { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (!string.IsNullOrEmpty(Token))
+		{
+			// Redirect to the server-side endpoint to issue the cookie
+			httpContext.Response.Redirect($"/account/signin?token={Token}");
+		}
+		else
+		{
+			httpContext.Response.Redirect("/");
+		}
+	}
+}

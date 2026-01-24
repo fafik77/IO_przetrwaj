@@ -5,6 +5,7 @@
 @inject NavigationManager NavigationManager
 @using PrzetrwajPL;
 @using PrzetrwajPL.Models
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="container">
 	<div class="inContainer">
@@ -46,7 +47,9 @@
 	<div class="inContainer">
 		<h2 style="text-align:center; font-weight:bold;">Szybkie logowanie</h2>
 		<p>Użyj konta do zalogowania:</p><br />
-		<button type="button" class="google">Google</button><br /><br />
+		<a href="@GoogleLoginUrl" class="button btn google-btn">
+			<i class="fa fa-google"></i> Google
+		</a><br /><br />
 		<button type="button" class="facebook">Facebook</button><br /><br />
 		<button type="button" class="github">GitHub</button><br /><br />
 		<button type="button" class="microsoft">Microsoft</button><br /><br />

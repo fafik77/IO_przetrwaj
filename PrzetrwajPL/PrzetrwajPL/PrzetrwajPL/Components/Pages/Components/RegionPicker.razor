@@ -29,7 +29,7 @@
             {
                 @foreach (var region in regions)
                 {
-                    <p @onclick="() => SelectRegion(region.IdRegion, region.Name)">@region.Name</p>
+                    <p @onclick="() => SelectRegion(region.Id, region.Name)">@region.Name</p>
                 }
             }
         </div>

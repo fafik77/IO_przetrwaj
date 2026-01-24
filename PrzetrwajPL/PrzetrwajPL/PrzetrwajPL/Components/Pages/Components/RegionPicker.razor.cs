@@ -58,7 +58,7 @@ public partial class RegionPicker
 			return;
 		}
 
-		var region = regions.FirstOrDefault(r => r.IdRegion == id);
+		var region = regions.FirstOrDefault(r => r.Id == id);
 		if (region != null)
 		{
 			SelectedRegionName = region.Name;

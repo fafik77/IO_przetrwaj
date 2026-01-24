@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using PrzetrwajPL;
 using PrzetrwajPL.Components;
+using PrzetrwajPL.Security;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,22 +11,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents()
 	.AddInteractiveWebAssemblyComponents();
-builder.Services.AddHttpClient("ServerAPI", client => 
+
+builder.Services.AddHttpClient("ServerAPI", client =>
 {
 	client.BaseAddress =
-	new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/");
-	//new Uri("https://localhost:7072/");
+	//new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/");
+	new Uri("https://localhost:7072/");
 })
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-	// This allows the client to send and receive cookies automatically
-	UseCookies = true,
-	// Warning: On Blazor Server, sharing one CookieContainer in a Singleton 
-	// can lead to users seeing each other's sessions. 
-	// For InteractiveServer, the browser handles cookies naturally.
-	//CookieContainer = new System.Net.CookieContainer(),
-	//Credentials = System.Net.CredentialCache.DefaultCredentials
-});
+.AddHttpMessageHandler<JwtAuthorizationHandler>(); // This links the handler to "ServerAPI"
+//.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+//{
+//	// This allows the client to send and receive cookies automatically
+//	UseCookies = true,
+//	// Warning: On Blazor Server, sharing one CookieContainer in a Singleton 
+//	// can lead to users seeing each other's sessions. 
+//	// For InteractiveServer, the browser handles cookies naturally.
+//	//CookieContainer = new System.Net.CookieContainer(),
+//	//Credentials = System.Net.CredentialCache.DefaultCredentials
+//});
 
 #region Auth
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -52,6 +55,10 @@ builder.Services.AddAuthorization(opt =>
 builder.Services.AddCascadingAuthenticationState();
 #endregion //Auth
 
+builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<JwtAuthorizationHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -73,10 +80,13 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
 	.AddInteractiveServerRenderMode()
 	.AddInteractiveWebAssemblyRenderMode()
 	.AddAdditionalAssemblies(typeof(PrzetrwajPL.Client._Imports).Assembly);
+
+app.MapControllers();
 
 app.Run();

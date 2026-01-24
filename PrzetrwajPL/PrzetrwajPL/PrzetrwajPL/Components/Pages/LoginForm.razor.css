@@ -1,12 +1,12 @@
-﻿button {
-    background-color: #0094ff;
-    color: white;
-    padding: 14px 20px;
-    margin: auto;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
+﻿button, .button {
+	background-color: #0094ff;
+	color: white;
+	padding: 14px 20px;
+	margin: auto;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	width: 100%;
 }
 
 button:hover {

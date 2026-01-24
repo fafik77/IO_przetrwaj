@@ -1,0 +1,19 @@
+﻿@page "/login-error/Banned"
+@using Przetrwaj.Domain.Models
+@using System.Text.Json
+
+<h3>Banned</h3>
+
+@code {
+	[Parameter, SupplyParameterFromQuery]
+	public string? Info { get; set; }
+	private BanInfo? banInfo;
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (!string.IsNullOrEmpty(Info))
+		{
+			banInfo = JsonSerializer.Deserialize<BanInfo>(Info);
+		}
+	}
+}

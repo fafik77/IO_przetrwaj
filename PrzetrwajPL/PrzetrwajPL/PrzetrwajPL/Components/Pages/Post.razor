@@ -62,13 +62,13 @@
                     <NotAuthorized>
                         @* Przycisk Pozytywny *@
                         <button class="upVoteButt"
-                                @onclick="VotePositive" disabled="@hasVoted">
+                                @onclick="VotePositive" disabled>
                             <i class="fa fa-arrow-up"></i> @post.VotePositive
                         </button>
 
                         @* Przycisk Negatywny *@
                         <button class="downVoteButt"
-                                @onclick="VoteNegative" disabled="@hasVoted">
+                                @onclick="VoteNegative" disabled>
                             <i class="fa fa-arrow-down"></i> @post.VoteNegative
                         </button>
                     </NotAuthorized>
@@ -149,7 +149,6 @@
     private PostCompleteDataDto? post;
     private bool isLoading = true;
     private bool isVoting = false;
-    private bool hasVoted = false;
 
     private bool showCommentForm = false;
     private bool isSendingComment = false;
@@ -165,8 +164,8 @@
         isLoading = true;
         try
         {
-			var client = ClientFactory.CreateClient("ServerAPI");
-			post = await client.GetFromJsonAsync<PostCompleteDataDto>($"/Post/{Id}");
+            var client = ClientFactory.CreateClient("ServerAPI");
+            post = await client.GetFromJsonAsync<PostCompleteDataDto>($"/Post/{Id}");
         }
         catch (Exception ex)
         {
@@ -184,9 +183,9 @@
         isVoting = true;
 
         try
-		{
-			var client = ClientFactory.CreateClient("ServerAPI");
-			var response = await client.PostAsync($"/Post/{Id}/VotePositive", null);
+        {
+            var client = ClientFactory.CreateClient("ServerAPI");
+            var response = await client.PostAsync($"/Post/{Id}/VotePositive", null);
 
             if (response.IsSuccessStatusCode)
             {
@@ -194,8 +193,8 @@
                 await LoadData();
             }
             else
-			{
-				Console.WriteLine("Błąd serwera przy głosowaniu." + response.StatusCode);
+            {
+                Console.WriteLine("Błąd serwera przy głosowaniu." + response.StatusCode);
                 Console.WriteLine(response.Headers.Location);
             }
         }
@@ -215,9 +214,9 @@
         isVoting = true;
 
         try
-		{
-			var client = ClientFactory.CreateClient("ServerAPI");
-			var response = await client.PostAsync($"/Post/{Id}/VoteNegative", null);
+        {
+            var client = ClientFactory.CreateClient("ServerAPI");
+            var response = await client.PostAsync($"/Post/{Id}/VoteNegative", null);
 
             if (response.IsSuccessStatusCode)
             {
@@ -242,11 +241,11 @@
         isSendingComment = true;
 
         try
-		{
-			var client = ClientFactory.CreateClient("ServerAPI");
+        {
+            var client = ClientFactory.CreateClient("ServerAPI");
             var commentBody = new { Content = newCommentContent };
 
-			var response = await client.PostAsJsonAsync($"/Post/{Id}/Comment", commentBody);
+            var response = await client.PostAsJsonAsync($"/Post/{Id}/Comment", commentBody);
 
             if (response.IsSuccessStatusCode)
             {
@@ -257,7 +256,8 @@
             else {
                 Console.WriteLine("Błąd serwera przy dodawaniu komentarza." + response.StatusCode);
                 Console.WriteLine(response.Headers.Location);
-			}
+                Console.WriteLine(commentBody);
+            }
         }
         catch (Exception ex)
         {

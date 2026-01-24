@@ -33,14 +33,14 @@
 		<label for="region">Twoja lokalizacja:</label><br />
 			<div class="picker-conteiner">
 				<div class="picker">
-					<RegionPicker SelectedRegionIdChanged="@(id => userUpdateRequest.IdRegion = id)" />
+					<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(id => userUpdateRequest.IdRegion = id)" />
 				</div>
 			</div><br /><br />
 
-		<label for="oldPassword">Stare hasło</label>
+		<label for="newPassword">Nowe hasło</label>
 			<InputText type="password" @bind-Value="userUpdateRequest.NewPassword" id="newPassword" placeholder="Podaj nowe hasło" class="form-control" /><br /><br />
 
-		<label for="newPassword">Nowe hasło</label>
+		<label for="oldPassword">Stare hasło</label>
 			<InputText type="password" @bind-Value="userUpdateRequest.OldPassword" id="oldPassword" placeholder="Podaj stare hasło" class="form-control" /><br /><br />
 			<ValidationMessage For="@(() => userUpdateRequest.OldPassword)" style="color:red; font-size: 12px;" /><br />
 
@@ -63,6 +63,16 @@
 	private UpdateAccountCommand userUpdateRequest { get; set; } = new UpdateAccountCommand();
 	private bool isLoading = false;
 	private string errorMessage = string.Empty;
+	private RegionPicker myRegionPicker;
+	private int userRegionId = 0;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender && myRegionPicker != null)
+		{
+			await myRegionPicker.PickRegion(userRegionId);
+		}
+	}
 
 	private async Task HandleUpdate()
 	{

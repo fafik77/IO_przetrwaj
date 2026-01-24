@@ -8,5 +8,5 @@ public class BanInfo
 	public DateTimeOffset? BanDate { get; set; }
 	public required string BanReason { get; set; }
 	public required string BannedById { get; set; }
-	public required UserGeneralDto BannedBy { get; set; }
+	public UserGeneralDto? BannedBy { get; set; }
 }

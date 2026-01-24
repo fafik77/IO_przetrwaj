@@ -33,7 +33,7 @@ public class AddCommentCommandHandler : ICommandHandler<AddCommentInternalComman
 		var res = await _postRepository.AddCommentAsync(comment, cancellationToken);
 		await _unitOfWork.SaveChangesAsync(cancellationToken);
 		var dto = (CommentDto)res;
-		dto.Autor = (UserGeneralDto?)user!;
+		dto.Autor = (UserGeneralDtoSimpleRegion?)user!;
 		return dto;
 	}
 }

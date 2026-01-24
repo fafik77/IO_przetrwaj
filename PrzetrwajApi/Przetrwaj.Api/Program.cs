@@ -34,15 +34,23 @@ builder.Services.AddProblemDetails();
 
 #region CORS Access-Control-Allow-Origin
 var AllowAllOrigins = "_AllowAllOrigins";
+var AllowPrzetrwajOrigins = "_AllowPrzetrwajOrigins";
 builder.Services.AddCors(options =>
 {
-	options.AddPolicy(name: AllowAllOrigins,
-					  policy =>
-					  {
-						  policy.AllowAnyOrigin()
-						  .AllowAnyHeader()
-						  .AllowAnyMethod();
-					  });
+	options.AddPolicy(name: AllowPrzetrwajOrigins,
+		policy =>
+		{
+			policy.
+			WithOrigins(
+				"https://localhost:7173",
+				"https://localhost",
+				"https://przetrwaj-front.grayflower-7f624026.polandcentral.azurecontainerapps.io"
+			)
+			.AllowAnyHeader()
+			.AllowAnyMethod()
+			.AllowCredentials()
+			;
+		});
 });
 #endregion
 
@@ -56,7 +64,8 @@ builder.Services.AddAuthorization(opt =>
 	// Policy 1: User+ access (can add posts ...)
 	opt.AddPolicy(UserRoles.User, policy =>
 	{   // this is an or gate
-		policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin);
+		policy.RequireAuthenticatedUser(); //any registered user with any role that is able to log in
+		//policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin);
 	});
 
 	// Policy 2: Moderator+ access

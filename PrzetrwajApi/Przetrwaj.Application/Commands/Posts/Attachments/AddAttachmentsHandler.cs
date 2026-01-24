@@ -36,7 +36,8 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 		{
 			Status = "success",
 			Error = new ErrorDetails { },
-			StatusCode = System.Net.HttpStatusCode.OK
+			StatusCode = System.Net.HttpStatusCode.OK,
+			Timestamp = DateTimeOffset.UtcNow,
 		};
 		var post = await _postRepository.GetPostWithAttachmentsByIdAsync(request.IdPost, cancellationToken);
 		if (post is null)
@@ -148,6 +149,7 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 
 		await _unitOfWork.SaveChangesAsync(cancellationToken);
 		results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, HttpPath)!).ToList();
+		results.Timestamp = DateTimeOffset.UtcNow;
 		return results;
 	}
 

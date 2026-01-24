@@ -96,12 +96,12 @@ internal class PostRepository : IPostRepository
 			{
 				Comment = c.Comment,
 				DateCreated = c.DateCreated,
-				Autor = c.IdAutorNavigation != null ? new UserGeneralDto
+				Autor = c.IdAutorNavigation != null ? new UserGeneralDtoSimpleRegion
 				{
 					Id = c.IdAutorNavigation.Id,
 					Name = c.IdAutorNavigation.Name ?? "",
 					Surname = c.IdAutorNavigation.Surname ?? "",
-					Region = (RegionOnlyDto?)c.IdAutorNavigation.IdRegionNavigation,
+					IdRegion = c.IdAutorNavigation.IdRegion,
 					RegistrationDate = c.IdAutorNavigation.RegistrationDate,
 					BanDate = c.IdAutorNavigation.BanDate,
 				} : null
@@ -109,7 +109,7 @@ internal class PostRepository : IPostRepository
 			.ToList(),
 			DateCreated = p.DateCreated,
 			Region = (RegionOnlyDto?)p.IdRegionNavigation,
-			Author = (UserGeneralDto?)p.IdAutorNavigation,
+			Author = (UserGeneralDtoSimpleRegion?)p.IdAutorNavigation,
 			//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = p.CustomCategory.Length > 0 ? new CategoryDto
 			{

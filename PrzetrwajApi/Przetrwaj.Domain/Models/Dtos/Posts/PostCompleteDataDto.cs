@@ -14,7 +14,7 @@ public class PostCompleteDataDto
 	public CategoryType CategoryType { get; set; }
 	public RegionOnlyDto? Region { get; set; }
 
-	public UserGeneralDto? Author { get; set; }
+	public UserGeneralDtoSimpleRegion? Author { get; set; }
 	public DateTimeOffset DateCreated { get; set; }
 
 
@@ -41,7 +41,7 @@ public class PostCompleteDataDto
 			Category = (CategoryDto?)post.IdCategoryNavigation,
 			CategoryType = post.Category,
 			Region = (RegionOnlyDto?)post.IdRegionNavigation,
-			Author = (UserGeneralDto?)post.IdAutorNavigation,
+			Author = (UserGeneralDtoSimpleRegion?)post.IdAutorNavigation,
 			DateCreated = post.DateCreated,
 			//Attachments = post.Attachments.Select(a => (AttachmentDto?)a).ToList(),
 			Comments = post.Comments.Select(c => (CommentDto)c).ToList(),

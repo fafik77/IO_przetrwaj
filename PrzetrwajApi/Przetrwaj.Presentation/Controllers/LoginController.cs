@@ -51,9 +51,12 @@ public class LoginController : Controller
 
 	[HttpGet("google")]
 	[SwaggerOperation("Login using Google gmail")]
-	public async Task<IActionResult> GoogleLogin()
+	public async Task<IActionResult> GoogleLogin(string? returnUrl = null)
 	{
-		var redirectUrl = Url.Action("GoogleResponse");
+		if(string.IsNullOrEmpty(returnUrl))
+			returnUrl = Request.Headers.Referer.ToString();
+
+		var redirectUrl = Url.Action("GoogleResponse", new { returnUrl });
 		if (redirectUrl is null) return NotFound("GoogleResponse endpoint not found");
 		var command = new GoogleLoginCommand(redirectUrl);
 		var properties = await _mediator.Send(command);
@@ -63,20 +66,33 @@ public class LoginController : Controller
 	[HttpGet("google-response")]
 	[SwaggerOperation("Login using Google gmail. Redirects back to frontend")]
 	[ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
-	public async Task<IActionResult> GoogleResponse()
+	public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
 	{
+		// SECURITY CHECK: Ensure the URL is local or from allowed domains
+		if (string.IsNullOrEmpty(returnUrl) || !IsUrlSafe(returnUrl))
+		{
+			returnUrl = _frontEndSettings.Url; // Fallback to frontEnd Url
+		}
 		try
 		{
 			var result = await _mediator.Send(new GoogleLoginResponseCommand());
-			return Redirect($"{_frontEndSettings.Url}/");
+			return Redirect($"{returnUrl}/");
 		}
 		catch (UserBannedException ex)
 		{
-			return Redirect($"{_frontEndSettings.Url}/login-error/banned");
+			return Redirect($"{returnUrl}/login-error/banned");
 		}
 		catch (BaseException ex)
 		{
-			return Redirect($"{_frontEndSettings.Url}/login-error/failed");
+			return Redirect($"{returnUrl}/login-error/failed");
 		}
+	}
+
+
+	// Helper to prevent Open Redirect attacks
+	private bool IsUrlSafe(string url)
+	{
+		// Check if it starts with front-end domain or is a local path
+		return url.StartsWith(_frontEndSettings.Url) || url.StartsWith("/");
 	}
 }

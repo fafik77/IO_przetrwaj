@@ -28,7 +28,7 @@ public class AddDangerCommandHandler : ICommandHandler<AddDangerInternallCommand
 	public async Task<PostCompleteDataDto> Handle(AddDangerInternallCommand request, CancellationToken cancellationToken)
 	{
 		var categories = await _categoryRepository.GetDangersAsync(cancellationToken);
-		if(categories.FirstOrDefault(c=>c.IdCategory==request.IdCategory) is null) //check if requested category exists in Dangers
+		if (categories.FirstOrDefault(c => c.IdCategory == request.IdCategory) is null) //check if requested category exists in Dangers
 		{
 			throw new PostNotValidException($"Category: {request.IdCategory} is not a valid Danger");
 		}
@@ -48,6 +48,10 @@ public class AddDangerCommandHandler : ICommandHandler<AddDangerInternallCommand
 				// or selected nothing that matches "Inne". Clear the custom field.
 				request.CustomCategory = null;
 			}
+		}
+		else if (inneCategory != null && inneCategory.IdCategory == request.IdCategory)
+		{
+			throw new PostNotValidException($"Category: \"{inneCategory.Name}\" requires 'CustomCategory'");
 		}
 		var post = new Post
 		{

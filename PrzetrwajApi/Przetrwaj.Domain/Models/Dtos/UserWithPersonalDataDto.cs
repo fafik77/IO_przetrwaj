@@ -11,7 +11,6 @@ public class UserWithPersonalDataDto
 	public string? Name { get; set; }
 	public string? Surname { get; set; }
 	public RegionOnlyDto? Region { get; set; }
-	//public string? Role { get; set; }
 	public IEnumerable<string> Roles { get; set; } = [];
 	public bool TwoFactorEnabled { get; set; }
 	public DateTimeOffset RegistrationDate { get; set; }

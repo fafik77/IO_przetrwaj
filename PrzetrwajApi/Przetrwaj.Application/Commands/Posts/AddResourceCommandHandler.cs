@@ -1,7 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Posts;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using System.Text.RegularExpressions;
@@ -48,6 +47,10 @@ public class AddResourceCommandHandler : ICommandHandler<AddResourceInternallCom
 				// or selected nothing that matches "Inne". Clear the custom field.
 				request.CustomCategory = null;
 			}
+		}
+		else if (inneCategory != null && inneCategory.IdCategory == request.IdCategory)
+		{
+			throw new PostNotValidException($"Category: \"{inneCategory.Name}\" requires 'CustomCategory'");
 		}
 		var post = new Post
 		{

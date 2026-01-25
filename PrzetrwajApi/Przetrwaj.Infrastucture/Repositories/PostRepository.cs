@@ -61,7 +61,7 @@ internal class PostRepository : IPostRepository
 				DateCreated = p.DateCreated,
 				Category = p.CustomCategory.Length > 0 ? new CategoryDto
 				{
-					IdCategory = p.IdCategory,
+					Id = p.IdCategory,
 					Type = p.IdCategoryNavigation.Type,
 					Name = p.CustomCategory,
 				}
@@ -113,7 +113,7 @@ internal class PostRepository : IPostRepository
 			//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = p.CustomCategory.Length > 0 ? new CategoryDto
 			{
-				IdCategory = p.IdCategory,
+				Id = p.IdCategory,
 				Type = p.IdCategoryNavigation.Type,
 				Name = p.CustomCategory,
 			}
@@ -170,7 +170,7 @@ internal class PostRepository : IPostRepository
 				//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 				Category = p.CustomCategory.Length > 0 ? new CategoryDto
 				{
-					IdCategory = p.IdCategory,
+					Id = p.IdCategory,
 					Type = p.IdCategoryNavigation.Type,
 					Name = p.CustomCategory,
 				}
@@ -209,7 +209,7 @@ internal class PostRepository : IPostRepository
 
 				Category = p.CustomCategory.Length > 0 ? new CategoryDto
 				{
-					IdCategory = p.IdCategory,
+					Id = p.IdCategory,
 					Type = p.IdCategoryNavigation.Type,
 					Name = p.CustomCategory,
 				}

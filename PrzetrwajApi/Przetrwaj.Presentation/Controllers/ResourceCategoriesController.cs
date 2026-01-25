@@ -33,7 +33,7 @@ public class ResourceCategoriesController : ControllerBase
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
-		return CreatedAtAction(nameof(GetById), new { id = created.IdCategory }, created);
+		return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
 	}
 
 	[HttpPut]

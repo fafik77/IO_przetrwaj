@@ -3,6 +3,7 @@ using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 
 namespace Przetrwaj.Application.Commands.Users;
 
@@ -23,7 +24,7 @@ public class MakeAdminCommandHandler : ICommandHandler<MakeAdminInternallCommand
 		var admin = await _userManager.FindByIdAsync(request.Id);
 		if (admin is null) return IdentityResult.Failed(new IdentityError { Description = "User not found." });
 		var passCorrect = await _userManager.CheckPasswordAsync(admin, request.Password);
-		if(passCorrect==false) return IdentityResult.Failed(new IdentityError { Description = "Incorrect password." });
+		if (passCorrect == false) return IdentityResult.Failed(new IdentityError { Description = "Incorrect password." });
 
 		//Find and grand Admin role to user
 		AppUser? user;
@@ -37,7 +38,14 @@ public class MakeAdminCommandHandler : ICommandHandler<MakeAdminInternallCommand
 		// Add the user to the Admin role
 		var result = await _userManager.AddToRoleAsync(user, UserRoles.Admin);
 		user.ModeratorRolePending = false;
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		return result;
 	}
 }

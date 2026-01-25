@@ -1,5 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Posts;
 
 namespace Przetrwaj.Application.Commands.Posts;
@@ -21,6 +22,13 @@ public class MarkPostAsInactiveCommandHandler : ICommandHandler<MarkPostAsInacti
 		if (post is null)
 			throw new PostNotFoundException(request.PostId);
 		post.Active = false;
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 	}
 }

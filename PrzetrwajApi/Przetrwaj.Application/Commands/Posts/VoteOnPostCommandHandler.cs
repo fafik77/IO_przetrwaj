@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Posts;
 
 namespace Przetrwaj.Application.Commands.Posts;
@@ -33,7 +34,13 @@ public class VoteOnPostCommandHandler : ICommandHandler<VoteOnPostCommand>
 			IdUser = request.IdUser.ToLower(),
 			IsUpvote = request.IsUpvote
 		}, cancellationToken);
-
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 	}
 }

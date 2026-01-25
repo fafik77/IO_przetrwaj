@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Commands.Categories.Resources;
 using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Exceptions;
 
 internal class DeleteResourceCategoryCommandHandler
 	: ICommandHandler<DeleteResourceCategoryCommand, bool>
@@ -18,7 +19,14 @@ internal class DeleteResourceCategoryCommandHandler
 		var cat = await _repo.GetResourceByIdAsync(cmd.IdCategory, ct);
 		if (cat is null) return false;
 		_repo.Delete(cat);
-		await _uow.SaveChangesAsync(ct);
+		try
+		{
+			await _uow.SaveChangesAsync(ct);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		return true;
 	}
 }

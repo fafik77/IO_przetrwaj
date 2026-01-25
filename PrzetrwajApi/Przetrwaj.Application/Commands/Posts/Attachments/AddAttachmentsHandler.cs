@@ -147,7 +147,14 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 			results.Results = fileResults;
 		}
 
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, HttpPath)!).ToList();
 		results.Timestamp = DateTimeOffset.UtcNow;
 		return results;

@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Posts;
 using Przetrwaj.Domain.Models.Dtos;
 
@@ -31,7 +32,14 @@ public class AddCommentCommandHandler : ICommandHandler<AddCommentInternalComman
 			Comment = request.Comment,
 		};
 		var res = await _postRepository.AddCommentAsync(comment, cancellationToken);
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		var dto = (CommentDto)res;
 		dto.Autor = (UserGeneralDtoSimpleRegion?)user!;
 		return dto;

@@ -62,14 +62,14 @@ public class DangerCategoriesController : Controller
 	[Authorize(UserRoles.Moderator)]
 	[Consumes("application/json")]
 	[SwaggerOperation("Create many Danger categories (Moderator)")]
-	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> Create([FromBody] CreateDangerCategoriesCommand cmd, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
-		return CreatedAtAction(nameof(GetById), created);
+		return Ok(created);
 	}
 
 

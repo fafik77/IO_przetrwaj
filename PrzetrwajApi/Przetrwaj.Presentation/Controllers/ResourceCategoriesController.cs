@@ -62,13 +62,13 @@ public class ResourceCategoriesController : ControllerBase
 	[Authorize(UserRoles.Moderator)]
 	[Consumes("application/json")]
 	[SwaggerOperation("Create many Resource categories (Moderator)")]
-	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<ActionResult<CategoryDto>> Create([FromBody] CreateResourceCategoriesCommand cmd, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
-		return CreatedAtAction(nameof(GetById), created);
+		return Ok(created);
 	}
 
 

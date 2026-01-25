@@ -3,6 +3,7 @@ using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 
 namespace Przetrwaj.Application.Commands.Users
 {
@@ -31,7 +32,14 @@ namespace Przetrwaj.Application.Commands.Users
 			var result = await _userManager.AddToRoleAsync(user, UserRoles.Moderator);
 			user.ModeratorRolePending = false;
 			user.ModeratorSince = DateTime.UtcNow;
-			await _unitOfWork.SaveChangesAsync(cancellationToken);
+			try
+			{
+				await _unitOfWork.SaveChangesAsync(cancellationToken);
+			}
+			catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+			{
+				throw new BadUpdateCommand(ex.InnerException.Message);
+			}
 			return result;
 		}
 	}

@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Categories.Dangers;
@@ -19,7 +20,14 @@ internal class CreateDangerCategoryCommandHandler : ICommandHandler<CreateDanger
 	{
 		var category = (CategoryDanger)request;
 		await _repo.AddAsync(category, ct);
-		await _uow.SaveChangesAsync(ct);
+		try
+		{
+			await _uow.SaveChangesAsync(ct);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		return (CategoryDto)category!;
 	}
 }

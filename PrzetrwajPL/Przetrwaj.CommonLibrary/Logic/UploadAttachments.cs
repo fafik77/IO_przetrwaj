@@ -1,25 +1,35 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿using PrzetrwajPL.Requests;
+using System.Net.Http.Headers;
 
 namespace Przetrwaj.CommonLibrary.Logic;
 
 public class CreateUploadAttachments
 {
-	public static (string, MultipartFormDataContent) CreateData(string id, IEnumerable<string> descriptions, IEnumerable<IBrowserFile> files)
+	public static (string url, MultipartFormDataContent data) CreateData(string id, List<AttachmentItem> items)
 	{
-		// 1. Construct the URL with Query Parameters for AlternateDescriptions
-		// Example: Post/123/Attachment?Alt=desc1&Alt=desc2
-		var queryParams = string.Join("&", descriptions.Select(d => $"Alt={Uri.EscapeDataString(d)}"));
-
-		var url = $"Post/{id}/Attachment?{queryParams}";
-
-		// 2. Prepare the Multipart Content for the Files
+		// The endpoint is now just the path since descriptions are in the body
+		var url = $"Post/{id}/Attachment";
 		var content = new MultipartFormDataContent();
 
-		foreach (var file in files)
+		for (int i = 0; i < items.Count; i++)
 		{
-			var fileContentStream = new StreamContent(file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10));   // 10 MB limit per file
-			fileContentStream.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
-			content.Add(fileContentStream, "Files", file.Name);
+			var item = items[i];
+
+			// 1. Add the File stream
+			// We use a high maxAllowedSize (10MB) to prevent WASM stream errors
+			var fileStream = item.File.OpenReadStream(1024 * 1024 * 10);
+			var fileContent = new StreamContent(fileStream);
+			fileContent.Headers.ContentType = new MediaTypeHeaderValue(item.File.ContentType);
+
+			// Name must match the API's property: Items[i].File
+			content.Add(fileContent, $"Items[{i}].File", item.File.Name);
+
+			// 2. Add the AltDescription
+			if (!string.IsNullOrEmpty(item.AltDescription))
+			{
+				// Name must match the API's property: Items[i].AltDescription
+				content.Add(new StringContent(item.AltDescription), $"Items[{i}].AltDescription");
+			}
 		}
 
 		return (url, content);

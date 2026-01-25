@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Przetrwaj.CommonLibrary.Logic;
+using PrzetrwajPL.Requests;
 
 namespace PrzetrwajPL.Components.Pages
 {
@@ -9,67 +10,54 @@ namespace PrzetrwajPL.Components.Pages
 		[Parameter, SupplyParameterFromQuery(Name = "post")]
 		public string? PostId { get; set; }
 
-		private List<IBrowserFile> selectedFiles = new();
-		private List<string> descriptions = new();
+		private List<AttachmentItem> Attachments = new();
 		private bool isUploading = false;
 		private string? message;
 
 		private void LoadFiles(InputFileChangeEventArgs e)
 		{
-			//selectedFiles.Clear();
-			//descriptions.Clear();
+			//Attachments.Clear();
+			message = null;
 
-			// Only allow image types, including gifs 
-			var imageFiles = e.GetMultipleFiles(10)
-							  .Where(f => f.ContentType.StartsWith("image/"));
+			// Filter for image types only
+			var files = e.GetMultipleFiles(10).Where(f => f.ContentType.StartsWith("image/"));
 
-			foreach (var file in imageFiles)
+			foreach (var file in files)
 			{
-				selectedFiles.Add(file);
-				descriptions.Add(string.Empty); // Matches index with selectedFiles 
-			}
-
-			if (!selectedFiles.Any())
-			{
-				message = "B³¹d: Wybrano nieprawid³owe pliki. Wybierz tylko obrazy.";
+				if (Attachments.Count >= 10) break;
+				Attachments.Add(new AttachmentItem { File = file, AltDescription = string.Empty });
 			}
 		}
 
 		private async Task UploadAll()
 		{
-			if (string.IsNullOrEmpty(PostId) || selectedFiles.Count == 0) return;
+			if (string.IsNullOrEmpty(PostId) || !Attachments.Any()) return;
 
 			isUploading = true;
-			message = "Trwa przesy³anie...";
-			MultipartFormDataContent? data = null;
 			try
 			{
 				var client = ClientFactory.CreateClient("ServerAPI");
 
-				// Calling helper class with indexed-matched lists 
-				(string url, data) =
-					CreateUploadAttachments.CreateData(PostId, descriptions, selectedFiles);
+				// Pass the single unified list to the logic helper
+				(string url, MultipartFormDataContent data) = CreateUploadAttachments.CreateData(PostId, Attachments);
 
 				var response = await client.PostAsync(url, data);
 
 				if (response.IsSuccessStatusCode)
 				{
-					message = "Zdjêcia zosta³y pomyœlnie dodane!";
-					await Task.Delay(1500);
 					Nav.NavigateTo($"/post/{PostId}");
 				}
 				else
 				{
-					message = $"B³¹d: {response.StatusCode}";
+					message = $"B³¹d serwera: {response.StatusCode}";
 				}
 			}
 			catch (Exception ex)
 			{
-				message = $"B³¹d: {ex.Message}";
+				message = $"B³¹d po³¹czenia: {ex.Message}";
 			}
 			finally
 			{
-				data?.Dispose();
 				isUploading = false;
 			}
 		}

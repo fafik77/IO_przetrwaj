@@ -1,0 +1,44 @@
+﻿@inject IHttpClientFactory ClientFactory
+
+<select class="form-select" @onchange="OnChange">
+    <option value="0">-- wybierz kategorię zagrożenia --</option>
+
+    @if (categories != null)
+    {
+        @foreach (var c in categories)
+        {
+            <option value="@c.Id">@c.Name</option>
+        }
+    }
+</select>
+
+@code {
+    [Parameter]
+    public int SelectedCategoryId { get; set; }
+
+    [Parameter]
+    public EventCallback<int> SelectedCategoryIdChanged { get; set; }
+
+    private List<CategoryDto>? categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = ClientFactory.CreateClient("ServerAPI");
+        categories = await client.GetFromJsonAsync<List<CategoryDto>>("/Category/Danger");
+    }
+
+    private async Task OnChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            SelectedCategoryId = id;
+            await SelectedCategoryIdChanged.InvokeAsync(id);
+        }
+    }
+
+    public class CategoryDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+    }
+}

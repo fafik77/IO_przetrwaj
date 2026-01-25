@@ -1,10 +1,6 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
-using Przetrwaj.Domain.Models;
 using PrzetrwajPL.Models;
 using PrzetrwajPL.Requests;
-using System.Security.Claims;
 
 
 namespace PrzetrwajPL.Components.Pages
@@ -69,41 +65,6 @@ namespace PrzetrwajPL.Components.Pages
 			{
 				isLoading = false;
 			}
-		}
-
-		private async Task LoginUser(UserWithPersonalDataDto? userToLogin)
-		{
-			if (userToLogin == null)
-			{
-				errorMessage = "Nieprawid≥owa odpowiedü z serwera.";
-				return;
-			}
-			user = userToLogin;
-			var claims = new List<Claim>
-							{
-								new Claim(ClaimTypes.NameIdentifier, user.Id),
-								new Claim(ClaimTypes.Name, user.Name ?? user.Email!), // Use Name for display
-								new Claim(ClaimTypes.Email, user.Email!),
-								new Claim("Region", user.Region.Id.ToString() ?? ""),
-							};
-			// Split the roles string (e.g., "User,Moderator") and add each as a separate claim
-			if (!string.IsNullOrWhiteSpace(user.Role))
-			{
-				var roles = user.Role.Split(',', StringSplitOptions.RemoveEmptyEntries);
-				foreach (var role in roles)
-				{
-					claims.Add(new Claim(ClaimTypes.Role, role.Trim())); // remember to trim
-				}
-			}
-			else
-			{
-				claims.Add(new Claim(ClaimTypes.Role, UserRoles.User));
-			}
-
-			var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-			var userPrincipal = new ClaimsPrincipal(identity);
-			await httpContext.SignInAsync(userPrincipal); //make cookie
-			httpContext.Response.Redirect("/"); //use this method to redirect user, as the NavigateTo does throw an exception
 		}
 	}
 }

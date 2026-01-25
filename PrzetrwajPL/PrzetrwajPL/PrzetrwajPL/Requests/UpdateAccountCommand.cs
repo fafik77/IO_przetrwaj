@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace PrzetrwajPL.Requests;
 
@@ -11,8 +12,10 @@ public class UpdateAccountCommand
     [EmailAddress(ErrorMessage = "Niepoprawny format email")]
     public string? Email { get; set; }
 	public int? IdRegion { get; set; }
-    public string NewPassword { get; set; }
 
-    [Required(ErrorMessage = "Hasło jest wymagane")]
+	[PasswordPropertyText]
+	public string NewPassword { get; set; }
+
+	[PasswordPropertyText]
     public string OldPassword { get; set; }
 }

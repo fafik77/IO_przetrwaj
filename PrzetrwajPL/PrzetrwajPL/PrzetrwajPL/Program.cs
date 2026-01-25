@@ -15,8 +15,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHttpClient("ServerAPI", client =>
 {
 	client.BaseAddress =
-	new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/");
-	//new Uri("https://localhost:7072/");
+	//new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/");
+	new Uri("https://localhost:7072/");
 })
 .AddHttpMessageHandler<JwtAuthorizationHandler>(); // This links the handler to "ServerAPI"
 //.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler

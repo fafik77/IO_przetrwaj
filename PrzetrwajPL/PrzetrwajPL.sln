@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrzetrwajPL", "PrzetrwajPL\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrzetrwajPL.Client", "PrzetrwajPL\PrzetrwajPL.Client\PrzetrwajPL.Client.csproj", "{01E52E53-D045-46EC-A918-9753EAC40FFD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Przetrwaj.CommonLibrary", "Przetrwaj.CommonLibrary\Przetrwaj.CommonLibrary.csproj", "{EB19E475-BFE0-4436-AB69-9D8B92A91C83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{01E52E53-D045-46EC-A918-9753EAC40FFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01E52E53-D045-46EC-A918-9753EAC40FFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01E52E53-D045-46EC-A918-9753EAC40FFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB19E475-BFE0-4436-AB69-9D8B92A91C83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB19E475-BFE0-4436-AB69-9D8B92A91C83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB19E475-BFE0-4436-AB69-9D8B92A91C83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB19E475-BFE0-4436-AB69-9D8B92A91C83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

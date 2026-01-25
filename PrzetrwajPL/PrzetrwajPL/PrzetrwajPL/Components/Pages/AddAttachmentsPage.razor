@@ -1,0 +1,53 @@
+﻿@page "/addAttachments"
+@rendermode InteractiveServer
+
+@using PrzetrwajPL.Requests
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager Nav
+
+<h3>Dodaj zdjęcia do posta #@PostId</h3>
+
+<div class="card p-3 mb-3">
+    <label class="form-label">Wybierz zdjęcia (tylko .jpg, .png, .gif, .webp)</label>
+    @* Accept attribute filters the file picker to images only  *@
+    <InputFile OnChange="LoadFiles" class="form-control" multiple accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+</div>
+
+@if (selectedFiles.Count > 0)
+{
+    <div class="list-group mb-3">
+        @for (int i = 0; i < selectedFiles.Count; i++)
+        {
+            var index = i; @* Capture the index for the loop *@
+            <div class="list-group-item">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        @* Display file name next to description input [cite: 10] *@
+                        <span class="text-truncate d-block" title="@selectedFiles[index].Name">
+                            <strong>@selectedFiles[index].Name</strong>
+                        </span>
+                    </div>
+                    <div class="col-md-8">
+                        @* Binding to the same index ensures description matches the image [cite: 10] *@
+                        <input type="text" class="form-control" 
+                               placeholder="Opcjonalny opis dla tego zdjęcia..."
+                               @bind="descriptions[index]" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-success" @onclick="UploadAll" disabled="@isUploading">
+            @(isUploading ? "Przesyłanie..." : "Wyślij zdjęcia")
+        </button>
+        <a href="/post/@PostId" class="btn btn-secondary">Pomiń i przejdź do posta</a>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert @(message.Contains("Błąd") ? "alert-danger" : "alert-info") mt-3">@message</div>
+}
+

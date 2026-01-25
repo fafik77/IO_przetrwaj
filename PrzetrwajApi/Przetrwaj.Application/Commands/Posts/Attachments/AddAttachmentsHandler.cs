@@ -50,7 +50,7 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 		int attCount = post.Attachments.Count;
 		//var resDto = new List<AttachmentDto>();
 		string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
-		if (request.Files is null || request.Files.Count == 0)
+		if (request.Items is null || request.Items.Count == 0)
 		{
 			results = (AddAttachmentsResult)new NothingChangedException("No Attachments");
 			results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, HttpPath)!).ToList();
@@ -63,10 +63,14 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 		if (attCount >= maxAttachments)
 			return (AddAttachmentsResult)new TooManyAttachmentsException($"Too many Attachments, max is {maxAttachments}");
 
-		for (int att = 0; att != request.Files.Count; ++att)
+		foreach (var itemAtt in request.Items)
 		{
+			
+		//}
+		//for (int att = 0; att != request.Files.Count; ++att)
+		//{
 			if (attCount >= maxAttachments) break;
-			IFormFile file = request.Files.ElementAt(att);
+			IFormFile file = itemAtt.File;
 			///check if file is an image type
 			bool isImageType = false;
 			foreach (var type in _attachmentSettings.AllowedTypes)
@@ -116,7 +120,7 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 				{
 					IdPost = request.IdPost,
 					IdAttachment = proccessedAtt.Hash,
-					AlternateDescription = request.AlternateDescriptions?.Count > att ? request.AlternateDescriptions?.ElementAtOrDefault(att) : null,
+					AlternateDescription = itemAtt.AltDescription,
 					OrderInList = attCount,
 				};
 				post.Attachments.Add(attInDB);

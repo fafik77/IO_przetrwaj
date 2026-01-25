@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Przetrwaj.Application.Configuration.Commands;
-using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Posts.Attachments;
 
@@ -9,8 +8,14 @@ public class AddAttachmentsInternal : AddAttachments, ICommand<AddAttachmentsRes
 	public required string IdPost { get; set; }
 	public required string IdUser { get; set; }
 }
+public class AttachmentItem
+{
+	public required IFormFile File { get; set; }
+	public string? AltDescription { get; set; }
+}
+
 public class AddAttachments
 {
-	public IList<string>? AlternateDescriptions { get; set; }
-	public IFormFileCollection? Files { get; set; }
+	// A list of pairs ensures the data stays together
+	public required List<AttachmentItem> Items { get; set; }
 }

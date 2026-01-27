@@ -61,84 +61,101 @@ else
 }
 
 @code {
-    private RegionPicker myRegionPicker; // The RegionPicker reference
-    private TypePicker myTypePicker;
-    private List<PostOverviewDto>? posts;
-    private UserGeneralDto? currentUser;
+	// Access basic user info from the cookie claims
+	[CascadingParameter]
+	private Task<AuthenticationState> AuthStateTask { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        //moved to OnAfterRenderAsync as we need `myRegionPicker` to exist
-    }
+	private RegionPicker myRegionPicker; // The RegionPicker reference
+	private TypePicker myTypePicker;
+	private List<PostOverviewDto>? posts;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            if (currentUser != null && currentUser.Region != null)
-            {
-                await myRegionPicker.PickRegion(currentUser.Region.Id);
-            }
-            else
-            {
-                await myRegionPicker.PickRegion(0);
-            }
-        }
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		//moved to OnAfterRenderAsync as we need `myRegionPicker` to exist
+	}
 
-    // Filtrowanie po regionie
-    private async Task FilterByRegion(int? regionId, string? regionName, int? typeId)
-    {
-        posts = null; // Pokaż ładowanie
-        var tempPosts = new List<PostOverviewDto>();
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await myRegionPicker.PickRegion(0);
+			await GetUserInfo();
+		}
+	}
 
-        try
-        {
-            if(typeId == 0 || typeId == 2)
-            {
-                try
-                {
+	// Filtrowanie po regionie
+	private async Task FilterByRegion(int? regionId, string? regionName, int? typeId)
+	{
+		posts = null; // Pokaż ładowanie
+		var tempPosts = new List<PostOverviewDto>();
+
+		try
+		{
+			if(typeId == 0 || typeId == 2)
+			{
+				try
+				{
 					var client = ClientFactory.CreateClient("ServerAPI");
 					var dangers = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
-                    if (dangers != null)
-                    {
-                        tempPosts.AddRange(dangers);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Błąd pobierania postów zagrożeń regionu: {ex.Message}");
-                }
-            }
-            if (typeId == 1 || typeId == 2)
-            {
-                try
+					if (dangers != null)
+					{
+						tempPosts.AddRange(dangers);
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Błąd pobierania postów zagrożeń regionu: {ex.Message}");
+				}
+			}
+			if (typeId == 1 || typeId == 2)
+			{
+				try
 				{
 					var client = ClientFactory.CreateClient("ServerAPI");
 					var resources = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Resource");
-                    if (resources != null)
-                    {
-                        tempPosts.AddRange(resources);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Błąd pobierania postów zasobów regionu: {ex.Message}");
-                }
-            }
-
-            if(tempPosts != null)
-            {
-                posts = tempPosts.OrderByDescending(p => p.VoteNegative == 0 ? (double)p.VotePositive 
-                : (double)p.VotePositive/(double)p.VoteNegative).ToList();
+					if (resources != null)
+					{
+						tempPosts.AddRange(resources);
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Błąd pobierania postów zasobów regionu: {ex.Message}");
+				}
 			}
-            
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Błąd: {ex.Message}");
-            posts = new List<PostOverviewDto>(); // Pusta lista w razie błędu
-        }
-    }
+
+			if(tempPosts != null)
+			{
+				posts = tempPosts.OrderByDescending(p => p.VoteNegative == 0 ? (double)p.VotePositive 
+				: (double)p.VotePositive/(double)p.VoteNegative).ToList();
+			}
+
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Błąd: {ex.Message}");
+			posts = new List<PostOverviewDto>(); // Pusta lista w razie błędu
+		}
+	}
+	// Get logged-in user region and apply it
+	private async Task GetUserInfo()
+	{
+		try
+		{
+			var authState = await AuthStateTask;
+			var userPrincipal = authState.User;
+
+			if (userPrincipal.Identity is not { IsAuthenticated: true })
+				return;
+
+			var regionStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
+			int region = 0;
+			if (int.TryParse(regionStr, out region))
+			{
+				await myRegionPicker.PickRegion(region);
+			}
+		}
+		catch (Exception) { }
+	}
 }
 

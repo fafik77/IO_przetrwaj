@@ -44,6 +44,8 @@ public class JwtService : IJwtService
 
 			new Claim(JwtRegisteredClaimNames.Sub, user.Id),
 			new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+			new Claim("Name", user.Name ?? string.Empty),
+			new Claim("Surname", user.Surname ?? string.Empty),
 			new Claim("Region", user.IdRegion.ToString()),
 		};
 		foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));

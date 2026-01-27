@@ -14,8 +14,12 @@ public class UpdateAccountCommand
 	public int? IdRegion { get; set; }
 
 	[PasswordPropertyText]
-	public string NewPassword { get; set; }
+	public string? NewPassword { get; set; }
 
 	[PasswordPropertyText]
-    public string OldPassword { get; set; }
+	[Compare(otherProperty: nameof(NewPassword), ErrorMessage = "Hasła nie są takie same !")]
+	public string? ConfirmPassword { get; set; }
+
+	[PasswordPropertyText]
+    public string? OldPassword { get; set; }
 }

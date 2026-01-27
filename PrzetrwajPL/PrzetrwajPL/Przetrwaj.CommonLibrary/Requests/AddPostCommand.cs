@@ -1,10 +1,18 @@
-﻿namespace PrzetrwajPL.Requests;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PrzetrwajPL.Requests;
 
 public class AddPostCommand
 {
-    public string Title { get; set; } = "";
-    public string? Description { get; set; }
-    public int IdCategory { get; set; }
-    public string? CustomCategory { get; set; }
-    public int IdRegion { get; set; }
+	[Required(ErrorMessage = "Tytuł jest wymagany")]
+	[MaxLength(250, ErrorMessage = "Tytuł nie może być dłuższy niż 250 znaków")]
+	public required string Title { get; set; } = "";
+	[MaxLength(2500, ErrorMessage = "Opis nie może być dłuższy niż 250, znaków")]
+	public string? Description { get; set; }
+	[Range(1, int.MaxValue, ErrorMessage = "Kategoria jest wymagana")]
+	public int IdCategory { get; set; }
+	[Length(3, 60, ErrorMessage = "Własna kategoria musi mieć od 3 do 60 znaków")]
+	public string? CustomCategory { get; set; }
+	[Range(0, int.MaxValue, ErrorMessage = "Region jest wymagany")]
+	public int IdRegion { get; set; }
 }

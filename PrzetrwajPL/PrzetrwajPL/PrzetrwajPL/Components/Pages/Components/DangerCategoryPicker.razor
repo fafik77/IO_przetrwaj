@@ -1,4 +1,5 @@
-﻿@inject IHttpClientFactory ClientFactory
+﻿@using PrzetrwajPL.Models
+@inject IHttpClientFactory ClientFactory
 
 <select class="form-select" @onchange="OnChange">
     <option value="0">-- wybierz kategorię zagrożenia --</option>
@@ -13,32 +14,28 @@
 </select>
 
 @code {
-    [Parameter]
-    public int SelectedCategoryId { get; set; }
+	[Parameter]
+	public int SelectedCategoryId { get; set; } = -1;
+	[Parameter]
+	public EventCallback<int> SelectedCategoryIdChanged { get; set; }
 
-    [Parameter]
-    public EventCallback<int> SelectedCategoryIdChanged { get; set; }
+	public string? SelectedCategoryName { get; private set; }
 
-    private List<CategoryDto>? categories;
+	private List<CategoryDto>? categories;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var client = ClientFactory.CreateClient("ServerAPI");
-        categories = await client.GetFromJsonAsync<List<CategoryDto>>("/Category/Danger");
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		var client = ClientFactory.CreateClient("ServerAPI");
+		categories = await client.GetFromJsonAsync<List<CategoryDto>>("/Category/Danger");
+	}
 
-    private async Task OnChange(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var id))
-        {
-            SelectedCategoryId = id;
+	private async Task OnChange(ChangeEventArgs e)
+	{
+		if (int.TryParse(e.Value?.ToString(), out var id))
+		{
+			SelectedCategoryName = categories?.FirstOrDefault(c => c.Id == id)?.Name ?? null;
+			SelectedCategoryId = id;
             await SelectedCategoryIdChanged.InvokeAsync(id);
         }
-    }
-
-    public class CategoryDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
     }
 }

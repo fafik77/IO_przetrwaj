@@ -3,6 +3,7 @@
 
 @namespace PrzetrwajPL.Components.Pages.Components
 @using PrzetrwajPL.Requests
+@using System.Text.RegularExpressions
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Nav
 
@@ -15,26 +16,31 @@
     <div class="mb-3">
         <label>Tytuł</label>
         <InputText class="form-control" @bind-Value="model.Title" />
+		<ValidationMessage For="@(() => model.Title)" style="color:red; font-size: 12px;" />
     </div>
 
     <div class="mb-3">
         <label>Opis</label>
-        <InputTextArea class="form-control" @bind-Value="model.Description" />
+		<InputTextArea class="form-control" @bind-Value="model.Description" />
+		<ValidationMessage For="@(() => model.Description)" style="color:red; font-size: 12px;" />
     </div>
 
     <div class="mb-3">
         <label>Kategoria</label>
-        <DangerCategoryPicker @bind-SelectedCategoryId="model.IdCategory" />
+		<DangerCategoryPicker @ref="DangerCategoryPicker" @bind-SelectedCategoryId="model.IdCategory" />
+		<ValidationMessage For="@(() => model.IdCategory)" style="color:red; font-size: 12px;" />
     </div>
 
     <div class="mb-3">
         <label>Własna kategoria (opcjonalnie)</label>
-        <InputText class="form-control" @bind-Value="model.CustomCategory" />
+		<InputText class="form-control" @bind-Value="model.CustomCategory" />
+		<ValidationMessage For="@(() => model.CustomCategory)" style="color:red; font-size: 12px;" />
     </div>
 
     <div class="mb-3">
         <label>Region</label>
-        <RegionPicker @bind-SelectedRegionId="model.IdRegion" />
+		<RegionPicker @bind-SelectedRegionId="model.IdRegion" />
+		<ValidationMessage For="@(() => model.IdRegion)" style="color:red; font-size: 12px;" />
     </div>
 
     <button class="btn btn-primary" type="submit">Dodaj post</button>
@@ -69,15 +75,54 @@
 }
 
 @code {
+	private EditContext? editContext;
+	private ValidationMessageStore? messageStore;
+	private DangerCategoryPicker DangerCategoryPicker;
+
 	private AddPostCommand model = new() { Title = "" };
 	private string? error;
-	private bool success = true; 
-	private string? newPostId="wadasd";
+	private bool success = false;
+	private string? newPostId;
+
+	private static readonly Regex InneCategoryRegex = new Regex(
+		@"^(inne|inna)(\s+\w+)?$",
+		RegexOptions.Compiled | RegexOptions.IgnoreCase
+	);
+
+	protected override void OnInitialized()
+	{
+		editContext = new EditContext(model);
+		messageStore = new ValidationMessageStore(editContext);
+		// Clear messages when the user changes a field so the error doesn't stick
+		editContext.OnFieldChanged += (s, e) => messageStore.Clear(e.FieldIdentifier);
+	}
 
 	private async Task HandleSubmit()
 	{
+		messageStore?.Clear(); // Clear previous manual errors
 		error = null;
 		success = false;
+		if (string.IsNullOrEmpty(model.Title))
+		{
+			error = "Post musi mieć tytuł";
+			return;
+		}
+		else if (model.IdCategory <= 0)
+		{
+			error = "Post musi przynależeć do kategori";
+			return;
+		}
+		else if (InneCategoryRegex.IsMatch(DangerCategoryPicker.SelectedCategoryName ?? string.Empty))
+		{
+			if (string.IsNullOrWhiteSpace(model.CustomCategory) || model.CustomCategory.Length < 3 || model.CustomCategory.Length > 60)
+			{
+				error = "Własna kategoria musi mieć od 3 do 60 znaków";
+				messageStore?.Add(() => model.CustomCategory, error);
+				// Notify the context that validation state has changed to show the message in the UI
+				editContext?.NotifyValidationStateChanged();
+				return;
+			}
+		}
 
 		try
 		{

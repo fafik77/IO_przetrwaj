@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Xml.Linq;
 
 namespace PrzetrwajPL.Components.Controllers;
 
@@ -34,6 +35,8 @@ public class AccountController : Controller
 		var sub = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
 		var email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
 		var region = jwtToken.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
+		var name = jwtToken.Claims.FirstOrDefault(c => c.Type == "Name")?.Value;
+		var surname = jwtToken.Claims.FirstOrDefault(c => c.Type == "Surname")?.Value;
 		var roles = jwtToken.Claims.Where(c => c.Type == "role");
 
 		if (!string.IsNullOrEmpty(sub))
@@ -45,6 +48,10 @@ public class AccountController : Controller
 		}
 		if (!string.IsNullOrEmpty(region))
 			claims.Add(new Claim("Region", region));
+		if (!string.IsNullOrEmpty(name))
+			claims.Add(new Claim("Name", name));
+		if (!string.IsNullOrEmpty(surname))
+			claims.Add(new Claim("Surname", surname));
 
 		if (roles.Count() != 0)
 		{

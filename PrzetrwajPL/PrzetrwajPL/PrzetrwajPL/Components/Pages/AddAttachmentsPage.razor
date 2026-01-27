@@ -1,0 +1,48 @@
+﻿@page "/addAttachments"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.Forms
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager Nav
+
+<h3>Dodaj zdjęcia do posta #@PostId</h3>
+
+<div class="card p-3 mb-3">
+	<label class="form-label">Wybierz zdjęcia (obrazki i gify)</label>
+	<InputFile OnChange="LoadFiles" class="form-control" multiple accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+</div>
+
+@if (Attachments.Count > 0)
+{
+	<div class="list-group mb-3">
+		@foreach (var item in Attachments)
+		{
+			<div class="list-group-item">
+				<div class="row align-items-center">
+					<div class="col-md-4 text-truncate">
+						<strong>@item.File.Name</strong>
+					</div>
+					<div class="col-md-8">
+						@* Direct binding to the object property *@
+						<input type="text" class="form-control"
+							   placeholder="Opcjonalny opis..."
+							   @bind="item.AltDescription"
+							   @bind:event="oninput" />
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+
+	<div class="d-flex gap-2">
+		<button class="btn btn-success" @onclick="UploadAll" disabled="@isUploading">
+			@(isUploading ? "Przesyłanie..." : "Wyślij zdjęcia")
+		</button>
+		<a href="/post/@PostId" class="btn btn-secondary">Pomiń</a>
+	</div>
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+	<div class="alert alert-danger mt-3">@message</div>
+}

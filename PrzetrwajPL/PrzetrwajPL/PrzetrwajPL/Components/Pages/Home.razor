@@ -1,7 +1,7 @@
 ﻿@page "/"
 
 @rendermode InteractiveServer
-@inject HttpClient HttpClient
+@inject IHttpClientFactory ClientFactory
 @using PrzetrwajPL;
 @using PrzetrwajPL.Components.Pages.Components
 @using PrzetrwajPL.Models;
@@ -13,8 +13,30 @@
 	<h1>Ogólnopolska strona do zgłaszania zagrożeń w twojej okolicy.</h1>
 	<h2>Widzisz zagrożenie? Zgłoś je!</h2>
 </div>
+<div class="add-post-box">
+   <AuthorizeView Policy="@UserRoles.User">
+    <Authorized>
+            <a href="/addPost">Dodaj Post o Zagrożeniu</a>
+    </Authorized>
+</AuthorizeView>
+    <AuthorizeView Policy="@UserRoles.Moderator">
+    <Authorized>
+            <a href="/addPost">Dodaj Post o Zasobie</a>
+    </Authorized>
+</AuthorizeView>
+</div>
 
-<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(id => FilterByRegion(id, ""))" />
+
+<div class="filters">
+    <div class="picker">
+        <RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(regionId => FilterByRegion(regionId, "", myTypePicker?.SelectedTypeId ?? 0))" />
+    </div>
+    <div class="picker">
+        <TypePicker @ref="myTypePicker" SelectedTypeIdChanged="@(typeId => FilterByRegion(myRegionPicker?.SelectedRegionId ?? 0, "", typeId))" />
+    </div>
+    
+</div>
+
 
 @if (posts == null)
 {
@@ -39,9 +61,13 @@ else
 }
 
 @code {
+	// Access basic user info from the cookie claims
+	[CascadingParameter]
+	private Task<AuthenticationState> AuthStateTask { get; set; }
+
 	private RegionPicker myRegionPicker; // The RegionPicker reference
+	private TypePicker myTypePicker;
 	private List<PostOverviewDto>? posts;
-	private UserGeneralDto? currentUser;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -52,31 +78,84 @@ else
 	{
 		if (firstRender)
 		{
-			if (currentUser != null && currentUser.Region != null)
-			{
-				await myRegionPicker.PickRegion(currentUser.Region.IdRegion);
-			}
-			else
-			{
-				await myRegionPicker.PickRegion(0);
-			}
+			await myRegionPicker.PickRegion(0);
+			await GetUserInfo();
 		}
 	}
 
-    // Filtrowanie po regionie
-    private async Task FilterByRegion(int? regionId, string? regionName)
-    {
-        posts = null; // Pokaż ładowanie
+	// Filtrowanie po regionie
+	private async Task FilterByRegion(int? regionId, string? regionName, int? typeId)
+	{
+		posts = null; // Pokaż ładowanie
+		var tempPosts = new List<PostOverviewDto>();
 
-        try
-        {
-            posts = await HttpClient.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Błąd pobierania postów regionu: {ex.Message}");
-            posts = new List<PostOverviewDto>(); // Pusta lista w razie błędu
-        }
-    }
+		try
+		{
+			if(typeId == 0 || typeId == 2)
+			{
+				try
+				{
+					var client = ClientFactory.CreateClient("ServerAPI");
+					var dangers = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
+					if (dangers != null)
+					{
+						tempPosts.AddRange(dangers);
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Błąd pobierania postów zagrożeń regionu: {ex.Message}");
+				}
+			}
+			if (typeId == 1 || typeId == 2)
+			{
+				try
+				{
+					var client = ClientFactory.CreateClient("ServerAPI");
+					var resources = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Resource");
+					if (resources != null)
+					{
+						tempPosts.AddRange(resources);
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Błąd pobierania postów zasobów regionu: {ex.Message}");
+				}
+			}
+
+			if(tempPosts != null)
+			{
+				posts = tempPosts.OrderByDescending(p => p.VoteNegative == 0 ? (double)p.VotePositive 
+				: (double)p.VotePositive/(double)p.VoteNegative).ToList();
+			}
+
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Błąd: {ex.Message}");
+			posts = new List<PostOverviewDto>(); // Pusta lista w razie błędu
+		}
+	}
+	// Get logged-in user region and apply it
+	private async Task GetUserInfo()
+	{
+		try
+		{
+			var authState = await AuthStateTask;
+			var userPrincipal = authState.User;
+
+			if (userPrincipal.Identity is not { IsAuthenticated: true })
+				return;
+
+			var regionStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
+			int region = 0;
+			if (int.TryParse(regionStr, out region))
+			{
+				await myRegionPicker.PickRegion(region);
+			}
+		}
+		catch (Exception) { }
+	}
 }
 

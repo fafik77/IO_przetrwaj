@@ -24,7 +24,8 @@ public partial class ConfirmEmail
 			// Note: Since backend is [HttpGet], we append parameters to the URL
 			// We use WebUtility.UrlEncode to ensure characters like '+' in the code don't break the query
 			var requestUrl = $"Account/ConfirmEmail?userId={UserId}&code={WebUtility.UrlEncode(Code)}";
-			var response = await HttpClient.GetAsync(requestUrl);
+			var client = ClientFactory.CreateClient("ServerAPI");
+			var response = await client.GetAsync(requestUrl);
 			if (response.IsSuccessStatusCode)
 			{
 				_isSuccess = true;

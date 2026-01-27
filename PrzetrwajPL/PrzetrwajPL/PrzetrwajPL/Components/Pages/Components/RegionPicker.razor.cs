@@ -26,7 +26,8 @@ public partial class RegionPicker
 		{
 			try
 			{
-				regions = await HttpClient.GetFromJsonAsync<List<RegionOnlyDto>>("/Region");
+				var client = ClientFactory.CreateClient("ServerAPI");
+				regions = await client.GetFromJsonAsync<List<RegionOnlyDto>>("/Region");
 				SelectedRegionName = "Wybierz Region";
 				// If a default ID was passed from parent, find its name immediately
 				if (SelectedRegionId != -1)
@@ -57,7 +58,7 @@ public partial class RegionPicker
 			return;
 		}
 
-		var region = regions.FirstOrDefault(r => r.IdRegion == id);
+		var region = regions.FirstOrDefault(r => r.Id == id);
 		if (region != null)
 		{
 			SelectedRegionName = region.Name;

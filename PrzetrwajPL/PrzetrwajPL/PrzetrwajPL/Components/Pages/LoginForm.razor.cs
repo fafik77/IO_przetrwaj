@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
 using PrzetrwajPL.Models;
 using PrzetrwajPL.Requests;
-using System.Security.Claims;
+
 
 namespace PrzetrwajPL.Components.Pages
 {
@@ -11,8 +9,6 @@ namespace PrzetrwajPL.Components.Pages
 	{
 		[CascadingParameter]
 		private HttpContext? httpContext { get; set; }
-		//[CascadingParameter]
-		//private NavigationManager NavigationManager { get; set; }
 
 		private UserWithPersonalDataDto? user = null;
 		[SupplyParameterFromForm]
@@ -20,66 +16,44 @@ namespace PrzetrwajPL.Components.Pages
 		private string errorMessage = string.Empty;
 		private bool isLoading = false;
 
+		private string GoogleLoginUrl
+		{
+			get
+			{
+				var apiPath = $"{ClientFactory.CreateClient("ServerAPI").BaseAddress}Login/google";
+				var currentUri = NavigationManager.BaseUri;
+				// Encode the URI so it can be passed safely in a query string
+				return $"{apiPath}?returnUrl={Uri.EscapeDataString(currentUri)}";
+			}
+		}
+
 		private async Task HandleLogin()
 		{
 			isLoading = true;
 			errorMessage = string.Empty;
 			try
 			{
-				var response = await HttpClient.PostAsJsonAsync("/Login/email", loginRequest);
+				var client = ClientFactory.CreateClient("ServerAPI");
+				var response = await client.PostAsJsonAsync("/Login/email", loginRequest);
 				if (response.IsSuccessStatusCode)
 				{
-					var result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
-					if (result != null)
-					{
-						user = result;
-						var claims = new List<Claim>
-							{
-								new Claim(ClaimTypes.NameIdentifier, user.Id),
-								new Claim(ClaimTypes.Name, user.Name ?? user.Email!), // Use Name for display
-								new Claim(ClaimTypes.Email, user.Email!),
-							};
-						// Split the roles string (e.g., "User,Moderator") and add each as a separate claim
-						if (!string.IsNullOrWhiteSpace(user.Role))
-						{
-							var roles = user.Role.Split(',', StringSplitOptions.RemoveEmptyEntries);
-							foreach (var role in roles)
-							{
-								claims.Add(new Claim(ClaimTypes.Role, role.Trim())); // remember to trim
-							}
-						}
-						else
-						{
-							claims.Add(new Claim(ClaimTypes.Role, UserRoles.User));
-						}
+					var result = await response.Content.ReadFromJsonAsync<JwtTokenDto>();
 
-						var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-						var userPrincipal = new ClaimsPrincipal(identity);
-						await httpContext.SignInAsync(userPrincipal); //make cookie
-						httpContext.Response.Redirect("/"); //use this method to redirect user, as the NavigateTo does throw an exception
-					}
-					else
-					{
-						errorMessage = "Nieprawid³owa odpowiedŸ z serwera.";
-					}
+					httpContext.Response.Redirect($"/account/signin?token={result.Token}");
+					//await LoginUser(result);
+				}
+				else if (response.StatusCode == (System.Net.HttpStatusCode)StatusCodes.Status418ImATeapot)
+				{
+					var BanInfo = await response.Content.ReadFromJsonAsync<BanInfo>();
+					errorMessage = $"Twoje konto zosta³o zablokowane przez {BanInfo.BannedBy.Name} {BanInfo.BannedBy.Surname}. Powód: {BanInfo.BanReason}";
 				}
 				else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
 				{
-					UserWithPersonalDataDto? result = null;
-					try
-					{
-						result = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
-						if (result?.Banned == true)
-							errorMessage = $"Twoje konto zosta³o zablokowane przez {result.BannedBy.Name} {result.BannedBy.Surname}. Powód: {result.BanReason}";
-					}
-					catch (Exception ex)
-					{
-						errorMessage = "Nieprawid³owy email lub has³o.";
-					}
+					var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
+					errorMessage = "Nieprawid³owy email lub has³o.";
 				}
 				else
 				{
-					var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
 					errorMessage = "Nieprawid³owy email lub has³o.";
 				}
 			}

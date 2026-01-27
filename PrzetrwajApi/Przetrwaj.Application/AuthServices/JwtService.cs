@@ -26,7 +26,9 @@ public class JwtService : IJwtService
 
 			new Claim(JwtRegisteredClaimNames.Sub, user.Id),
 			new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-			new Claim("Region", user.Region?.Id.ToString() ?? ""),
+			new Claim("Name", user.Name ?? string.Empty),
+			new Claim("Surname", user.Surname ?? string.Empty),
+			new Claim("Region", user.Region?.Id.ToString() ?? string.Empty),
 			new Claim("BanInfo", user.BanInfo?.ToString() ?? string.Empty),
 		};
 		foreach (var role in user.Roles) claims.Add(new Claim(ClaimTypes.Role, role));

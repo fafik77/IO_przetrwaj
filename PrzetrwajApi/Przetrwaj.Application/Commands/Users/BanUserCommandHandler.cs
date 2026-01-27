@@ -59,8 +59,14 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		user.Banned = true;
 		// This is the key line to invalidate logged in user cookie or other tokens:
 		await _userManager.UpdateSecurityStampAsync(user);
-
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		// cache ban info
 		_banCache.BanUser(user.Id);
 

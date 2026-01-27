@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Regions;
@@ -23,7 +24,14 @@ public class AddRegionsCommandHandler : ICommandHandler<AddRegionsCommand, IEnum
 		{
 			await _regionRepository.AddAsync(region, cancellationToken);
 		}
-		await _unitOfWork.SaveChangesAsync(cancellationToken);	//this could throw
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);  //this could throw
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		return regions
 			.Select(r => (RegionOnlyDto)r!)
 			.ToList();

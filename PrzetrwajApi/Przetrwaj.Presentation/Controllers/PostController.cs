@@ -298,13 +298,12 @@ public partial class PostController : Controller
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[RequestFormLimits(MultipartBodyLengthLimit = 52428800)] //up to 50 MB
 	[RequestSizeLimit(52428800)] //up to 50 MB
-	public async Task<IActionResult> AddAttachment(string id, AddAttachments attachments, CancellationToken CT)
+	public async Task<IActionResult> AddAttachment(string id, [FromForm] AddAttachments attachments, CancellationToken CT)
 	{
 		var req = new AddAttachmentsInternal
 		{
 			IdPost = id,
-			AlternateDescriptions = attachments.AlternateDescriptions,
-			Files = attachments.Files,
+			Items = attachments.Items,
 			// Set user from cookie
 			IdUser = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
 		};

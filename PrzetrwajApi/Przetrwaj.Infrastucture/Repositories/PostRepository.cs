@@ -61,7 +61,7 @@ internal class PostRepository : IPostRepository
 				DateCreated = p.DateCreated,
 				Category = p.CustomCategory.Length > 0 ? new CategoryDto
 				{
-					IdCategory = p.IdCategory,
+					Id = p.IdCategory,
 					Type = p.IdCategoryNavigation.Type,
 					Name = p.CustomCategory,
 				}
@@ -113,7 +113,7 @@ internal class PostRepository : IPostRepository
 			//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = p.CustomCategory.Length > 0 ? new CategoryDto
 			{
-				IdCategory = p.IdCategory,
+				Id = p.IdCategory,
 				Type = p.IdCategoryNavigation.Type,
 				Name = p.CustomCategory,
 			}
@@ -155,7 +155,7 @@ internal class PostRepository : IPostRepository
 	{
 		var posts = await _context.PostsDangerRO
 			//.Where(p => p.Active == true && p.Category == CategoryType.Danger) //Posts without the pre-filtered(mapping) to PostsDanger
-			.Where(p => p.IdRegion == idRegion)
+			.Where(p => p.IdRegion == idRegion || p.IdRegion == 0)
 			.Select(p => new PostOverviewDto
 			{
 				Id = p.IdPost,
@@ -170,7 +170,7 @@ internal class PostRepository : IPostRepository
 				//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 				Category = p.CustomCategory.Length > 0 ? new CategoryDto
 				{
-					IdCategory = p.IdCategory,
+					Id = p.IdCategory,
 					Type = p.IdCategoryNavigation.Type,
 					Name = p.CustomCategory,
 				}
@@ -200,7 +200,7 @@ internal class PostRepository : IPostRepository
 	public async Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
 	{
 		var posts = await _context.PostsResourcesRO
-			.Where(p => p.IdRegion == idRegion)
+			.Where(p => p.IdRegion == idRegion || p.IdRegion == 0)
 			.Select(p => new PostOverviewDto
 			{
 				Id = p.IdPost,
@@ -209,7 +209,7 @@ internal class PostRepository : IPostRepository
 
 				Category = p.CustomCategory.Length > 0 ? new CategoryDto
 				{
-					IdCategory = p.IdCategory,
+					Id = p.IdCategory,
 					Type = p.IdCategoryNavigation.Type,
 					Name = p.CustomCategory,
 				}

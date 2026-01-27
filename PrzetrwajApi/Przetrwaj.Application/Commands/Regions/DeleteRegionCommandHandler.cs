@@ -1,5 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.RegionException;
 
 namespace Przetrwaj.Application.Commands.Regions;
@@ -21,6 +22,13 @@ public class DeleteRegionCommandHandler : ICommandHandler<DeleteRegionCommand>
 		var region = await _regionRepository.GetByIdAsync(request.RegionId, cancellationToken);
 		if (region == null) throw new RegionNotFoundException(request.RegionId);
 		_regionRepository.Delete(region);
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.RegionException;
 
 namespace Przetrwaj.Application.Commands.Regions;
@@ -26,6 +27,13 @@ public class UpdateRegionCommandHandler : ICommandHandler<UpdateRegionCommand>
 		regionToUpdate.Long = request.Long;
 
 		_regionRepository.Update(regionToUpdate);
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 	}
 }

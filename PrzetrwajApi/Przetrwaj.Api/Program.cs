@@ -233,9 +233,5 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 	ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
-//app.MapPost("login/email", () => "login email");
-//app.MapPost("login/google", () => "login google");
-//app.MapGet("/Attachments/", () => provides the given Attachment file (for frontend rendering as an image) );
-
 
 app.Run();

@@ -44,9 +44,9 @@ public class RegionWoj : IRegionInfo
 public class RegionPow : IRegionInfo
 {
 	//2x Char
-	[Key]
+	//[Key]
 	public short WojId { get; set; }
-	//2x Char
+	//4x Char
 	[Key]
 	public short Id { get; set; }
 	public required string Name { get; set; }
@@ -57,23 +57,23 @@ public class RegionPow : IRegionInfo
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 	public virtual ICollection<AppUser> Users { get; set; } = new List<AppUser>();
 	public virtual ICollection<RegionGmi> Gminy { get; set; } = [];
-	public virtual ICollection<RegionUl> Ulice { get; set; } = [];
+	//public virtual ICollection<RegionUl> Ulice { get; set; } = [];
 
-	int IRegionInfo.Id => WojId * 100000 + Id * 1000;
+	int IRegionInfo.Id =>  Id * 1000;
 	LatLong IRegionInfo.LatLong => new LatLong(Lat, Long);
 }
 //Gmina/Dzielnica
 public class RegionGmi : IRegionInfo
 {
 	//2x Char
-	[Key]
-	public short WojId { get; set; }
-	//2x Char
-	[Key]
+	//[Key]
+	//public short WojId { get; set; }
+	//4x Char
+	//[Key]
 	public short PowId { get; set; }
-	//2+1x Char (where last one will be ignored as it violates the Name uniqness)
+	//6+1x Char (where last one will be ignored as it violates the Name uniqness)
 	[Key]
-	public short Id { get; set; }
+	public int Id { get; set; }
 	public required string Name { get; set; }
 	public double Lat { get; set; }
 	public double Long { get; set; }
@@ -81,21 +81,21 @@ public class RegionGmi : IRegionInfo
 	public virtual required RegionPow Pow { get; set; }
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
-	int IRegionInfo.Id => WojId * 100000 + PowId * 1000 + Id * 10;
+	int IRegionInfo.Id => Id * 10;
 	LatLong IRegionInfo.LatLong => new LatLong(Lat, Long);
 }
 //Ulica
-public class RegionUl
-{
-	[Key]
-	public short WojId { get; set; }
-	[Key]
-	public short PowId { get; set; }
-	//SYM_UL
-	[Key]
-	public int Id { get; set; }
-	public required string Name { get; set; }
+//public class RegionUl
+//{
+//	//[Key]
+//	//public short WojId { get; set; }
+//	[Key]
+//	public short PowId { get; set; }
+//	//SYM_UL
+//	[Key]
+//	public int Id { get; set; }
+//	public required string Name { get; set; }
 
-	public virtual required RegionPow Pow { get; set; }
-	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
-}
+//	public virtual required RegionPow Pow { get; set; }
+//	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+//}

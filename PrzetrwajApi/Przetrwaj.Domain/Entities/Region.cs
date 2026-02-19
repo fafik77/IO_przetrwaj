@@ -53,7 +53,7 @@ public class RegionPow : IRegionInfo
 	public double Lat { get; set; }
 	public double Long { get; set; }
 
-	public virtual required RegionWoj Woj { get; set; }
+	public virtual RegionWoj Woj { get; set; }
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 	public virtual ICollection<AppUser> Users { get; set; } = new List<AppUser>();
 	public virtual ICollection<RegionGmi> Gminy { get; set; } = [];
@@ -71,14 +71,14 @@ public class RegionGmi : IRegionInfo
 	//4x Char
 	//[Key]
 	public short PowId { get; set; }
-	//6+1x Char (where last one will be ignored as it violates the Name uniqness)
+	//6(+1)x Char (where last one will be ignored as it violates the Name uniqness)
 	[Key]
 	public int Id { get; set; }
 	public required string Name { get; set; }
 	public double Lat { get; set; }
 	public double Long { get; set; }
 
-	public virtual required RegionPow Pow { get; set; }
+	public virtual RegionPow Pow { get; set; }
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
 	int IRegionInfo.Id => Id * 10;

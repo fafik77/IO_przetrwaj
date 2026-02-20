@@ -1,4 +1,6 @@
-﻿using Przetrwaj.Domain.Entities;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using Przetrwaj.Domain.Entities;
 
 namespace Przetrwaj.Application.Commands;
 
@@ -17,22 +19,36 @@ public class TercParser
 	public static void Parse()
 	{
 		using var file = new FileStream(@"V:\TERC_Adresowy_2026-02-18.csv", FileMode.Open, FileAccess.Read);
-		if (!file.CanRead) return;
 		using StreamReader sr = new StreamReader(file);
-		var res = ParseCsvToClass(sr);
+		using var reader = new CsvReader(sr,
+			new CsvConfiguration(cultureInfo: System.Globalization.CultureInfo.InvariantCulture)
+			{
+				Delimiter = ";"
+			});
+		var res = reader.GetRecords<TERCItem>();
 		TercToRegionT(res);
 	}
-
-	private static void TercToRegionT(List<TERCItem> itemList)
+	public struct TercRegionResults
 	{
-		List<RegionWoj> woj = [];   //16
-		List<RegionPow> pow = [];   //380
-		List<RegionGmi> gmi = [];   //2511 (should be 2479) 32 too many
+		public List<RegionWoj> woj; //16
+		public List<RegionPow> pow; //380
+		public List<RegionGmi> gmi; //2511 (should be 2479) 32 too many
+		public TercRegionResults()
+		{
+			woj = [];
+			pow = [];
+			gmi = [];
+		}
+	}
+
+	private static TercRegionResults TercToRegionT(IEnumerable<TERCItem> itemList)
+	{
+		var results = new TercRegionResults();
 		foreach (var item in itemList)
 		{
 			if (string.IsNullOrEmpty(item.POW))
 			{
-				woj.Add(new RegionWoj
+				results.woj.Add(new RegionWoj
 				{
 					Id = short.Parse(item.WOJ),
 					Name = item.NAZWA,
@@ -41,7 +57,7 @@ public class TercParser
 			else if (string.IsNullOrEmpty(item.GMI))
 			{
 				var wojId = short.Parse(item.WOJ);
-				pow.Add(new RegionPow
+				results.pow.Add(new RegionPow
 				{
 					WojId = wojId,
 					Id = (short)(wojId * 100 + int.Parse(item.POW)),
@@ -59,33 +75,14 @@ public class TercParser
 					Name = item.NAZWA,
 				};
 				//add only if it does not exist already (compare the full Compund Key)
-				if (!gmi.Where(g => g.Id == gmina.Id).Any())
+				if (!results.gmi.Where(g => g.Id == gmina.Id).Any())
 				{
-					gmi.Add(gmina);
+					results.gmi.Add(gmina);
 				}
 			}
 		}
-	}
-
-	private static List<TERCItem> ParseCsvToClass(StreamReader sr)
-	{
-		List<TERCItem> items = [];
-		string? line;
-		while ((line = sr.ReadLine()) != null)
-		{
-			if (line.StartsWith("WOJ")) continue;
-			if (line.Length < 4) continue;
-			var parts = line.Split(';');
-			items.Add(new TERCItem
-			{
-				WOJ = parts[0],
-				POW = parts[1],
-				GMI = parts[2],
-				RODZ = parts[3],
-				NAZWA = parts[4],
-				NAZWA_DOD = parts[5],
-			});
-		}
-		return items;
+		//so there is 32 gmi too many
+		//var freq = results.gmi.GroupBy(x => x.Name).OrderByDescending(x => x.Count()).ToDictionary(x => x.Key, x => x.Count());
+		return results;
 	}
 }

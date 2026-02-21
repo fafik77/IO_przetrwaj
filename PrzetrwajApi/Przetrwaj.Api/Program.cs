@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Przetrwaj.Application;
+using Przetrwaj.Application.Commands;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Infrastucture;
 using Przetrwaj.Infrastucture.Context;
 using Przetrwaj.Presentation;
@@ -228,10 +230,20 @@ app.UseRouting(); // Added this explicitly beffore UseCors (New .Net thing)
 app.UseCors(AllowPrzetrwajOrigins);
 app.UsePresentation();
 
+app.MapPost("UpdateTercRegions", (IFormFile file) =>
+{
+	TercParser.Parse();
+})//.RequireAuthorization(UserRoles.Moderator)
+	;
+app.MapPost("RegionFromLocation", ([FromBody] LatLong LatLong) =>
+{
+
+});
+
+
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
 	ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
-
-
 app.Run();

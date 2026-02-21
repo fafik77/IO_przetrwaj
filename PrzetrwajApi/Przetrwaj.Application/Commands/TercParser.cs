@@ -4,15 +4,6 @@ using Przetrwaj.Domain.Entities;
 
 namespace Przetrwaj.Application.Commands;
 
-public class TERCItem
-{
-	public string WOJ { get; set; }
-	public string POW { get; set; }
-	public string GMI { get; set; }
-	public string RODZ { get; set; }
-	public string NAZWA { get; set; }
-	public string NAZWA_DOD { get; set; }
-}
 
 public class TercParser
 {
@@ -39,6 +30,15 @@ public class TercParser
 			pow = [];
 			gmi = [];
 		}
+	}
+	internal class TERCItem
+	{
+		public string WOJ { get; set; }
+		public string POW { get; set; }
+		public string GMI { get; set; }
+		public string RODZ { get; set; }
+		public string NAZWA { get; set; }
+		public string NAZWA_DOD { get; set; }
 	}
 
 	private static TercRegionResults TercToRegionT(IEnumerable<TERCItem> itemList)
@@ -75,13 +75,15 @@ public class TercParser
 					Name = item.NAZWA,
 				};
 				//add only if it does not exist already (compare the full Compund Key)
-				if (!results.gmi.Where(g => g.Id == gmina.Id).Any())
+				if (!results.gmi.Where(g =>
+					(g.Id == gmina.Id) || (g.PowId == gmina.PowId && g.Name.Equals(gmina.Name, StringComparison.InvariantCultureIgnoreCase))
+				).Any())
 				{
 					results.gmi.Add(gmina);
 				}
 			}
 		}
-		//so there is 32 gmi too many
+		//so there was 32 gmi too many, now we are about 100 short?
 		//var freq = results.gmi.GroupBy(x => x.Name).OrderByDescending(x => x.Count()).ToDictionary(x => x.Key, x => x.Count());
 		return results;
 	}

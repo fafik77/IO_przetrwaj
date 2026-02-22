@@ -76,7 +76,7 @@ public class TercParser
 				};
 				//add only if it does not exist already (compare the full Compund Key)
 				if (!results.gmi.Where(g =>
-					(g.Id == gmina.Id) || (g.PowId == gmina.PowId && g.Name.Equals(gmina.Name, StringComparison.InvariantCultureIgnoreCase))
+					(g.Id == gmina.Id) //|| (g.PowId == gmina.PowId && g.Name.Equals(gmina.Name, StringComparison.InvariantCultureIgnoreCase))
 				).Any())
 				{
 					results.gmi.Add(gmina);

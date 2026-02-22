@@ -13,7 +13,6 @@ public class AppUser : IdentityUser
 	//[MaxLength(24)]
 	public string? Surname { get; set; }
 	public int IdRegion { get; set; }
-	public bool Banned { get; set; } = false;
 	public DateTimeOffset? BanDate { get; set; }
 	//[MaxLength(300)]
 	public string? BanReason { get; set; }
@@ -30,9 +29,10 @@ public class AppUser : IdentityUser
 	/// <summary>
 	/// private preference for Post display sorting rules
 	/// </summary>
-	//public short GminaId { get; set; } = 0;
+	//public int GminaId { get; set; } = 0;
 	//public bool z_sight, z_hearing, z_movement, z_speach, z_body;
-
+	///Remove the `Banned` field, its unnecessary with `BanDate?`
+	public bool Banned { get; set; } = false;
 
 	[ForeignKey(nameof(IdRegion))]
 	public virtual Region IdRegionNavigation { get; set; } = null!;

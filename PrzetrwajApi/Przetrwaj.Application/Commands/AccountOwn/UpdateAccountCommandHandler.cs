@@ -82,19 +82,20 @@ public class UpdateAccountCommandHandler : ICommandHandler<UpdateAccountInternal
 					throw new AccountUpdateException(errors);
 				}
 			}
-			//change email
+			//change email is not available withouat a password
 			if (!string.IsNullOrEmpty(request.Email))
 			{
-				var normName = _userManager.NormalizeName(request.Email)!;
-				var normOldName = user.NormalizedUserName;
-				if (normName != normOldName)
-				{
-					//check if email is unique
-					var emailExists = await _userManager.FindByNameAsync(normName);
-					if (emailExists != null) throw new UserAlreadyExistsException(request.Email ?? request.UserId);
-					//now generate a token and send an email
-					await _authService.GenerateChangeEmailTokenAsync(user, request.Email);
-				}
+				throw new AccountUpdateException("Password is not set, email change is not available!");
+				//var normName = _userManager.NormalizeName(request.Email)!;
+				//var normOldName = user.NormalizedUserName;
+				//if (normName != normOldName)
+				//{
+				//	//check if email is unique
+				//	var emailExists = await _userManager.FindByNameAsync(normName);
+				//	if (emailExists != null) throw new UserAlreadyExistsException(request.Email ?? request.UserId);
+				//	//now generate a token and send an email
+				//	await _authService.GenerateChangeEmailTokenAsync(user, request.Email);
+				//}
 			}
 		}
 

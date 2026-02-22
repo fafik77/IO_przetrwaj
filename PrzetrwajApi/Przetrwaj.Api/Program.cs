@@ -235,6 +235,12 @@ app.MapPost("UpdateTercRegions", (IFormFile file) =>
 	TercParser.Parse();
 })//.RequireAuthorization(UserRoles.Moderator)
 	;
+
+app.MapGet("UpdateTercRegions", () =>
+{
+	TercParser.Parse();
+})//.RequireAuthorization(UserRoles.Moderator)
+	;
 app.MapPost("RegionFromLocation", ([FromBody] LatLong LatLong) =>
 {
 

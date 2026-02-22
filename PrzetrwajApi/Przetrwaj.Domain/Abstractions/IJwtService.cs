@@ -5,6 +5,6 @@ namespace Przetrwaj.Domain.Abstractions;
 
 public interface IJwtService
 {
-	string GenerateToken(AppUser user, IList<string> roles);
+	//string GenerateToken(AppUser user, IList<string> roles);
 	string GenerateToken(UserWithPersonalDataDto user);
 }

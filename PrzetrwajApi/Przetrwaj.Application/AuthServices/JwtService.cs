@@ -35,23 +35,23 @@ public class JwtService : IJwtService
 		//make token
 		return MakeTokenWithClaims(claims);
 	}
-	public string GenerateToken(AppUser user, IList<string> roles)
-	{
-		//make claims
-		var claims = new List<Claim>
-		{
-			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+	//public string GenerateToken(AppUser user, IList<string> roles)
+	//{
+	//	//make claims
+	//	var claims = new List<Claim>
+	//	{
+	//		new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
 
-			new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-			new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-			new Claim("Name", user.Name ?? string.Empty),
-			new Claim("Surname", user.Surname ?? string.Empty),
-			new Claim("Region", user.IdRegion.ToString()),
-		};
-		foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));
-		//make token
-		return MakeTokenWithClaims(claims);
-	}
+	//		new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+	//		new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+	//		new Claim("Name", user.Name ?? string.Empty),
+	//		new Claim("Surname", user.Surname ?? string.Empty),
+	//		new Claim("Region", user.IdRegion.ToString()),
+	//	};
+	//	foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));
+	//	//make token
+	//	return MakeTokenWithClaims(claims);
+	//}
 
 	private string MakeTokenWithClaims(List<Claim> claims)
 	{

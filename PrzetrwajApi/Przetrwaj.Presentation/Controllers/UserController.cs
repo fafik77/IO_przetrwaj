@@ -129,7 +129,7 @@ public class UserController : Controller
 
 	[HttpGet("ModeratorPending")]
 	[SwaggerOperation("Gets users with Moderator Pending status (Admin)")]
-	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IEnumerable<ModeratorPendingStatus>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetModeratorPending(CancellationToken cancellationToken)
 	{
 		try

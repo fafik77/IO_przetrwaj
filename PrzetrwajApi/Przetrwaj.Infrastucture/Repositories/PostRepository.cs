@@ -2,6 +2,7 @@
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Posts;
+using Przetrwaj.Domain.Helpers;
 using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Przetrwaj.Infrastucture.Context;
@@ -11,10 +12,12 @@ namespace Przetrwaj.Infrastucture.Repositories;
 internal class PostRepository : IPostRepository
 {
 	private readonly ApplicationDbContext _context;
+	private readonly IRegionRepository _regionRepository;
 
-	public PostRepository(ApplicationDbContext context)
+	public PostRepository(ApplicationDbContext context, IRegionRepository regionRepository)
 	{
 		_context = context;
+		_regionRepository = regionRepository;
 	}
 
 
@@ -54,26 +57,7 @@ internal class PostRepository : IPostRepository
 	{
 		var posts = await _context.Posts
 			.Where(p => p.Active == true && p.IdAutor == idAuthor.ToLower())
-			.Select(p => new PostOverviewDto
-			{
-				Id = p.IdPost,
-				Title = p.Title,
-				DateCreated = p.DateCreated,
-				Category = p.CustomCategory.Length > 0 ? new CategoryDto
-				{
-					Id = p.IdCategory,
-					Type = p.IdCategoryNavigation.Type,
-					Name = p.CustomCategory,
-				}
-				: (CategoryDto?)p.IdCategoryNavigation,
-				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
-				{
-					Id = p.IdRegionNavigation.IdRegion,
-					Name = p.IdRegionNavigation.Name
-				} : null,
-				VotePositive = p.Votes.Count(v => v.IsUpvote),
-				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
-			})
+			.Select(p => SelectAsPostOverview(p))
 			.ToListAsync(cancellationToken);
 		return posts;
 	}
@@ -81,7 +65,7 @@ internal class PostRepository : IPostRepository
 	public async Task<PostCompleteDataDto?> GetFullROPostByIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
 		idPost = idPost.ToLower();
-		return await _context.Posts
+		var res = await _context.Posts
 		.AsNoTracking()
 		.Where(u => u.IdPost == idPost)
 		.Select(p => new PostCompleteDataDto
@@ -89,7 +73,7 @@ internal class PostRepository : IPostRepository
 			Id = p.IdPost,
 			Title = p.Title,
 			Description = p.Description,
-			CategoryType = p.Category,
+			CategoryType = p.CategoryType,
 			Comments = p.Comments
 			.OrderByDescending(x => x.DateCreated)
 			.Select(c => new CommentDto
@@ -101,16 +85,21 @@ internal class PostRepository : IPostRepository
 					Id = c.IdAutorNavigation.Id,
 					Name = c.IdAutorNavigation.Name ?? "",
 					Surname = c.IdAutorNavigation.Surname ?? "",
-					IdRegion = c.IdAutorNavigation.IdRegion,
+					IdRegion = c.IdAutorNavigation.PowiatId,
 					RegistrationDate = c.IdAutorNavigation.RegistrationDate,
 					BanDate = c.IdAutorNavigation.BanDate,
 				} : null
 			})
 			.ToList(),
 			DateCreated = p.DateCreated,
-			Region = (RegionOnlyDto?)p.IdRegionNavigation,
+			// we have to re-map the region (as this is on DB side) later in the code
+			Region = new RegionOnlyDto
+			{
+				Id = p.IdGmiOnly ?? p.IdPowOnly ?? p.IdWojOnly ?? 0,
+				Name = string.Empty,
+			},
 			Author = (UserGeneralDtoSimpleRegion?)p.IdAutorNavigation,
-			//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
+			// if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = p.CustomCategory.Length > 0 ? new CategoryDto
 			{
 				Id = p.IdCategory,
@@ -120,9 +109,8 @@ internal class PostRepository : IPostRepository
 			: (CategoryDto?)p.IdCategoryNavigation,
 
 			// Fetch only the bool values
-			VotePositive = p.Votes.Count(p => p.IsUpvote),
-			VoteNegative = p.Votes.Count(p => !p.IsUpvote),
-			//VoteSum = p.Votes.Count(),
+			VotePositive = p.Votes.LongCount(p => p.IsUpvote),
+			VoteNegative = p.Votes.LongCount(p => !p.IsUpvote),
 			// Map attachments using the URL logic
 			Attachments = p.Attachments
 			.OrderBy(x => x.OrderInList)    //sort by OrderInList asc
@@ -133,6 +121,9 @@ internal class PostRepository : IPostRepository
 			}).ToList()
 		})
 		.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+		if (res is null) return null;
+		res.Region = RegionOnlyDto.Map(await _regionRepository.GetByIdAsync(res.Region?.Id ?? 0, cancellationToken));
+		return res;
 	}
 	public async Task<Post?> GetPostWithAttachmentsByIdAsync(string idPost, CancellationToken cancellationToken = default)
 	{
@@ -150,46 +141,58 @@ internal class PostRepository : IPostRepository
 		return post;
 	}
 
+	private async Task<IEnumerable<PostOverviewDto>> FillInPostDataAfterFetch(IEnumerable<PostOverviewDto> posts, CancellationToken cancellationToken)
+	{
+		foreach (var post in posts)
+		{
+			post.Region = RegionOnlyDto.Map(await _regionRepository.GetByIdAsync(post.Region?.Id ?? 0, cancellationToken));
+			var votes = post.VotePositive + post.VoteNegative;
+			post.VoteRatio = (votes > 0)
+				? ((float)post.VotePositive / votes * 100)
+				: 100;
+		}
+		return posts;
+	}
 
 	public async Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
 	{
+		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(idRegion);
+
 		var posts = await _context.PostsDangerRO
-			//.Where(p => p.Active == true && p.Category == CategoryType.Danger) //Posts without the pre-filtered(mapping) to PostsDanger
-			.Where(p => p.IdRegion == idRegion || p.IdRegion == 0)
-			.Select(p => new PostOverviewDto
+			.Where(p => p.IdWojOnly == Woj || p.IdPowOnly == Pow || p.IdGmiOnly == Gmi || p.IdWojOnly == 0)
+			.OrderByDescending(k => k.DateCreated)
+			.Select(p => SelectAsPostOverview(p))
+			.ToListAsync(cancellationToken);
+		return await FillInPostDataAfterFetch(posts, cancellationToken);
+	}
+	/// <summary>
+	/// This function is the Func(in, out) of _context.Select(), has to follow the code to SQL rules
+	/// </summary>
+	/// <param name="p">the post on which DB is running Select</param>
+	/// <returns>PostOverviewDto</returns>
+	private static PostOverviewDto SelectAsPostOverview(Post p)
+	{
+		return new PostOverviewDto
+		{
+			Id = p.IdPost,
+			Title = p.Title,
+			DateCreated = p.DateCreated,
+			Category = p.CustomCategory.Length > 0 ? new CategoryDto
 			{
-				Id = p.IdPost,
-				Title = p.Title,
-				DateCreated = p.DateCreated,
-				//// Map Navigations safely
-				//Category = p.IdCategoryNavigation != null ? new CategoryDto
-				//{
-				//	IdCategory = p.IdCategoryNavigation.IdCategory,
-				//	Name = p.IdCategoryNavigation.Name
-				//} : null,
-				//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
-				Category = p.CustomCategory.Length > 0 ? new CategoryDto
-				{
-					Id = p.IdCategory,
-					Type = p.IdCategoryNavigation.Type,
-					Name = p.CustomCategory,
-				}
-				: (CategoryDto?)p.IdCategoryNavigation,
-				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
-				{
-					Id = p.IdRegionNavigation.IdRegion,
-					Name = p.IdRegionNavigation.Name
-				} : null,
-				// --- VOTE CALCULATIONS (Executed on Database side) ---
-				VotePositive = p.Votes.Count(v => v.IsUpvote),
-				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
-				//VoteSum = p.Votes.Count(),
-				//VoteRatio = (p.Votes.Count() > 0)
-				//? ((float)p.Votes.Count(v => v.IsUpvote) / p.Votes.Count() * 100)
-				//: 100
-			})
-		.ToListAsync(cancellationToken);
-		return posts;
+				Id = p.IdCategory,
+				Type = p.IdCategoryNavigation.Type,
+				Name = p.CustomCategory,
+			}
+			: (CategoryDto?)p.IdCategoryNavigation,
+			Region = new RegionOnlyDto
+			{
+				Id = p.IdGmiOnly ?? p.IdPowOnly ?? p.IdWojOnly ?? 0,
+				Name = string.Empty,
+			},
+			// --- VOTE CALCULATIONS (Executed on Database side) ---
+			VotePositive = p.Votes.LongCount(v => v.IsUpvote),
+			VoteNegative = p.Votes.LongCount(v => !v.IsUpvote),
+		};
 	}
 
 	public async Task<IEnumerable<PostMinimalCategoryRegion>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default)
@@ -199,35 +202,13 @@ internal class PostRepository : IPostRepository
 
 	public async Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
 	{
+		var regions = RegionCompoundHelper.RegionSplit(idRegion);
+
 		var posts = await _context.PostsResourcesRO
-			.Where(p => p.IdRegion == idRegion || p.IdRegion == 0)
-			.Select(p => new PostOverviewDto
-			{
-				Id = p.IdPost,
-				Title = p.Title,
-				DateCreated = p.DateCreated,
-
-				Category = p.CustomCategory.Length > 0 ? new CategoryDto
-				{
-					Id = p.IdCategory,
-					Type = p.IdCategoryNavigation.Type,
-					Name = p.CustomCategory,
-				}
-				: (CategoryDto?)p.IdCategoryNavigation,
-
-				Region = p.IdRegionNavigation != null ? new RegionOnlyDto
-				{
-					Id = p.IdRegionNavigation.IdRegion,
-					Name = p.IdRegionNavigation.Name
-				} : null,
-
-				VotePositive = p.Votes.Count(v => v.IsUpvote),
-				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
-				//VoteSum = p.Votes.Count(),
-			})
+			.Where(p => p.IdWojOnly == regions.Woj || p.IdPowOnly == regions.Pow || p.IdGmiOnly == regions.Gmi || p.IdWojOnly == 0)
+			.Select(p => SelectAsPostOverview(p))
 			.ToListAsync(cancellationToken);
-
-		return posts;
+		return await FillInPostDataAfterFetch(posts, cancellationToken);
 	}
 
 
@@ -266,8 +247,8 @@ internal class PostRepository : IPostRepository
 			{
 				Id = p.IdPost,
 				Active = p.Active,
-				VotePositive = p.Votes.Count(v => v.IsUpvote),
-				VoteNegative = p.Votes.Count(v => !v.IsUpvote),
+				VotePositive = p.Votes.LongCount(v => v.IsUpvote),
+				VoteNegative = p.Votes.LongCount(v => !v.IsUpvote),
 			})
 			.ToListAsync(cancellationToken);
 		return posts;

@@ -2,7 +2,12 @@
 
 public class StatisticsDto
 {
-	public long Regions { get; set; }
+	public int RegionsWoj { get; set; }
+	public int RegionsPow { get; set; }
+	public int RegionsGmi { get; set; }
+	public int DangerCategories { get; set; }
+	public int ResourceCategories { get; set; }
+
 	public long Users { get; set; }
 	public long ActiveDangers { get; set; }
 	public long ActiveResources { get; set; }

@@ -7,18 +7,16 @@ public class RegionOnlyDto
 	public int Id { get; set; }
 	/// Gmi?, Pow (, Woj)?
 	public required string Name { get; set; }
-	public double Lat { get; set; }
-	public double Long { get; set; }
+	public string? In { get; set; }
+	public LatLong? LatLong { get; set; }
 
-
-	public static explicit operator RegionOnlyDto?(Region region)
+	public static RegionOnlyDto? Map(IRegionInfo? region)
 	{
 		return region is null ? null : new RegionOnlyDto
 		{
-			Id = region.IdRegion,
+			Id = region.Id,
 			Name = region.Name,
-			Lat = region.Lat,
-			Long = region.Long,
+			LatLong = region.LatLong
 		};
 	}
 }

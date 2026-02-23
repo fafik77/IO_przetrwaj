@@ -19,21 +19,22 @@ public class AddRegionsCommandHandler : ICommandHandler<AddRegionsCommand, IEnum
 
 	public async Task<IEnumerable<RegionOnlyDto>> Handle(AddRegionsCommand request, CancellationToken cancellationToken)
 	{
-		var regions = (List<Region>)request;
-		foreach (var region in regions)
-		{
-			await _regionRepository.AddAsync(region, cancellationToken);
-		}
-		try
-		{
-			await _unitOfWork.SaveChangesAsync(cancellationToken);  //this could throw
-		}
-		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
-		{
-			throw new BadUpdateCommand(ex.InnerException.Message);
-		}
-		return regions
-			.Select(r => (RegionOnlyDto)r!)
-			.ToList();
+		throw new NotImplementedException();
+		//var regions = (List<Region>)request;
+		//foreach (var region in regions)
+		//{
+		//	await _regionRepository.AddAsync(region, cancellationToken);
+		//}
+		//try
+		//{
+		//	await _unitOfWork.SaveChangesAsync(cancellationToken);  //this could throw
+		//}
+		//catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		//{
+		//	throw new BadUpdateCommand(ex.InnerException.Message);
+		//}
+		//return regions
+		//	.Select(r => (RegionOnlyDto)r!)
+		//	.ToList();
 	}
 }

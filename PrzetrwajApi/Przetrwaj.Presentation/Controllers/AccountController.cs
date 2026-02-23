@@ -78,16 +78,11 @@ public class AccountController : Controller
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
-			return NotFound((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 404 User for some reason does not exist
+			return NotFound((ExceptionCasting)new InvalidCookieException("Invalid Cookie/Token")); // Returns a 404 User for some reason does not exist
 		var requ = new UpdateAccountInternallCommand
 		{
 			UserId = currentUserId,
-			IdRegion = updateAccount.IdRegion,
-			Name = updateAccount.Name,
-			Surname = updateAccount.Surname,
-			Email = updateAccount.Email,
-			NewPassword = updateAccount.NewPassword,
-			OldPassword = updateAccount.OldPassword,
+			Update = updateAccount
 		};
 		try
 		{

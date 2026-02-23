@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Helpers;
+using Przetrwaj.Domain.Models;
 using Przetrwaj.Infrastucture.Context;
 
 namespace Przetrwaj.Infrastucture.Repositories;
@@ -9,53 +11,83 @@ namespace Przetrwaj.Infrastucture.Repositories;
 
 public class RegionRepository : IRegionRepository
 {
-	private readonly ApplicationDbContext _dbContext;
+	private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+	//private readonly ApplicationDbContext _dbContext;
 	private readonly IAppCache _cache;
 	private const string RegionsCacheKey = "Regions";
 	private readonly TimeSpan _cacheDuration = TimeSpan.FromHours(24); // Long duration for static data
 
-	public RegionRepository(ApplicationDbContext dbContext, IAppCache cache)
+	public RegionRepository(IAppCache cache, IDbContextFactory<ApplicationDbContext> contextFactory)
 	{
-		_dbContext = dbContext;
 		_cache = cache;
+		_contextFactory = contextFactory;
 	}
 
-	public async Task<IEnumerable<Region>> GetAllAsync(CancellationToken ct)
+	public async Task<AllRegions> GetAllAsync(CancellationToken ct)
 	{
-		// Fetch all regions into memory atomically
+		// Fetch all regions into memory atomically (asynchronus querries)
 		return await _cache.GetOrAddAsync(RegionsCacheKey, async entry =>
 		{
 			entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
+
 			// IMPORTANT: Use AsNoTracking because these objects will live in RAM
-			return await _dbContext.Regions.AsNoTracking()
-				.OrderBy(o => o.Name.ToLower())
-				.ToListAsync(ct);
+			var wojTask = ExecuteQueryAsync(ctx =>
+				ctx.RegionWoj.AsNoTracking().OrderBy(r => r.Id).ToListAsync(ct));
+			var powTask = ExecuteQueryAsync(ctx =>
+				ctx.RegionPow.AsNoTracking().OrderBy(r => r.Id).ToListAsync(ct));
+			var gmiTask = ExecuteQueryAsync(ctx =>
+				ctx.RegionGmi.AsNoTracking().OrderBy(r => r.Id).ToListAsync(ct));
+
+			await Task.WhenAll(wojTask, powTask, gmiTask);
+
+			var regions = new AllRegions
+			{
+				Woj = await wojTask,
+				Pow = await powTask,
+				Gmi = await gmiTask
+			};
+
+			var list = new List<IRegionInfo>(regions.Woj);
+			list.AddRange(regions.Pow);
+			list.AddRange(regions.Gmi);
+			regions.CompundList = list.OrderBy(r => r.Id).ToList();
+			return regions;
 		});
 	}
-
-	public async Task<Region?> GetByIdAsync(int id, CancellationToken ct)
+	private async Task<T> ExecuteQueryAsync<T>(Func<ApplicationDbContext, Task<T>> query)
 	{
+		using var context = await _contextFactory.CreateDbContextAsync();
+		return await query(context);
+	}
+
+	public async Task<IRegionInfo?> GetByIdAsync(int id, CancellationToken ct)
+	{
+		var regionId = RegionCompoundHelper.UnifyRegionId(id);
 		// Don't go to DB. Use the cached list.
 		var allRegions = await GetAllAsync(ct);
-		return allRegions.FirstOrDefault(r => r.IdRegion == id);
+		return allRegions.CompundList.FirstOrDefault(r => r.Id == regionId);
 	}
 
-	public async Task AddAsync(Region region, CancellationToken ct)
+	public async Task AddAsync(IRegionInfo region, CancellationToken ct)
 	{
-		await _dbContext.Regions.AddAsync(region, ct);
-		// We don't save changes here (Unit of Work pattern), but we MUST clear cache
-		_cache.Remove(RegionsCacheKey);
+		//if(region is RegionWoj woj)
+		throw new NotImplementedException();
+		//await _dbContext.Regions.AddAsync(region, ct);
+		//// We don't save changes here (Unit of Work pattern), but we MUST clear cache
+		//_cache.Remove(RegionsCacheKey);
 	}
 
-	public void Update(Region item)
+	public void Update(IRegionInfo item)
 	{
-		_dbContext.Regions.Update(item);
-		_cache.Remove(RegionsCacheKey);
+		throw new NotImplementedException();
+		//_dbContext.Regions.Update(item);
+		//_cache.Remove(RegionsCacheKey);
 	}
 
-	public void Delete(Region item)
+	public void Delete(IRegionInfo item)
 	{
-		_dbContext.Regions.Remove(item);
-		_cache.Remove(RegionsCacheKey);
+		throw new NotImplementedException();
+		//_dbContext.Regions.Remove(item);
+		//_cache.Remove(RegionsCacheKey);
 	}
 }

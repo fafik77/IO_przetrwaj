@@ -11,7 +11,9 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
 	public DbSet<Attachment> Attachments { get; set; }
 	public DbSet<Post> Posts { get; set; }
-	public DbSet<Region> Regions { get; set; }
+	public DbSet<RegionWoj> RegionWoj { get; set; }
+	public DbSet<RegionPow> RegionPow { get; set; }
+	public DbSet<RegionGmi> RegionGmi { get; set; }
 	public DbSet<UserComment> Comments { get; set; }
 	public DbSet<Vote> Votes { get; set; }
 
@@ -19,11 +21,11 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	/// <summary>
 	/// Returns only Active Danger Posts
 	/// </summary>
-	public IQueryable<Post> PostsDangerRO => Posts.AsNoTracking().Where(p => p.Active == true && p.Category == CategoryType.Danger);
+	public IQueryable<Post> PostsDangerRO => Posts.AsNoTracking().Where(p => p.Active == true && p.CategoryType == CategoryType.Danger);
 	/// <summary>
 	/// Returns only Active Resource Posts
 	/// </summary>
-	public IQueryable<Post> PostsResourcesRO => Posts.AsNoTracking().Where(p => p.Active == true && p.Category == CategoryType.Resource);
+	public IQueryable<Post> PostsResourcesRO => Posts.AsNoTracking().Where(p => p.Active == true && p.CategoryType == CategoryType.Resource);
 	public DbSet<PostMinimalCategoryRegion> PostMinimalViews { get; set; }
 	#endregion
 
@@ -76,7 +78,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.OnDelete(DeleteBehavior.Restrict);
 
 
-		// --- 3. UserComment Entity Configuration ---
+		// --- 2. UserComment Entity Configuration ---
 
 		// Relationship: Post (Principal) -> UserComment (Dependent)
 		builder.Entity<UserComment>()
@@ -94,7 +96,21 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.OnDelete(DeleteBehavior.Restrict);
 
 
-		// --- 4. Post Entity Configuration ---
+		// --- 2. Region___ Entity Configuration ---
+
+		// Relationship: Region_up (Principal) -> Region_down (Dependent)
+		builder.Entity<RegionGmi>()
+			.HasOne(p => p.Pow)                     // Gmi is in Pow
+			.WithMany(c => c.Gminy)                 // Pow has many Gmi
+			.HasForeignKey(p => p.PowId)            // Foreign Key is PowId (short)
+			.OnDelete(DeleteBehavior.Restrict);
+		builder.Entity<RegionPow>()
+			.HasOne(p => p.Woj)                     // Pow is in Woj
+			.WithMany(c => c.Powiaty)               // Woj has many Pow
+			.HasForeignKey(p => p.WojId)            // Foreign Key is WojId (short)
+			.OnDelete(DeleteBehavior.Restrict);
+
+		// --- 2. Post Entity Configuration ---
 
 		// Relationship: AppUser (Principal) -> Post (Dependent)
 		builder.Entity<Post>()
@@ -110,40 +126,50 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.HasForeignKey(p => p.IdCategory)       // Foreign Key is IdCategory (int) in Post
 			.OnDelete(DeleteBehavior.Restrict);
 
-		// Relationship: Region (Principal) -> Post (Dependent)
+		// Relationship: Region___ (Principal) -> Post (Dependent)
 		builder.Entity<Post>()
-			.HasOne(p => p.IdRegionNavigation)      // Post has one Region
+			.HasOne(p => p.RegionWojNavigation)     // Post has one Region
 			.WithMany(r => r.Posts)                 // Region has many Posts
-			.HasForeignKey(p => p.IdRegion)         // Foreign Key is IdRegion (int) in Post
+			.HasForeignKey(p => p.IdWojOnly)        // Foreign Key is IdWojOnly (short?) in Post
+			.OnDelete(DeleteBehavior.Restrict);
+		builder.Entity<Post>()
+			.HasOne(p => p.RegionPowNavigation)     // Post has one Region
+			.WithMany(r => r.Posts)                 // Region has many Posts
+			.HasForeignKey(p => p.IdPowOnly)        // Foreign Key is IdPowOnly (short?) in Post
+			.OnDelete(DeleteBehavior.Restrict);
+		builder.Entity<Post>()
+			.HasOne(p => p.RegionGmiNavigation)     // Post has one Region
+			.WithMany(r => r.Posts)                 // Region has many Posts
+			.HasForeignKey(p => p.IdGmiOnly)        // Foreign Key is IdGmiOnly (int?) in Post
 			.OnDelete(DeleteBehavior.Restrict);
 
 		builder.Entity<Post>()
-			.Property(p => p.Category)
+			.Property(p => p.CategoryType)
 			.IsRequired();
 
 		// Add a composite index for Category and Active status (used for: PostsDangerROm, PostsResourcesRO, Statistics)
 		builder.Entity<Post>()
-			.HasIndex(p => new { p.Category, p.Active })    // 2 * 2 = only 4 branching paths (Da, Dn, Ra, Rn)
+			.HasIndex(p => new { p.CategoryType, p.Active })    // 2 * 2 = only 4 branching paths (Da, Dn, Ra, Rn)
 			.HasDatabaseName("IX_Post_Category_Active");
 
 
-		// --- 5. Attachment Entity Configuration ---
+		// --- 2. Attachment Entity Configuration ---
 
 		// Relationship: Post (Principal) -> Attachment (Dependent)
 		builder.Entity<Attachment>()
 			.HasOne(a => a.IdPostNavigation)        // Attachment has one Post
 			.WithMany(p => p.Attachments)           // Post has many Attachments
 			.HasForeignKey(a => a.IdPost)           // Foreign Key is IdPost in Attachment
-			.OnDelete(DeleteBehavior.Cascade);      // If a Post is deleted, its Attachments are deleted
+			.OnDelete(DeleteBehavior.SetNull);      // If a Post is deleted, its Attachments are invalidated (to clean up)
 
 
-		// --- 6. AppUser Entity Configuration ---
+		// --- 2. AppUser Entity Configuration ---
 
-		// Relationship: Region (Principal) -> AppUser (Dependent)
+		// Relationship: Region___ (Principal) -> AppUser (Dependent)
 		builder.Entity<AppUser>()
-			.HasOne(u => u.IdRegionNavigation)      // AppUser has one Region
+			.HasOne(u => u.RegionPowNavigation)      // AppUser has one Region
 			.WithMany(r => r.Users)                 // Region has many Users
-			.HasForeignKey(u => u.IdRegion)         // Foreign Key is IdRegion in AppUser
+			.HasForeignKey(u => u.PowiatId)         // Foreign Key is PowiatId in AppUser
 			.OnDelete(DeleteBehavior.Restrict);     // Prevent deleting a Region if users are linked
 	}
 }

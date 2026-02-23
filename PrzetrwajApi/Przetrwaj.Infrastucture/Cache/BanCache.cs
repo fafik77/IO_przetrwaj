@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions.Users;
 using Przetrwaj.Domain.Models;
+using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Infrastucture.Cache;
 
@@ -35,17 +36,16 @@ public class BanCache : IBanCache
 			var _userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 			var bannedUser = await _userRepository.GetByIdAsync(userId);
 			if (bannedUser is null) throw new UserNotFoundException(userId);
-			var moderatorUser = await _userRepository.GetByIdAsync(bannedUser.BannedById);
-			if (moderatorUser is null) throw new UserNotFoundException(bannedUser.BannedById);
+			var moderatorUser = await _userRepository.GetByIdAsync(bannedUser.BannedById ?? string.Empty);
 
 			banStatus = _cache.Set(userId, new BanStatus { Banned = true }, _banCacheDuration);
 			banStatus.BanInfo = new BanInfo
 			{
 				BanDate = bannedUser.BanDate,
 				BanReason = bannedUser.BanReason ?? string.Empty,
-				BannedById = bannedUser.BannedById,
-				Banned = bannedUser.Banned,
-				BannedBy = (Domain.Models.Dtos.UserGeneralDto)moderatorUser!
+				BannedById = bannedUser.BannedById ?? string.Empty,
+				Banned = bannedUser.BanDate != null,
+				BannedBy = UserGeneralDto.Map(moderatorUser)
 			};
 			return banStatus.BanInfo;
 		}

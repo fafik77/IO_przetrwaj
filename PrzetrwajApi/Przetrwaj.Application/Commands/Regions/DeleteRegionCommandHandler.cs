@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions;
-using Przetrwaj.Domain.Exceptions.RegionException;
+using Przetrwaj.Domain.Exceptions.Regions;
 
 namespace Przetrwaj.Application.Commands.Regions;
 

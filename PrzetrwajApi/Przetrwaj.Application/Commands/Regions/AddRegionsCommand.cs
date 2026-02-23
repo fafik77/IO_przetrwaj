@@ -10,8 +10,8 @@ public class AddRegionsCommand : ICommand<IEnumerable<RegionOnlyDto>>
 	[Required]
 	public required IEnumerable<AddRegionCommand> Regions { get; set; }
 
-	static public implicit operator List<Region>(AddRegionsCommand request)
+	static public implicit operator List<IRegionInfo>(AddRegionsCommand request)
 	{
-		return request.Regions.Select(r => (Region)r).ToList();
+		return request.Regions.Select(r => r.Map()).ToList();
 	}
 }

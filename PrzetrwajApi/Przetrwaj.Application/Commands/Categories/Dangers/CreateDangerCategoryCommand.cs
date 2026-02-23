@@ -12,6 +12,7 @@ public class CreateDangerCategoryCommand : ICommand<CategoryDto>
 	[MaxLength(100)]
 	public required string Name { get; set; }
 	public string? CategoryIcon { get; set; }
+	public int Impediments { get; set; } = 0;
 
 	static public implicit operator CategoryDanger(CreateDangerCategoryCommand request)
 	{
@@ -19,6 +20,7 @@ public class CreateDangerCategoryCommand : ICommand<CategoryDto>
 		{
 			Name = request.Name,
 			CategoryIcon = request.CategoryIcon,
+			Impediments = request.Impediments,
 		};
 	}
 }

@@ -12,7 +12,9 @@ public class UpdateAccountCommand
 	[MaxLength(64)]
 	[EmailAddress]
 	public string? Email { get; set; }
-	public int? IdRegion { get; set; }
+	public short? PowiatId { get; set; }
+	public int? GminaId { get; set; }
+	public int? Impediments { get; set; }
 	[MaxLength(64)]
 	[PasswordPropertyText]
 	public string? NewPassword { get; set; }

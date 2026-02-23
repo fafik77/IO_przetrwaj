@@ -13,6 +13,7 @@ public abstract class Category
 	public CategoryType Type { get; set; }
 	//[MaxLength(70)]
 	public string? CategoryIcon { get; set; }
+	public int Impediments { get; set; } = 0;
 
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 }

@@ -57,14 +57,14 @@ public class AuthService : IAuthService
 		// send the email
 		await _emailSender.SendEmailAsync(newEmail, subject: "Potwierdź zmianę adresu e-mail - Przetrwaj.pl",
 		$@"<h2>Witaj {user.Name}!</h2>
-        <p>Otrzymaliśmy prośbę o zmianę adresu e-mail na: <strong>{newEmail}</strong>.</p>
-        <div style='margin: 30px 0;'>
-            <a href='{absoluteUrlString}' 
-               style='background-color: #007bff; color: white; padding: 15px 25px; text-decoration: none; font-size: 18px; border-radius: 5px; display: inline-block;'>
-               Potwierdź zmianę e-maila
-            </a>
-        </div>
-        <p>Dopóki nie klikniesz w przycisk, Twój obecny adres pozostanie aktywny.</p>");
+		<p>Otrzymaliśmy prośbę o zmianę adresu e-mail na: <strong>{newEmail}</strong>.</p>
+		<div style='margin: 30px 0;'>
+			<a href='{absoluteUrlString}' 
+			   style='background-color: #007bff; color: white; padding: 15px 25px; text-decoration: none; font-size: 18px; border-radius: 5px; display: inline-block;'>
+			   Potwierdź zmianę e-maila
+			</a>
+		</div>
+		<p>Dopóki nie klikniesz w przycisk, Twój obecny adres pozostanie aktywny.</p>");
 	}
 
 	public async Task<AppUser> GetUserDetailsAsync(string userIdEmail)
@@ -91,12 +91,12 @@ public class AuthService : IAuthService
 		if (false == await _userManager.CheckPasswordAsync(user, password))
 			throw new InvalidLoginException("Bad login attempt");
 
-		if (user.Banned || user.BanDate != null)    //user is banned
+		if (user.BanDate != null)    //user is banned
 		{
-			var bannedBy = await _userRepository.GetByIdAsync(user.BannedById!);
-			var dto = (UserWithPersonalDataDto)user;
-			if (dto.BanInfo != null) dto.BanInfo.BannedBy = (UserGeneralDto?)bannedBy!;
-			throw new UserBannedException("User is banned", dto.BanInfo);
+			var bannedBy = await _userRepository.GetByIdAsync(user.BannedById ?? string.Empty);
+			UserWithPersonalDataDto dto = (UserWithPersonalDataDto)user;
+			if (dto.BanInfo != null) dto.BanInfo.BannedBy = UserGeneralDto.Map(bannedBy);
+			throw new UserBannedException("User is banned", dto.BanInfo!);
 		}
 		var signedIn = await _signInManager.PasswordSignInAsync(user, password, true, true);
 		if (signedIn.Succeeded)
@@ -112,7 +112,7 @@ public class AuthService : IAuthService
 			Name = register.Name,
 			Surname = register.Surname,
 			UserName = register.Email, // Typically, UserName is set to the email for login (its enforced unique)
-			IdRegion = register.IdRegion ?? 0,
+									   //IdRegion = register.IdRegion ?? 0,
 			RegistrationDate = DateTimeOffset.UtcNow,
 			ModeratorRolePending = register.ModeratorRole,
 		};
@@ -138,17 +138,17 @@ public class AuthService : IAuthService
 			$"<h2>{register.Name} witaj w serwisie Przetrwaj.pl</h2><br>" +
 			$@"<p>Potwierdź swoje konto, klikając w poniższy przycisk:</p>
 <div style='text-align: center; margin: 30px 0;'>
-    <a href='{absoluteUrlString}' 
-       style='background-color: #28a745; 
-              color: white; 
-              padding: 15px 25px; 
-              text-decoration: none; 
-              font-size: 18px; 
-              font-weight: bold; 
-              border-radius: 5px; 
-              display: inline-block;'>
-        Potwierdź konto
-    </a>
+	<a href='{absoluteUrlString}' 
+	   style='background-color: #28a745; 
+			  color: white; 
+			  padding: 15px 25px; 
+			  text-decoration: none; 
+			  font-size: 18px; 
+			  font-weight: bold; 
+			  border-radius: 5px; 
+			  display: inline-block;'>
+		Potwierdź konto
+	</a>
 </div>" +
 			$"<br><br><p style='color: gray; font-size: 12px;'>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
 

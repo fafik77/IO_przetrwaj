@@ -13,6 +13,7 @@ public class PostCompleteDataDto
 	public CategoryDto? Category { get; set; }
 	public CategoryType CategoryType { get; set; }
 	public RegionOnlyDto? Region { get; set; }
+	public LatLong? LatLong { get; set; }
 
 	public UserGeneralDtoSimpleRegion? Author { get; set; }
 	public DateTimeOffset DateCreated { get; set; }
@@ -39,8 +40,9 @@ public class PostCompleteDataDto
 			Description = post.Description,
 			//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = (CategoryDto?)post.IdCategoryNavigation,
-			CategoryType = post.Category,
-			Region = (RegionOnlyDto?)post.IdRegionNavigation,
+			CategoryType = post.CategoryType,
+			//Region = (RegionOnlyDto?)post.IdRegionNavigation,
+			LatLong = post.Lat is null ? null : new LatLong((double)post.Lat, (double)post.Long!),
 			Author = (UserGeneralDtoSimpleRegion?)post.IdAutorNavigation,
 			DateCreated = post.DateCreated,
 			//Attachments = post.Attachments.Select(a => (AttachmentDto?)a).ToList(),

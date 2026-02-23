@@ -11,15 +11,19 @@ namespace Przetrwaj.Infrastucture.Services;
 public class StatisticsService : IStatisticsService
 {
 	private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+	private readonly IRegionRepository _regionRepository;
+	private readonly ICategoryRepository _categoryRepository;
 	private readonly IAppCache _cache;
 	private const string StatsCacheKey = "Statistics";
+	private static readonly TimeSpan _statisticsCacheDuration = TimeSpan.FromHours(1);
 
-	public StatisticsService(IDbContextFactory<ApplicationDbContext> contextFactory, IAppCache cache)
+	public StatisticsService(IDbContextFactory<ApplicationDbContext> contextFactory, IRegionRepository regionRepository, ICategoryRepository categoryRepository, IAppCache cache)
 	{
 		_contextFactory = contextFactory;
+		_regionRepository = regionRepository;
+		_categoryRepository = categoryRepository;
 		_cache = cache;
 	}
-
 
 	/// <summary>
 	/// Gets or Fetches StatisticsDto that is fetched only once an hour from DB. After that its cached.
@@ -32,17 +36,14 @@ public class StatisticsService : IStatisticsService
 		// Try to get from cache, or fetch and save if not present
 		return await _cache.GetOrAddAsync(StatsCacheKey, async entry =>
 		{
-			// Set cache duration (e.g., 5 minutes)
-			entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-			// Log this so you can see in your console when a REAL DB hit happens
+			entry.AbsoluteExpirationRelativeToNow = _statisticsCacheDuration;
+			// Log this to see when a REAL DB hit happens
 			Console.WriteLine("Cache expired. Fetching fresh statistics from Database...");
 
 			// Run the parallel counts
-			var regionsTask = GetCountAsync(ctx => ctx.Regions.LongCountAsync());
 			var usersTask = GetCountAsync(ctx => ctx.Users.LongCountAsync());
-			var activeDangersTask = GetCountAsync(ctx => ctx.Posts.LongCountAsync(p => p.Category == CategoryType.Danger && p.Active));
-			var activeResourcesTask = GetCountAsync(ctx => ctx.Posts.LongCountAsync(p => p.Category == CategoryType.Resource && p.Active));
-			//_userManager.GetUsersInRoleAsync(UserRoles.Moderator)
+			var activeDangersTask = GetCountAsync(ctx => ctx.Posts.LongCountAsync(p => p.CategoryType == CategoryType.Danger && p.Active));
+			var activeResourcesTask = GetCountAsync(ctx => ctx.Posts.LongCountAsync(p => p.CategoryType == CategoryType.Resource && p.Active));
 			var moderatorsTask = GetCountAsync(ctx => ctx.UserRoles
 			.AsNoTracking()
 			.Join(ctx.Roles,
@@ -51,12 +52,23 @@ public class StatisticsService : IStatisticsService
 				(ur, r) => new { ur, r })
 			.Where(joined => joined.r.Name == UserRoles.Moderator)
 			.LongCountAsync());
+
+			///here I am hoping that some tasks will complete beffore reaching the `regionsTask` which has 3 more async queries if not already in RAM.
+			///_categoryRepository gets the entire list of Danger/Resource Category and stores them in RAM, running 2 async queries is bad.
+			var DangerCategories = await _categoryRepository.GetDangersAsync(cancellationToken);
+			var ResourceCategories = await _categoryRepository.GetResourcesAsync(cancellationToken);
+			var regionsTask = _regionRepository.GetAllAsync(cancellationToken);
+
 			//get all of their results
 			await Task.WhenAll(regionsTask, usersTask, activeDangersTask, activeResourcesTask);
 			//return those results
 			return new StatisticsDto
 			{
-				Regions = await regionsTask,
+				RegionsWoj = (await regionsTask).Woj.Count,
+				RegionsPow = (await regionsTask).Pow.Count,
+				RegionsGmi = (await regionsTask).Gmi.Count,
+				DangerCategories = DangerCategories.Count(),
+				ResourceCategories = ResourceCategories.Count(),
 				Users = await usersTask,
 				ActiveDangers = await activeDangersTask,
 				ActiveResources = await activeResourcesTask,

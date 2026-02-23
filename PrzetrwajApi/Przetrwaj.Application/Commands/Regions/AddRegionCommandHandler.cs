@@ -1,6 +1,5 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
-using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models.Dtos;
 
@@ -20,7 +19,7 @@ public class AddRegionCommandHandler : ICommandHandler<AddRegionCommand, RegionO
 
 	public async Task<RegionOnlyDto> Handle(AddRegionCommand request, CancellationToken cancellationToken)
 	{
-		var region = (Region)request;
+		var region = request.Map();
 		await _regionRepository.AddAsync(region, cancellationToken);
 		try
 		{

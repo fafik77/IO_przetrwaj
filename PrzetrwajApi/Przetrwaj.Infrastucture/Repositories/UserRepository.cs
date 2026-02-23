@@ -27,18 +27,22 @@ public class UserRepository : IUserRepository
 
 	public async Task<AppUser?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
 	{
+		if (string.IsNullOrEmpty(id)) return null;
 		id = id.ToLower();
 		var res = await _dbContext.Users
-			.Include(u => u.IdRegionNavigation)
+			.Include(u => u.RegionPowNavigation)
+			.Include(u => u.RegionGmiNavigation)
 			.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 		return res;
 	}
 
 	public async Task<AppUser?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
 	{
+		if (string.IsNullOrEmpty(email)) return null;
 		var normEmail = _userManager.NormalizeEmail(email);
 		var res = await _dbContext.Users
-			.Include(u => u.IdRegionNavigation)
+			.Include(u => u.RegionPowNavigation)
+			.Include(u => u.RegionGmiNavigation)
 			.FirstOrDefaultAsync(u => u.NormalizedEmail == normEmail, cancellationToken);
 		return res;
 	}
@@ -47,14 +51,13 @@ public class UserRepository : IUserRepository
 	{
 		var users = await _dbContext.Users
 			.AsNoTracking()
-			.Where(u => u.ModeratorRolePending && u.EmailConfirmed && !u.Banned && u.ModeratorSince == null)
-			//.Include(u => u.IdRegionNavigation)
+			.Where(u => u.ModeratorRolePending && u.EmailConfirmed && u.BanDate == null && u.ModeratorSince == null)
 			.Select(u => new ModeratorPendingStatus
 			{
 				Email = u.Email!,
 				Id = u.Id,
-				RegionId = u.IdRegion,
-				RegionName = u.IdRegionNavigation.Name,
+				RegionId = u.PowiatId * 1_000,
+				RegionName = u.RegionPowNavigation.Woj.Name + " - " + u.RegionPowNavigation.Name,
 				Surname = u.Surname,
 				Name = u.Name,
 			})

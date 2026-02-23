@@ -34,12 +34,12 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		else //id
 			user = await _userRepository.GetByIdAsync(request.UserIdOrEmail, cancellationToken);
 		if (user is null) throw new UserNotFoundException(request.UserIdOrEmail);
-		if (user.Banned || user.BannedById != null) //user was already banned
+		if (user.BannedById != null) //user was already banned
 		{
-			AppUser? moderatorOld = await _userRepository.GetByIdAsync(user.BannedById!, cancellationToken);
+			AppUser? moderatorOld = await _userRepository.GetByIdAsync(user.BannedById ?? string.Empty, cancellationToken);
 			var dtoUserAlreadyBanned = (UserWithPersonalDataDto)user;
 			if (dtoUserAlreadyBanned.BanInfo != null)
-				dtoUserAlreadyBanned.BanInfo.BannedBy = (UserGeneralDto?)moderatorOld; //add Moderator info
+				dtoUserAlreadyBanned.BanInfo.BannedBy = UserGeneralDto.Map(moderatorOld); //add Moderator info
 			return dtoUserAlreadyBanned;
 		}
 		AppUser? moderator = await _userRepository.GetByIdAsync(request.ModeratorId, cancellationToken);
@@ -56,7 +56,6 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		user.BanDate = DateTimeOffset.UtcNow;
 		user.BanReason = request.Reason;
 		user.BannedById = request.ModeratorId;
-		user.Banned = true;
 		// This is the key line to invalidate logged in user cookie or other tokens:
 		await _userManager.UpdateSecurityStampAsync(user);
 		try
@@ -72,7 +71,7 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 
 		var dto = (UserWithPersonalDataDto)user;
 		if (dto.BanInfo != null)
-			dto.BanInfo.BannedBy = (UserGeneralDto?)moderator; //add Moderator info
+			dto.BanInfo.BannedBy = UserGeneralDto.Map(moderator); //add Moderator info
 		return dto;
 	}
 }

@@ -3,22 +3,25 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Domain.Entities;
 
-public class Region
+//public class Region
+//{
+//	[Key]
+//	public int IdRegion { get; set; }
+//	//[MaxLength(100)]
+//	public required string Name { get; set; }
+//	public double Lat { get; set; }
+//	public double Long { get; set; }
+//	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+//	public virtual ICollection<AppUser> Users { get; set; } = new List<AppUser>();
+//}
+
+public enum RegionPrecision
 {
-	[Key]
-	public int IdRegion { get; set; }
-	//[MaxLength(100)]
-	public required string Name { get; set; }
-	public double Lat { get; set; }
-	public double Long { get; set; }
-
-
-	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
-
-	public virtual ICollection<AppUser> Users { get; set; } = new List<AppUser>();
+	PL,
+	WOJ,
+	POW,
+	GMI
 }
-
-
 public interface IRegionInfo
 {
 	public int Id { get; }
@@ -37,7 +40,7 @@ public class RegionWoj : IRegionInfo
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 	public virtual ICollection<RegionPow> Powiaty { get; set; } = [];
 
-	int IRegionInfo.Id => Id * 100000;
+	int IRegionInfo.Id => Id * 100_000;
 	LatLong? IRegionInfo.LatLong => null;
 }
 //Powiat
@@ -57,12 +60,11 @@ public class RegionPow : IRegionInfo
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 	public virtual ICollection<AppUser> Users { get; set; } = new List<AppUser>();
 	public virtual ICollection<RegionGmi> Gminy { get; set; } = [];
-	//public virtual ICollection<RegionUl> Ulice { get; set; } = [];
 
-	int IRegionInfo.Id =>  Id * 1000;
+	int IRegionInfo.Id => Id * 1_000;
 	LatLong IRegionInfo.LatLong => new LatLong(Lat, Long);
 }
-//Gmina/Dzielnica
+//Gmina
 public class RegionGmi : IRegionInfo
 {
 	//2x Char
@@ -84,18 +86,3 @@ public class RegionGmi : IRegionInfo
 	int IRegionInfo.Id => Id * 10;
 	LatLong IRegionInfo.LatLong => new LatLong(Lat, Long);
 }
-//Ulica
-//public class RegionUl
-//{
-//	//[Key]
-//	//public short WojId { get; set; }
-//	[Key]
-//	public short PowId { get; set; }
-//	//SYM_UL
-//	[Key]
-//	public int Id { get; set; }
-//	public required string Name { get; set; }
-
-//	public virtual required RegionPow Pow { get; set; }
-//	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
-//}

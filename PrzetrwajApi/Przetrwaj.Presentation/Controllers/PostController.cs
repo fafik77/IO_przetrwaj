@@ -239,13 +239,10 @@ public partial class PostController : Controller
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var postI = new AddDangerInternallCommand
 		{
-			Title = newPost.Title,
-			Description = newPost.Description,
-			IdCategory = newPost.IdCategory,
-			CustomCategory = newPost.CustomCategory,
-			IdRegion = newPost.IdRegion,
+			AddPostCommand = newPost,
 			// Set user from cookie
 			IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+			Claims = User.FindAll(ClaimTypes.Role),
 		};
 		try
 		{
@@ -270,13 +267,10 @@ public partial class PostController : Controller
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var postI = new AddResourceInternallCommand
 		{
-			Title = newPost.Title,
-			Description = newPost.Description,
-			IdCategory = newPost.IdCategory,
-			CustomCategory = newPost.CustomCategory,
-			IdRegion = newPost.IdRegion,
+			AddPostCommand = newPost,
 			// Set user from cookie
 			IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+			Claims = User.FindAll(ClaimTypes.Role),
 		};
 		try
 		{

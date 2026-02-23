@@ -20,7 +20,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-const string AuthenticationCookie = "cookie";
+//const string AuthenticationCookie = "cookie";
 
 // Bind the "Email" section to the EmailSettings class
 builder.Services.Configure<EmailSettings>(
@@ -84,10 +84,10 @@ builder.Services.AddAuthentication(
 		options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 		options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 	})
-	.AddCookie(AuthenticationCookie, options =>
-	{
-		options.Cookie.Name = AuthenticationCookie;
-	})
+	//.AddCookie(AuthenticationCookie, options =>
+	//{
+	//	options.Cookie.Name = AuthenticationCookie;
+	//})
 	.AddJwtBearer(options =>
 	{
 		options.IncludeErrorDetails = true;
@@ -161,29 +161,29 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>() // Specifies that Identity should use EF Core and your DbContext
 .AddDefaultTokenProviders(); // Required for generating tokens (e.g., password reset)
-builder.Services.ConfigureApplicationCookie(options =>
-{
-	// Cookie settings
-	options.Cookie.HttpOnly = true;
-	options.ExpireTimeSpan = TimeSpan.FromHours(8);
+//builder.Services.ConfigureApplicationCookie(options =>
+//{
+//	// Cookie settings
+//	options.Cookie.HttpOnly = true;
+//	options.ExpireTimeSpan = TimeSpan.FromHours(8);
 
-	//options.LoginPath = "/Identity/Account/Login";
-	//options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-	options.SlidingExpiration = true;
+//	//options.LoginPath = "/Identity/Account/Login";
+//	//options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+//	options.SlidingExpiration = true;
 
-	options.Events.OnRedirectToLogin = context =>
-	{
-		// Instead of redirecting to /Account/Login, return 401
-		context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-		return Task.CompletedTask;
-	};
-	options.Events.OnRedirectToAccessDenied = context =>
-	{
-		// Instead of redirecting to AccessDenied, return 403
-		context.Response.StatusCode = StatusCodes.Status403Forbidden;
-		return Task.CompletedTask;
-	};
-});
+//	options.Events.OnRedirectToLogin = context =>
+//	{
+//		// Instead of redirecting to /Account/Login, return 401
+//		context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+//		return Task.CompletedTask;
+//	};
+//	options.Events.OnRedirectToAccessDenied = context =>
+//	{
+//		// Instead of redirecting to AccessDenied, return 403
+//		context.Response.StatusCode = StatusCodes.Status403Forbidden;
+//		return Task.CompletedTask;
+//	};
+//});
 builder.Services.AddAuthentication(options =>   //re-apply JWT as default
 {
 	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

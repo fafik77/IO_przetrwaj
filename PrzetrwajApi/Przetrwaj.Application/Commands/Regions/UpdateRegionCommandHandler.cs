@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions;
-using Przetrwaj.Domain.Exceptions.RegionException;
+using Przetrwaj.Domain.Exceptions.Regions;
 
 namespace Przetrwaj.Application.Commands.Regions;
 
@@ -19,12 +19,13 @@ public class UpdateRegionCommandHandler : ICommandHandler<UpdateRegionCommand>
 
 	public async Task Handle(UpdateRegionCommand request, CancellationToken cancellationToken)
 	{
+		throw new NotImplementedException();
 		var regionToUpdate = await _regionRepository.GetByIdAsync(request.IdRegion);
 		if (regionToUpdate == null) throw new RegionNotFoundException(request.IdRegion);
 
-		regionToUpdate.Name = request.Name;
-		regionToUpdate.Lat = request.Lat;
-		regionToUpdate.Long = request.Long;
+		//regionToUpdate.Name = request.Name;
+		//regionToUpdate.Lat = request.Lat;
+		//regionToUpdate.Long = request.Long;
 
 		_regionRepository.Update(regionToUpdate);
 		try

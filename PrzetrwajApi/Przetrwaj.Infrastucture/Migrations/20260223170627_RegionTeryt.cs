@@ -62,7 +62,8 @@ namespace Przetrwaj.Infrastucture.Migrations
 				schema: "przetrwaj",
 				table: "AspNetUsers",
 				type: "integer",
-				nullable: false);
+				nullable: false,
+				defaultValue: 0);
 
 			migrationBuilder.RenameColumn(
 				name: "Category",

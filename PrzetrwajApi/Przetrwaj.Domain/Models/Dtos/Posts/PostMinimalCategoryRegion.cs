@@ -10,7 +10,7 @@ public class PostMinimalCategoryRegion
 	// Added this to act as a unique identifier for EF's internal tracking
 	public string IdPost { get; set; } = null!;
 
-	public int IdRegion { get; set; }
+	//public int IdRegion { get; set; }
 	public required string Title { get; set; }
 	public int IdCategory { get; set; }
 

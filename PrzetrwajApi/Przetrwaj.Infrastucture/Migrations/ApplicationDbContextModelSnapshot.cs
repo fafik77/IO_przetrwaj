@@ -519,9 +519,6 @@ namespace Przetrwaj.Infrastucture.Migrations
                         .HasColumnType("text")
                         .HasColumnName("IdPost");
 
-                    b.Property<int>("IdRegion")
-                        .HasColumnType("integer");
-
                     b.Property<double>("Lat")
                         .HasColumnType("double precision");
 

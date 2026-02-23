@@ -330,6 +330,11 @@ namespace Przetrwaj.Infrastucture.Migrations
 				principalTable: "RegionWoj",
 				principalColumn: "Id",
 				onDelete: ReferentialAction.Restrict);
+
+			migrationBuilder.Sql(@"
+				CREATE OR REPLACE VIEW przetrwaj.""View_PostMinimal"" AS
+				SELECT p.""IdPost"", p.""Title"", p.""IdCategory"", p.""Active"", p.""Lat"", p.""Long""
+				FROM przetrwaj.""Posts"" p;");
 		}
 
 		/// <inheritdoc />

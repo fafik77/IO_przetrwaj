@@ -173,8 +173,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 				schema: "przetrwaj",
 				columns: table => new
 				{
-					Id = table.Column<short>(type: "smallint", nullable: false)
-						.Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+					Id = table.Column<short>(type: "smallint", nullable: false),
 					Name = table.Column<string>(type: "text", nullable: false)
 				},
 				constraints: table =>
@@ -187,8 +186,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 				schema: "przetrwaj",
 				columns: table => new
 				{
-					Id = table.Column<short>(type: "smallint", nullable: false)
-						.Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+					Id = table.Column<short>(type: "smallint", nullable: false),
 					WojId = table.Column<short>(type: "smallint", nullable: false),
 					Name = table.Column<string>(type: "text", nullable: false),
 					Lat = table.Column<double>(type: "double precision", nullable: false),
@@ -211,8 +209,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 				schema: "przetrwaj",
 				columns: table => new
 				{
-					Id = table.Column<int>(type: "integer", nullable: false)
-						.Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+					Id = table.Column<int>(type: "integer", nullable: false),
 					PowId = table.Column<short>(type: "smallint", nullable: false),
 					Name = table.Column<string>(type: "text", nullable: false),
 					Lat = table.Column<double>(type: "double precision", nullable: false),
@@ -228,6 +225,19 @@ namespace Przetrwaj.Infrastucture.Migrations
 						principalTable: "RegionPow",
 						principalColumn: "Id",
 						onDelete: ReferentialAction.Restrict);
+				});
+
+			migrationBuilder.CreateTable(
+				name: "Impediments",
+				schema: "przetrwaj",
+				columns: table => new
+				{
+					Id = table.Column<short>(type: "smallint", nullable: false),
+					Name = table.Column<string>(type: "text", nullable: false)
+				},
+				constraints: table =>
+				{
+					table.PrimaryKey("PK_Impediments", x => x.Id);
 				});
 
 			migrationBuilder.CreateIndex(
@@ -341,6 +351,10 @@ namespace Przetrwaj.Infrastucture.Migrations
 		protected override void Down(MigrationBuilder migrationBuilder)
 		{
 			migrationBuilder.Sql("DROP VIEW przetrwaj.\"View_PostMinimal\";");
+
+			migrationBuilder.DropTable(
+				name: "Impediments",
+				schema: "przetrwaj");
 
 			migrationBuilder.DropForeignKey(
 				name: "FK_AspNetUsers_RegionGmi_RegionGmiNavigationId",

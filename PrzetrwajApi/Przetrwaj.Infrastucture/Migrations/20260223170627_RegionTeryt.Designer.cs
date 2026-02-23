@@ -316,6 +316,20 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.UseTphMappingStrategy();
 				});
 
+			modelBuilder.Entity("Przetrwaj.Domain.Entities.Impediment", b =>
+				{
+					b.Property<short>("Id")
+						.HasColumnType("smallint");
+
+					b.Property<string>("Name")
+						.IsRequired()
+						.HasColumnType("text");
+
+					b.HasKey("Id");
+
+					b.ToTable("Impediments", "przetrwaj");
+				});
+
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.Post", b =>
 				{
 					b.Property<string>("IdPost")
@@ -387,10 +401,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionGmi", b =>
 				{
 					b.Property<int>("Id")
-						.ValueGeneratedOnAdd()
 						.HasColumnType("integer");
-
-					NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
 					b.Property<double>("Lat")
 						.HasColumnType("double precision");
@@ -415,10 +426,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionPow", b =>
 				{
 					b.Property<short>("Id")
-						.ValueGeneratedOnAdd()
 						.HasColumnType("smallint");
-
-					NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
 
 					b.Property<double>("Lat")
 						.HasColumnType("double precision");
@@ -443,10 +451,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionWoj", b =>
 				{
 					b.Property<short>("Id")
-						.ValueGeneratedOnAdd()
 						.HasColumnType("smallint");
-
-					NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
 
 					b.Property<string>("Name")
 						.IsRequired()
@@ -521,9 +526,6 @@ namespace Przetrwaj.Infrastucture.Migrations
 						.IsRequired()
 						.HasColumnType("text")
 						.HasColumnName("IdPost");
-
-					b.Property<int>("IdRegion")
-						.HasColumnType("integer");
 
 					b.Property<double>("Lat")
 						.HasColumnType("double precision");

@@ -1,5 +1,6 @@
 ﻿using Przetrwaj.Domain.Models.Dtos;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Przetrwaj.Domain.Entities;
 
@@ -34,6 +35,7 @@ public class RegionWoj : IRegionInfo
 {
 	//2x Char
 	[Key]
+	[DatabaseGenerated(DatabaseGeneratedOption.None)] // Id set manualy
 	public short Id { get; set; }
 	public required string Name { get; set; }
 
@@ -51,6 +53,7 @@ public class RegionPow : IRegionInfo
 	public short WojId { get; set; }
 	//4x Char
 	[Key]
+	[DatabaseGenerated(DatabaseGeneratedOption.None)] // Id set manualy 
 	public short Id { get; set; }
 	public required string Name { get; set; }
 	public double Lat { get; set; }
@@ -75,6 +78,7 @@ public class RegionGmi : IRegionInfo
 	public short PowId { get; set; }
 	//6(+1)x Char (where last one will be ignored as it violates the Name uniqness)
 	[Key]
+	[DatabaseGenerated(DatabaseGeneratedOption.None)] // Id set manualy
 	public int Id { get; set; }
 	public required string Name { get; set; }
 	public double Lat { get; set; }

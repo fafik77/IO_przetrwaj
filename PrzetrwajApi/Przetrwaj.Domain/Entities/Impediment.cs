@@ -7,6 +7,6 @@ public class Impediment
 {
 	[Key]
 	[DatabaseGenerated(DatabaseGeneratedOption.None)] // Id set manualy (0-31)
-	short Id { get; set; }
+	public short Id { get; set; }
 	public required string Name { get; set; }
 }

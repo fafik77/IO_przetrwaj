@@ -443,6 +443,16 @@ namespace Przetrwaj.Infrastucture.Migrations
                     b.HasIndex("WojId");
 
                     b.ToTable("RegionPow", "przetrwaj");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)0,
+                            Lat = 0.0,
+                            Long = 0.0,
+                            Name = "",
+                            WojId = (short)0
+                        });
                 });
 
             modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionWoj", b =>
@@ -457,6 +467,13 @@ namespace Przetrwaj.Infrastucture.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RegionWoj", "przetrwaj");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)0,
+                            Name = "Polska"
+                        });
                 });
 
             modelBuilder.Entity("Przetrwaj.Domain.Entities.UserComment", b =>

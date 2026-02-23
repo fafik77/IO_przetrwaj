@@ -283,6 +283,18 @@ namespace Przetrwaj.Infrastucture.Migrations
 				table: "RegionPow",
 				column: "WojId");
 
+			migrationBuilder.InsertData(
+				schema: "przetrwaj",
+				table: "RegionWoj",
+				columns: new[] { "Id", "Name" },
+				values: new object[] { (short)0, "Polska" });
+
+			migrationBuilder.InsertData(
+				schema: "przetrwaj",
+				table: "RegionPow",
+				columns: new[] { "Id", "Lat", "Long", "Name", "WojId" },
+				values: new object[] { (short)0, 0.0, 0.0, "", (short)0 });
+
 			migrationBuilder.AddForeignKey(
 				name: "FK_AspNetUsers_RegionGmi_RegionGmiNavigationId",
 				schema: "przetrwaj",

@@ -11,6 +11,8 @@ namespace Przetrwaj.Infrastucture.Migrations
 		/// <inheritdoc />
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
+			migrationBuilder.Sql("DROP VIEW przetrwaj.\"View_PostMinimal\";");
+
 			migrationBuilder.DropForeignKey(
 				name: "FK_AspNetUsers_Regions_IdRegion",
 				schema: "przetrwaj",
@@ -333,6 +335,8 @@ namespace Przetrwaj.Infrastucture.Migrations
 		/// <inheritdoc />
 		protected override void Down(MigrationBuilder migrationBuilder)
 		{
+			migrationBuilder.Sql("DROP VIEW przetrwaj.\"View_PostMinimal\";");
+
 			migrationBuilder.DropForeignKey(
 				name: "FK_AspNetUsers_RegionGmi_RegionGmiNavigationId",
 				schema: "przetrwaj",
@@ -569,6 +573,12 @@ namespace Przetrwaj.Infrastucture.Migrations
 				principalTable: "Regions",
 				principalColumn: "IdRegion",
 				onDelete: ReferentialAction.Restrict);
+
+			migrationBuilder.Sql(@"
+				CREATE OR REPLACE VIEW przetrwaj.""View_PostMinimal"" AS
+				SELECT p.""IdPost"", p.""IdRegion"", p.""Title"", p.""IdCategory"", p.""Active"", r.""Lat"", r.""Long""
+				FROM przetrwaj.""Posts"" p
+				JOIN przetrwaj.""Regions"" r ON p.""IdRegion"" = r.""IdRegion"";");
 		}
 	}
 }

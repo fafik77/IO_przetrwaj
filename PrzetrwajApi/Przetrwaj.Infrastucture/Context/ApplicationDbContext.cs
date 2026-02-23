@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	public DbSet<RegionGmi> RegionGmi { get; set; }
 	public DbSet<UserComment> Comments { get; set; }
 	public DbSet<Vote> Votes { get; set; }
+	public DbSet<Impediment> Impediments { get; set; }
 
 	#region Views and TPH mappings
 	/// <summary>

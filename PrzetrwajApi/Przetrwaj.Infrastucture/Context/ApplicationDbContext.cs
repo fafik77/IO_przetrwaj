@@ -168,10 +168,16 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
 		// Relationship: Region___ (Principal) -> AppUser (Dependent)
 		builder.Entity<AppUser>()
-			.HasOne(u => u.RegionPowNavigation)      // AppUser has one Region
-			.WithMany(r => r.Users)                 // Region has many Users
-			.HasForeignKey(u => u.PowiatId)         // Foreign Key is PowiatId in AppUser
-			.OnDelete(DeleteBehavior.Restrict);     // Prevent deleting a Region if users are linked
+			.HasOne(u => u.RegionPowNavigation)		// AppUser has one Region
+			.WithMany(r => r.Users)					// Region has many Users
+			.HasForeignKey(u => u.PowiatId)			// Foreign Key is PowiatId in AppUser
+			.OnDelete(DeleteBehavior.Restrict);		// Prevent deleting a Region if users are linked
+
+		builder.Entity<AppUser>()
+			.HasOne(u => u.RegionGmiNavigation)		// AppUser has one Region
+			.WithMany()
+			.HasForeignKey(u => u.GminaId)			// Foreign Key is PowiatId in AppUser
+			.OnDelete(DeleteBehavior.SetNull);		// Prevent deleting a Region if users are linked
 
 
 		// --- 3. Seed data ---

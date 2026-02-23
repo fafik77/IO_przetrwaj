@@ -227,9 +227,6 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.Property<short>("PowiatId")
 						.HasColumnType("smallint");
 
-					b.Property<int?>("RegionGmiNavigationId")
-						.HasColumnType("integer");
-
 					b.Property<DateTimeOffset>("RegistrationDate")
 						.HasColumnType("timestamp with time zone");
 
@@ -248,6 +245,8 @@ namespace Przetrwaj.Infrastucture.Migrations
 
 					b.HasKey("Id");
 
+					b.HasIndex("GminaId");
+
 					b.HasIndex("NormalizedEmail")
 						.HasDatabaseName("EmailIndex");
 
@@ -256,8 +255,6 @@ namespace Przetrwaj.Infrastucture.Migrations
 						.HasDatabaseName("UserNameIndex");
 
 					b.HasIndex("PowiatId");
-
-					b.HasIndex("RegionGmiNavigationId");
 
 					b.ToTable("AspNetUsers", "przetrwaj");
 				});
@@ -446,6 +443,16 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.HasIndex("WojId");
 
 					b.ToTable("RegionPow", "przetrwaj");
+
+					b.HasData(
+						new
+						{
+							Id = (short)0,
+							Lat = 0.0,
+							Long = 0.0,
+							Name = "",
+							WojId = (short)0
+						});
 				});
 
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionWoj", b =>
@@ -460,6 +467,13 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.HasKey("Id");
 
 					b.ToTable("RegionWoj", "przetrwaj");
+
+					b.HasData(
+						new
+						{
+							Id = (short)0,
+							Name = "Polska"
+						});
 				});
 
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.UserComment", b =>
@@ -609,15 +623,16 @@ namespace Przetrwaj.Infrastucture.Migrations
 
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.AppUser", b =>
 				{
+					b.HasOne("Przetrwaj.Domain.Entities.RegionGmi", "RegionGmiNavigation")
+						.WithMany()
+						.HasForeignKey("GminaId")
+						.OnDelete(DeleteBehavior.SetNull);
+
 					b.HasOne("Przetrwaj.Domain.Entities.RegionPow", "RegionPowNavigation")
 						.WithMany("Users")
 						.HasForeignKey("PowiatId")
 						.OnDelete(DeleteBehavior.Restrict)
 						.IsRequired();
-
-					b.HasOne("Przetrwaj.Domain.Entities.RegionGmi", "RegionGmiNavigation")
-						.WithMany()
-						.HasForeignKey("RegionGmiNavigationId");
 
 					b.Navigation("RegionGmiNavigation");
 

@@ -224,9 +224,6 @@ namespace Przetrwaj.Infrastucture.Migrations
                     b.Property<short>("PowiatId")
                         .HasColumnType("smallint");
 
-                    b.Property<int?>("RegionGmiNavigationId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTimeOffset>("RegistrationDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -245,6 +242,8 @@ namespace Przetrwaj.Infrastucture.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GminaId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -253,8 +252,6 @@ namespace Przetrwaj.Infrastucture.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.HasIndex("PowiatId");
-
-                    b.HasIndex("RegionGmiNavigationId");
 
                     b.ToTable("AspNetUsers", "przetrwaj");
                 });
@@ -623,15 +620,16 @@ namespace Przetrwaj.Infrastucture.Migrations
 
             modelBuilder.Entity("Przetrwaj.Domain.Entities.AppUser", b =>
                 {
+                    b.HasOne("Przetrwaj.Domain.Entities.RegionGmi", "RegionGmiNavigation")
+                        .WithMany()
+                        .HasForeignKey("GminaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Przetrwaj.Domain.Entities.RegionPow", "RegionPowNavigation")
                         .WithMany("Users")
                         .HasForeignKey("PowiatId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("Przetrwaj.Domain.Entities.RegionGmi", "RegionGmiNavigation")
-                        .WithMany()
-                        .HasForeignKey("RegionGmiNavigationId");
 
                     b.Navigation("RegionGmiNavigation");
 

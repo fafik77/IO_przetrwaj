@@ -162,13 +162,6 @@ namespace Przetrwaj.Infrastucture.Migrations
 				nullable: false,
 				defaultValue: (short)0);
 
-			migrationBuilder.AddColumn<int>(
-				name: "RegionGmiNavigationId",
-				schema: "przetrwaj",
-				table: "AspNetUsers",
-				type: "integer",
-				nullable: true);
-
 			migrationBuilder.CreateTable(
 				name: "RegionWoj",
 				schema: "przetrwaj",
@@ -266,10 +259,10 @@ namespace Przetrwaj.Infrastucture.Migrations
 				column: "PowiatId");
 
 			migrationBuilder.CreateIndex(
-				name: "IX_AspNetUsers_RegionGmiNavigationId",
+				name: "IX_AspNetUsers_GminaId",
 				schema: "przetrwaj",
 				table: "AspNetUsers",
-				column: "RegionGmiNavigationId");
+				column: "GminaId");
 
 			migrationBuilder.CreateIndex(
 				name: "IX_RegionGmi_PowId",
@@ -296,13 +289,14 @@ namespace Przetrwaj.Infrastucture.Migrations
 				values: new object[] { (short)0, 0.0, 0.0, "", (short)0 });
 
 			migrationBuilder.AddForeignKey(
-				name: "FK_AspNetUsers_RegionGmi_RegionGmiNavigationId",
+				name: "FK_AspNetUsers_RegionGmi_GminaId",
 				schema: "przetrwaj",
 				table: "AspNetUsers",
-				column: "RegionGmiNavigationId",
+				column: "GminaId",
 				principalSchema: "przetrwaj",
 				principalTable: "RegionGmi",
-				principalColumn: "Id");
+				principalColumn: "Id",
+				onDelete: ReferentialAction.SetNull);
 
 			migrationBuilder.AddForeignKey(
 				name: "FK_AspNetUsers_RegionPow_PowiatId",
@@ -370,7 +364,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 				schema: "przetrwaj");
 
 			migrationBuilder.DropForeignKey(
-				name: "FK_AspNetUsers_RegionGmi_RegionGmiNavigationId",
+				name: "FK_AspNetUsers_RegionGmi_GminaId",
 				schema: "przetrwaj",
 				table: "AspNetUsers");
 
@@ -432,7 +426,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 				table: "AspNetUsers");
 
 			migrationBuilder.DropIndex(
-				name: "IX_AspNetUsers_RegionGmiNavigationId",
+				name: "IX_AspNetUsers_GminaId",
 				schema: "przetrwaj",
 				table: "AspNetUsers");
 
@@ -473,11 +467,6 @@ namespace Przetrwaj.Infrastucture.Migrations
 
 			migrationBuilder.DropColumn(
 				name: "PowiatId",
-				schema: "przetrwaj",
-				table: "AspNetUsers");
-
-			migrationBuilder.DropColumn(
-				name: "RegionGmiNavigationId",
 				schema: "przetrwaj",
 				table: "AspNetUsers");
 

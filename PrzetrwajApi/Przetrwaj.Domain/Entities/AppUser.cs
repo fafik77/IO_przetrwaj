@@ -29,16 +29,7 @@ public class AppUser : IdentityUser
 	/// </summary>
 	public int? GminaId { get; set; }
 	public int Impediments { get; set; } = 0;
-	//public bool Zsight { get; set; }
-	//public bool Zhearing { get; set; }
-	//public bool Zmovement { get; set; }
-	//public bool Zspeach { get; set; }
-	//public bool Zbody { get; set; }
-	///Remove the `Banned` field, its unnecessary with `BanDate?`
-	//public bool Banned { get; set; } = false;
 
-	//[ForeignKey(nameof(IdRegion))]
-	//public virtual Region IdRegionNavigation { get; set; } = null!;
 	public virtual RegionPow RegionPowNavigation { get; set; } = null!;
 	public virtual RegionGmi? RegionGmiNavigation { get; set; }
 	public virtual ICollection<UserComment> Comments { get; set; } = new List<UserComment>();

@@ -13,6 +13,17 @@ namespace Przetrwaj.Infrastucture.Migrations
 		{
 			migrationBuilder.Sql("DROP VIEW przetrwaj.\"View_PostMinimal\";");
 
+			migrationBuilder.InsertData(
+				schema: "przetrwaj",
+				table: "AspNetRoles",
+				columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+				values: new object[,]
+				{
+					{ "8411b424-3e32-4ea3-8dbc-b5d786b62e40", null, "Admin", "ADMIN" },
+					{ "aabf5428-e94c-418a-939a-8004bd1fe63c", null, "Moderator", "MODERATOR" },
+					{ "c395bc61-a75a-44ea-a8b6-d136bb4e032e", null, "User", "USER" }
+				});
+
 			migrationBuilder.DropForeignKey(
 				name: "FK_AspNetUsers_Regions_IdRegion",
 				schema: "przetrwaj",

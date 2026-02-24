@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos.Posts;
@@ -168,19 +169,39 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
 		// Relationship: Region___ (Principal) -> AppUser (Dependent)
 		builder.Entity<AppUser>()
-			.HasOne(u => u.RegionPowNavigation)		// AppUser has one Region
-			.WithMany(r => r.Users)					// Region has many Users
-			.HasForeignKey(u => u.PowiatId)			// Foreign Key is PowiatId in AppUser
-			.OnDelete(DeleteBehavior.SetNull);		// Prevent deleting a Region if users are linked
+			.HasOne(u => u.RegionPowNavigation)     // AppUser has one Region
+			.WithMany(r => r.Users)                 // Region has many Users
+			.HasForeignKey(u => u.PowiatId)         // Foreign Key is PowiatId in AppUser
+			.OnDelete(DeleteBehavior.SetNull);      // Prevent deleting a Region if users are linked
 
 		builder.Entity<AppUser>()
-			.HasOne(u => u.RegionGmiNavigation)		// AppUser has one Region
+			.HasOne(u => u.RegionGmiNavigation)     // AppUser has one Region
 			.WithMany()
-			.HasForeignKey(u => u.GminaId)			// Foreign Key is PowiatId in AppUser
-			.OnDelete(DeleteBehavior.SetNull);		// Prevent deleting a Region if users are linked
-
+			.HasForeignKey(u => u.GminaId)          // Foreign Key is PowiatId in AppUser
+			.OnDelete(DeleteBehavior.SetNull);      // Prevent deleting a Region if users are linked
 
 		// --- 3. Seed data ---
+		builder.Entity<IdentityRole>().HasData(
+			new IdentityRole
+			{
+				Id = "c395bc61-a75a-44ea-a8b6-d136bb4e032e",
+				Name = "User",
+				NormalizedName = "USER"
+			},
+			new IdentityRole
+			{
+				Id = "aabf5428-e94c-418a-939a-8004bd1fe63c",
+				Name = "Moderator",
+				NormalizedName = "MODERATOR"
+			},
+			new IdentityRole
+			{
+				Id = "8411b424-3e32-4ea3-8dbc-b5d786b62e40",
+				Name = "Admin",
+				NormalizedName = "ADMIN"
+			}
+		);
+
 		builder.Entity<RegionWoj>().HasData(
 			new RegionWoj { Id = 0, Name = "Polska" }
 		);

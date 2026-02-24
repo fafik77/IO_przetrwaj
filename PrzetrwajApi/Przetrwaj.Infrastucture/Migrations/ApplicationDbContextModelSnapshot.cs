@@ -47,6 +47,26 @@ namespace Przetrwaj.Infrastucture.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", "przetrwaj");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "c395bc61-a75a-44ea-a8b6-d136bb4e032e",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        },
+                        new
+                        {
+                            Id = "aabf5428-e94c-418a-939a-8004bd1fe63c",
+                            Name = "Moderator",
+                            NormalizedName = "MODERATOR"
+                        },
+                        new
+                        {
+                            Id = "8411b424-3e32-4ea3-8dbc-b5d786b62e40",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

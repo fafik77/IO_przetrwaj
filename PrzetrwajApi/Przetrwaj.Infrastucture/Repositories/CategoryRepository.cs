@@ -11,7 +11,7 @@ public class CategoryRepository : ICategoryRepository
 {
 	private readonly ApplicationDbContext _db;
 	private readonly IAppCache _cache;
-	private const string CategoryCacheKey = "Categories";
+	private readonly string CategoryCacheKey = "Categories";
 	private readonly TimeSpan _cacheDuration = TimeSpan.FromHours(24);
 
 	public CategoryRepository(ApplicationDbContext db, IAppCache cache)

@@ -23,7 +23,10 @@ namespace Przetrwaj.Infrastucture
 			services.AddScoped<ICategoryRepository, CategoryRepository>();
 			services.AddScoped<IPostRepository, PostRepository>();
 			services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+			services.AddScoped<IImpedimentsRepository, ImpedimentsRepository>();
+
 			services.AddScoped<IStatisticsService, StatisticsService>();
+
 			services.AddSingleton<IBanCache>(sp =>
 			{
 				// A completely separate memory pool just for bans

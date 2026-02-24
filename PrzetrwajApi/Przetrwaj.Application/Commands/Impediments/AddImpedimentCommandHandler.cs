@@ -1,0 +1,34 @@
+﻿using Przetrwaj.Application.Configuration.Commands;
+using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions.Impediments;
+
+namespace Przetrwaj.Application.Commands.Impediments;
+
+public class AddImpedimentCommandHandler : ICommandHandler<AddImpedimentCommand, Impediment>
+{
+	private readonly IImpedimentsRepository _repo;
+	private readonly IUnitOfWork _uow;
+
+	public AddImpedimentCommandHandler(IImpedimentsRepository repo, IUnitOfWork uow)
+	{
+		_repo = repo;
+		_uow = uow;
+	}
+
+	public async Task<Impediment> Handle(AddImpedimentCommand request, CancellationToken cancellationToken)
+	{
+		var item = request.Map();
+		if (!(item.Id >= 0 && item.Id <= 31)) throw new ImpedimentIdException($"{item.Id} is not in [0;31] range");
+		await _repo.AddAsync(item, cancellationToken);
+		try
+		{
+			await _uow.SaveChangesAsync(cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			throw new ImpedimentIdException($"Failed to save {item.Id}: {item.Name}");
+		}
+		return item;
+	}
+}

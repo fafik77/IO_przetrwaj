@@ -40,7 +40,7 @@ public class ImpedimentsRepository : IImpedimentsRepository
 		return await _cache.GetOrAddAsync(ImpedimentsCacheKey, async entry =>
 		{
 			entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
-			// Fetching the base type gets all derived types (TPH)
+			// Fetch from DB
 			return await _db.Impediments.AsNoTracking().ToListAsync(cancellationToken);
 		});
 	}

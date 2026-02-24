@@ -24,7 +24,7 @@ public class RegionCompoundHelper
 	{
 		if (RegionId < 100) return RegionId * 100_000;
 		if (RegionId < 10000) return RegionId * 1_000;
-		if (RegionId < 1000000) return RegionId * 10;
+		if (RegionId < 100000) return RegionId * 10;
 		return RegionId;
 	}
 }

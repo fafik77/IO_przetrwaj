@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Regions;
 using Przetrwaj.Application.Quaries.RegionQauries;
 using Przetrwaj.Domain;
+using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Models.Dtos;
@@ -24,7 +25,6 @@ public class RegionController : Controller
 	{
 		_mediator = mediator;
 	}
-
 
 	[HttpGet]
 	[SwaggerOperation("Get Regions")]
@@ -63,6 +63,33 @@ public class RegionController : Controller
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var res = await _mediator.Send(region, cancellationToken);
 		return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
+	}
+
+	[HttpPost("UpdateTercRegions")]
+	[SwaggerOperation("Add or Update TERC Regions (Moderator)")]
+	[Authorize(UserRoles.Moderator)]
+	[ProducesResponseType(typeof(UpdateTercRegionsResults), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(UpdateTercRegionsResults), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[RequestFormLimits(MultipartBodyLengthLimit = 5242880)] //up to 5 MB
+	[RequestSizeLimit(5242880)] //up to 5 MB
+	public async Task<IActionResult> UpdateRegions([FromForm] UpdateTercRegionsCommand region, CancellationToken ct)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		var res = await _mediator.Send(region, ct);
+		return StatusCode((int)res.StatusCode, res);
+	}
+
+	[HttpPost("FromLocation")]
+	[SwaggerOperation("Get region from location")]
+	[ProducesResponseType(typeof(IRegionInfo), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> FromLocation([FromBody] LatLong region, CancellationToken ct)
+	{
+		return NoContent();
+		//if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		//var res = await _mediator.Send(region, ct);
+		//return StatusCode((int)res.StatusCode, res);
 	}
 
 	[HttpPost("many")]

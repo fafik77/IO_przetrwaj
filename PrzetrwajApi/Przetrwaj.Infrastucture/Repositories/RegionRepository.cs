@@ -11,16 +11,17 @@ namespace Przetrwaj.Infrastucture.Repositories;
 
 public class RegionRepository : IRegionRepository
 {
-	private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
-	//private readonly ApplicationDbContext _dbContext;
+	private readonly IDbContextFactory<ApplicationDbContext> _contextFactoryRO;
+	private readonly ApplicationDbContext _dbContext;
 	private readonly IAppCache _cache;
 	private const string RegionsCacheKey = "Regions";
 	private readonly TimeSpan _cacheDuration = TimeSpan.FromHours(24); // Long duration for static data
 
-	public RegionRepository(IAppCache cache, IDbContextFactory<ApplicationDbContext> contextFactory)
+	public RegionRepository(IAppCache cache, IDbContextFactory<ApplicationDbContext> contextFactory, ApplicationDbContext dbContext)
 	{
 		_cache = cache;
-		_contextFactory = contextFactory;
+		_contextFactoryRO = contextFactory;
+		_dbContext = dbContext;
 	}
 
 	public async Task<AllRegions> GetAllAsync(CancellationToken ct)
@@ -56,7 +57,7 @@ public class RegionRepository : IRegionRepository
 	}
 	private async Task<T> ExecuteQueryAsync<T>(Func<ApplicationDbContext, Task<T>> query)
 	{
-		using var context = await _contextFactory.CreateDbContextAsync();
+		using var context = await _contextFactoryRO.CreateDbContextAsync();
 		return await query(context);
 	}
 
@@ -68,26 +69,39 @@ public class RegionRepository : IRegionRepository
 		return allRegions.CompundList.FirstOrDefault(r => r.Id == regionId);
 	}
 
-	public async Task AddAsync(IRegionInfo region, CancellationToken ct)
+	public async Task AddAsync<T>(IEnumerable<T> regions, CancellationToken ct) where T : class, IRegionInfo
 	{
-		//if(region is RegionWoj woj)
-		throw new NotImplementedException();
-		//await _dbContext.Regions.AddAsync(region, ct);
-		//// We don't save changes here (Unit of Work pattern), but we MUST clear cache
-		//_cache.Remove(RegionsCacheKey);
+		await _dbContext.Set<T>().AddRangeAsync(regions, ct);
+		_cache.Remove(RegionsCacheKey); //invalidate cache
 	}
 
-	public void Update(IRegionInfo item)
+	public async Task AddAsync<T>(T region, CancellationToken ct) where T : class, IRegionInfo
 	{
-		throw new NotImplementedException();
-		//_dbContext.Regions.Update(item);
-		//_cache.Remove(RegionsCacheKey);
+		await _dbContext.Set<T>().AddAsync(region, ct);
+		_cache.Remove(RegionsCacheKey); //invalidate cache
 	}
 
-	public void Delete(IRegionInfo item)
+	public void Delete<T>(IEnumerable<T> regions) where T : class, IRegionInfo
 	{
-		throw new NotImplementedException();
-		//_dbContext.Regions.Remove(item);
-		//_cache.Remove(RegionsCacheKey);
+		_dbContext.Set<T>().RemoveRange(regions);
+		_cache.Remove(RegionsCacheKey); //invalidate cache
+	}
+
+	public void Delete<T>(T region) where T : class, IRegionInfo
+	{
+		_dbContext.Set<T>().Remove(region);
+		_cache.Remove(RegionsCacheKey); //invalidate cache
+	}
+
+	public void Update<T>(IEnumerable<T> regions) where T : class, IRegionInfo
+	{
+		_dbContext.Set<T>().UpdateRange(regions);
+		_cache.Remove(RegionsCacheKey); //invalidate cache
+	}
+
+	public void Update<T>(T region) where T : class, IRegionInfo
+	{
+		_dbContext.Set<T>().Update(region);
+		_cache.Remove(RegionsCacheKey); //invalidate cache
 	}
 }

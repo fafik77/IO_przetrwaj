@@ -7,17 +7,17 @@ namespace Przetrwaj.Application.Commands;
 
 public class TercParser
 {
-	public static void Parse()
+	public static TercRegionResults Parse(Stream fileStream)
 	{
-		using var file = new FileStream(@"V:\TERC_Adresowy_2026-02-18.csv", FileMode.Open, FileAccess.Read);
-		using StreamReader sr = new StreamReader(file);
+		fileStream.Seek(0, SeekOrigin.Begin);
+		using StreamReader sr = new StreamReader(fileStream);
 		using var reader = new CsvReader(sr,
 			new CsvConfiguration(cultureInfo: System.Globalization.CultureInfo.InvariantCulture)
 			{
 				Delimiter = ";"
 			});
-		var res = reader.GetRecords<TERCItem>();
-		TercToRegionT(res);
+		var records = reader.GetRecords<TERCItem>();
+		return TercToRegionT(records);
 	}
 	public struct TercRegionResults
 	{

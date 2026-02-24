@@ -41,7 +41,7 @@ public class ImpedimentsRepository : IImpedimentsRepository
 		{
 			entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
 			// Fetch from DB
-			return await _db.Impediments.AsNoTracking().ToListAsync(cancellationToken);
+			return await _db.Impediments.AsNoTracking().OrderBy(e => e.Id).ToListAsync(cancellationToken);
 		});
 	}
 

@@ -26,7 +26,7 @@ public enum RegionPrecision
 public interface IRegionInfo
 {
 	public int Id { get; }
-	public string Name { get; }
+	public string Name { get; set; }
 	public LatLong? LatLong { get; }
 }
 //source TERYT: TERC_Urzedowy, ULIC_Urzedowy

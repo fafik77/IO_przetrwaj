@@ -231,22 +231,6 @@ app.UseRouting(); // Added this explicitly beffore UseCors (New .Net thing)
 app.UseCors(AllowPrzetrwajOrigins);
 app.UsePresentation();
 
-app.MapPost("UpdateTercRegions", (IFormFile file) =>
-{
-	TercParser.Parse();
-})//.RequireAuthorization(UserRoles.Moderator)
-	;
-
-app.MapGet("UpdateTercRegions", () =>
-{
-	TercParser.Parse();
-})//.RequireAuthorization(UserRoles.Moderator)
-	;
-app.MapPost("RegionFromLocation", ([FromBody] LatLong LatLong) =>
-{
-
-});
-
 app.MapPost("RefreshToken", ([FromBody] TokenRequest request) =>
 {
 	//this endpoint is not Authorized as that would require a valid Token in the first place

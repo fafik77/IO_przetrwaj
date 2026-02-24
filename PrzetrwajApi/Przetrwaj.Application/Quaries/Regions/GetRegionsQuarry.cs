@@ -1,8 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
 using Przetrwaj.Domain.Models.Dtos;
 
-namespace Przetrwaj.Application.Quaries.RegionQauries;
+namespace Przetrwaj.Application.Quaries.Regions;
 
 public class GetRegionsQuarry : IQuery<IEnumerable<RegionOnlyDto>>
-{
-}
+{ }

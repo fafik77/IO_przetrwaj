@@ -4,20 +4,19 @@ using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Quaries.Regions;
 
-public class GetRegionsQuarryHandler : IQueryHandler<GetRegionsQuarry, IEnumerable<RegionOnlyDto>>
+public class GetGmiRegionsQuarryHandler : IQueryHandler<GetGmiRegionsQuarry, IEnumerable<RegionOnlyDto>>
 {
 	private readonly IRegionRepository _regionRepository;
 
-	public GetRegionsQuarryHandler(IRegionRepository regionRepository)
+	public GetGmiRegionsQuarryHandler(IRegionRepository regionRepository)
 	{
 		_regionRepository = regionRepository;
 	}
 
-
-	public async Task<IEnumerable<RegionOnlyDto>> Handle(GetRegionsQuarry request, CancellationToken cancellationToken)
+	public async Task<IEnumerable<RegionOnlyDto>> Handle(GetGmiRegionsQuarry request, CancellationToken cancellationToken)
 	{
 		var res = await _regionRepository.GetAllAsync(cancellationToken);
-		return res.CompundList
+		return res.Gmi
 			.Select(r => RegionOnlyDto.Map(r)!)
 			.ToList();
 	}

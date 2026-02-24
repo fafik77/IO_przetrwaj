@@ -3,7 +3,5 @@ using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Quaries.Regions;
 
-public class GetRegionQuarry : IQuery<RegionOnlyDto>
-{
-	public int IdRegion;
-}
+public class GetGmiRegionsQuarry : IQuery<IEnumerable<RegionOnlyDto>>
+{ }

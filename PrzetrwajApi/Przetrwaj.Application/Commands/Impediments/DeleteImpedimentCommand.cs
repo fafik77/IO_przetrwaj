@@ -7,5 +7,5 @@ public class DeleteImpedimentCommand : ICommand
 {
 	[Required]
 	[Range(0, 31)]
-	public int Id { get; set; }
+	public short Id { get; set; }
 }

@@ -19,7 +19,7 @@ public class UserGeneralDtoSimpleRegion
 			Id = registeredUser.Id,
 			Name = registeredUser.Name ?? "",
 			Surname = registeredUser.Surname ?? "",
-			IdRegion = registeredUser.PowiatId * 100,
+			IdRegion = registeredUser.PowiatId ?? 0 * 100,
 			RegistrationDate = registeredUser.RegistrationDate,
 			BanDate = registeredUser.BanDate,
 		};

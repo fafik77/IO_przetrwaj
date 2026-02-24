@@ -171,7 +171,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.HasOne(u => u.RegionPowNavigation)		// AppUser has one Region
 			.WithMany(r => r.Users)					// Region has many Users
 			.HasForeignKey(u => u.PowiatId)			// Foreign Key is PowiatId in AppUser
-			.OnDelete(DeleteBehavior.Restrict);		// Prevent deleting a Region if users are linked
+			.OnDelete(DeleteBehavior.SetNull);		// Prevent deleting a Region if users are linked
 
 		builder.Entity<AppUser>()
 			.HasOne(u => u.RegionGmiNavigation)		// AppUser has one Region
@@ -183,9 +183,6 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 		// --- 3. Seed data ---
 		builder.Entity<RegionWoj>().HasData(
 			new RegionWoj { Id = 0, Name = "Polska" }
-		);
-		builder.Entity<RegionPow>().HasData(
-			new RegionPow { Id = 0, Name = "", WojId = 0 }
 		);
 
 	}

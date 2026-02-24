@@ -56,7 +56,7 @@ public class UserRepository : IUserRepository
 			{
 				Email = u.Email!,
 				Id = u.Id,
-				RegionId = u.PowiatId * 1_000,
+				RegionId = u.PowiatId ?? 0 * 1_000,
 				RegionName = u.RegionPowNavigation.Woj.Name + " - " + u.RegionPowNavigation.Name,
 				Surname = u.Surname,
 				Name = u.Name,

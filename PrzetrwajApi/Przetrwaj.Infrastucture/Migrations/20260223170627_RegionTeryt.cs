@@ -159,8 +159,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 				schema: "przetrwaj",
 				table: "AspNetUsers",
 				type: "smallint",
-				nullable: false,
-				defaultValue: (short)0);
+				nullable: true);
 
 			migrationBuilder.CreateTable(
 				name: "RegionWoj",
@@ -282,12 +281,6 @@ namespace Przetrwaj.Infrastucture.Migrations
 				columns: new[] { "Id", "Name" },
 				values: new object[] { (short)0, "Polska" });
 
-			migrationBuilder.InsertData(
-				schema: "przetrwaj",
-				table: "RegionPow",
-				columns: new[] { "Id", "Lat", "Long", "Name", "WojId" },
-				values: new object[] { (short)0, 0.0, 0.0, "", (short)0 });
-
 			migrationBuilder.AddForeignKey(
 				name: "FK_AspNetUsers_RegionGmi_GminaId",
 				schema: "przetrwaj",
@@ -306,7 +299,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 				principalSchema: "przetrwaj",
 				principalTable: "RegionPow",
 				principalColumn: "Id",
-				onDelete: ReferentialAction.Restrict);
+				onDelete: ReferentialAction.SetNull);
 
 			migrationBuilder.AddForeignKey(
 				name: "FK_Attachments_Posts_IdPost",

@@ -23,7 +23,7 @@ public class AppUser : IdentityUser
 	/// <summary>
 	/// Publicly visible info
 	/// </summary>
-	public short PowiatId { get; set; }
+	public short? PowiatId { get; set; }
 	/// <summary>
 	/// private preference for Post display sorting rules
 	/// </summary>

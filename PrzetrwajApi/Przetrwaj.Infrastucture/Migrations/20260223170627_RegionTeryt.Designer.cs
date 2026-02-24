@@ -224,7 +224,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.Property<bool>("PhoneNumberConfirmed")
 						.HasColumnType("boolean");
 
-					b.Property<short>("PowiatId")
+					b.Property<short?>("PowiatId")
 						.HasColumnType("smallint");
 
 					b.Property<DateTimeOffset>("RegistrationDate")
@@ -443,16 +443,6 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.HasIndex("WojId");
 
 					b.ToTable("RegionPow", "przetrwaj");
-
-					b.HasData(
-						new
-						{
-							Id = (short)0,
-							Lat = 0.0,
-							Long = 0.0,
-							Name = "",
-							WojId = (short)0
-						});
 				});
 
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionWoj", b =>
@@ -631,8 +621,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.HasOne("Przetrwaj.Domain.Entities.RegionPow", "RegionPowNavigation")
 						.WithMany("Users")
 						.HasForeignKey("PowiatId")
-						.OnDelete(DeleteBehavior.Restrict)
-						.IsRequired();
+						.OnDelete(DeleteBehavior.SetNull);
 
 					b.Navigation("RegionGmiNavigation");
 

@@ -85,7 +85,7 @@ internal class PostRepository : IPostRepository
 					Id = c.IdAutorNavigation.Id,
 					Name = c.IdAutorNavigation.Name ?? "",
 					Surname = c.IdAutorNavigation.Surname ?? "",
-					IdRegion = c.IdAutorNavigation.PowiatId,
+					IdRegion = c.IdAutorNavigation.PowiatId ?? 0,
 					RegistrationDate = c.IdAutorNavigation.RegistrationDate,
 					BanDate = c.IdAutorNavigation.BanDate,
 				} : null

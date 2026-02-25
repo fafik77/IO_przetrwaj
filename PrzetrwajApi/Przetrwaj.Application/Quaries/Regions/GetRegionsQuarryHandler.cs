@@ -17,8 +17,8 @@ public class GetRegionsQuarryHandler : IQueryHandler<GetRegionsQuarry, IEnumerab
 	public async Task<IEnumerable<RegionOnlyDto>> Handle(GetRegionsQuarry request, CancellationToken cancellationToken)
 	{
 		var res = await _regionRepository.GetAllAsync(cancellationToken);
-		return res.CompundList
-			.Select(r => RegionOnlyDto.Map(r)!)
+		return res.CompundDict
+			.Select(r => RegionOnlyDto.Map(r.Value)!)
 			.ToList();
 	}
 }

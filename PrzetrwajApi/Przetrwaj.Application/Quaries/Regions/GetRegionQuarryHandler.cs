@@ -18,6 +18,16 @@ public class GetRegionQuarryHandler : IQueryHandler<GetRegionQuarry, RegionOnlyD
 	{
 		var res = await _regionRepository.GetByIdAsync(request.IdRegion, cancellationToken);
 		if (res is null) throw new RegionNotFoundException(request.IdRegion);
-		return RegionOnlyDto.Map(res)!;
+		var dto = RegionOnlyDto.Map(res)!;
+		var parents = new List<string>();
+		var parentId = res.ParentId;
+		while (parentId != 0)
+		{
+			var parent = await _regionRepository.GetByIdAsync(parentId, cancellationToken);
+			parents.Add(parent.Name);
+			parentId = parent.ParentId;
+		}
+		dto.In = string.Join("; ", parents);
+		return dto;
 	}
 }

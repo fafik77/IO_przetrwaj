@@ -5,6 +5,7 @@ using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Helpers;
 using Przetrwaj.Domain.Models;
 using Przetrwaj.Infrastucture.Context;
+using System.Collections.Frozen;
 
 namespace Przetrwaj.Infrastucture.Repositories;
 
@@ -51,7 +52,7 @@ public class RegionRepository : IRegionRepository
 			var list = new List<IRegionInfo>(regions.Woj);
 			list.AddRange(regions.Pow);
 			list.AddRange(regions.Gmi);
-			regions.CompundList = list.OrderBy(r => r.Id).ToList();
+			regions.CompundDict = list.ToFrozenDictionary(r => r.Id);
 			return regions;
 		});
 	}
@@ -63,10 +64,11 @@ public class RegionRepository : IRegionRepository
 
 	public async Task<IRegionInfo?> GetByIdAsync(int id, CancellationToken ct)
 	{
+		if (id < 0 || id > 100_00_000) return null; // filter out invalid ids
 		var regionId = RegionCompoundHelper.UnifyRegionId(id);
 		// Don't go to DB. Use the cached list.
 		var allRegions = await GetAllAsync(ct);
-		return allRegions.CompundList.FirstOrDefault(r => r.Id == regionId);
+		return allRegions.CompundDict.GetValueOrDefault(regionId);
 	}
 
 	public async Task AddAsync<T>(IEnumerable<T> regions, CancellationToken ct) where T : class, IRegionInfo

@@ -8,6 +8,7 @@ using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Exceptions.Users;
+using Przetrwaj.Domain.Helpers;
 using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 
@@ -22,8 +23,9 @@ public class AuthService : IAuthService
 	private readonly IUrlHelper _urlHelper;
 	private readonly IHttpContextAccessor _httpContextAccessor;
 	private readonly FrontEndSettings _frontEndSettings;
+	private readonly IRegionRepository _regionRepository;
 
-	public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IOptions<FrontEndSettings> frontEndSettings)
+	public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IOptions<FrontEndSettings> frontEndSettings, IRegionRepository regionRepository)
 	{
 		_userManager = userManager;
 		_signInManager = signInManager;
@@ -32,6 +34,7 @@ public class AuthService : IAuthService
 		_httpContextAccessor = httpContextAccessor;
 		_userRepository = userRepository;
 		_frontEndSettings = frontEndSettings.Value;
+		_regionRepository = regionRepository;
 	}
 
 
@@ -106,13 +109,17 @@ public class AuthService : IAuthService
 
 	public async Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register)
 	{
+		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(register.IdRegion);
+		var PowExists = _regionRepository.GetByIdAsync(Pow);
+		var GmiExists = _regionRepository.GetByIdAsync(Gmi);
 		var user = new AppUser
 		{
 			Email = register.Email,
 			Name = register.Name,
 			Surname = register.Surname,
 			UserName = register.Email, // Typically, UserName is set to the email for login (its enforced unique)
-									   //IdRegion = register.IdRegion ?? 0,
+			PowiatId = PowExists is null ? null : Pow,
+			GminaId = GmiExists is null ? null : Gmi,
 			RegistrationDate = DateTimeOffset.UtcNow,
 			ModeratorRolePending = register.ModeratorRole,
 		};

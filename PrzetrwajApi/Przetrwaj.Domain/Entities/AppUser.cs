@@ -30,7 +30,7 @@ public class AppUser : IdentityUser
 	public int? GminaId { get; set; }
 	public int Impediments { get; set; } = 0;
 
-	public virtual RegionPow RegionPowNavigation { get; set; } = null!;
+	public virtual RegionPow? RegionPowNavigation { get; set; }
 	public virtual RegionGmi? RegionGmiNavigation { get; set; }
 	public virtual ICollection<UserComment> Comments { get; set; } = new List<UserComment>();
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();

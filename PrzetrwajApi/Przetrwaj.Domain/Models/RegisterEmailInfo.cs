@@ -19,7 +19,8 @@ public class RegisterEmailInfo
 	[Required]
 	[MaxLength(24)]
 	public required string Surname { get; set; }
-	public int? IdRegion { get; set; }
+	[Required]
+	public int IdRegion { get; set; }
 
 	public bool ModeratorRole { get; set; }
 }

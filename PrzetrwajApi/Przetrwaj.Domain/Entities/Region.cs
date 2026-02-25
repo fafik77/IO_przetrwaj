@@ -4,18 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Przetrwaj.Domain.Entities;
 
-//public class Region
-//{
-//	[Key]
-//	public int IdRegion { get; set; }
-//	//[MaxLength(100)]
-//	public required string Name { get; set; }
-//	public double Lat { get; set; }
-//	public double Long { get; set; }
-//	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
-//	public virtual ICollection<AppUser> Users { get; set; } = new List<AppUser>();
-//}
-
 public enum RegionPrecision
 {
 	PL,
@@ -28,6 +16,7 @@ public interface IRegionInfo
 	public int Id { get; }
 	public string Name { get; set; }
 	public LatLong? LatLong { get; }
+	public short ParentId { get; }
 }
 //source TERYT: TERC_Urzedowy, ULIC_Urzedowy
 //Województwo || Polska{id=0}
@@ -42,8 +31,10 @@ public class RegionWoj : IRegionInfo
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 	public virtual ICollection<RegionPow> Powiaty { get; set; } = [];
 
+
 	int IRegionInfo.Id => Id * 100_000;
 	LatLong? IRegionInfo.LatLong => null;
+	public short ParentId => 0;
 }
 //Powiat
 public class RegionPow : IRegionInfo
@@ -66,6 +57,7 @@ public class RegionPow : IRegionInfo
 
 	int IRegionInfo.Id => Id * 1_000;
 	LatLong IRegionInfo.LatLong => new LatLong(Lat, Long);
+	public short ParentId => WojId;
 }
 //Gmina
 public class RegionGmi : IRegionInfo
@@ -89,4 +81,5 @@ public class RegionGmi : IRegionInfo
 
 	int IRegionInfo.Id => Id * 10;
 	LatLong IRegionInfo.LatLong => new LatLong(Lat, Long);
+	public short ParentId => PowId;
 }

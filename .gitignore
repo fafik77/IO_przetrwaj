@@ -417,3 +417,4 @@ FodyWeavers.xsd
 *.msm
 *.msp
 /PrzetrwajPlContext_toFix.txt
+/PrzetrwajApi/Przetrwaj.Api/postgres in docker.txt

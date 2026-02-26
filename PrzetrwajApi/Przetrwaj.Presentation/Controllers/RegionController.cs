@@ -98,8 +98,8 @@ public class RegionController : Controller
 	[ProducesResponseType(typeof(UpdateTercRegionsResults), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(UpdateTercRegionsResults), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	[RequestFormLimits(MultipartBodyLengthLimit = 5242880)] //up to 5 MB
-	[RequestSizeLimit(5242880)] //up to 5 MB
+	[RequestFormLimits(MultipartBodyLengthLimit = 5 << 20)] //up to 5 MB
+	[RequestSizeLimit(5 << 20)] //up to 5 MB
 	public async Task<IActionResult> UpdateTercRegions([FromForm] UpdateTercRegionsCommand region, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);

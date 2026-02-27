@@ -80,6 +80,6 @@ public class GoogleLoginResponseCommandHandler : ICommandHandler<GoogleLoginResp
 		else
 			await _signInManager.SignInAsync(user, isPersistent: true);
 
-		return await _jwtService.GenerateTokenAsync(userDto);
+		return await _jwtService.GenerateTokenAsync(userDto, cancellationToken);
 	}
 }

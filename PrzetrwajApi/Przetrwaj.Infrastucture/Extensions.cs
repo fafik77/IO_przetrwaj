@@ -44,7 +44,7 @@ namespace Przetrwaj.Infrastucture
 				// A completely separate memory pool just for logged out users
 				var options = new MemoryCacheOptions
 				{
-					SizeLimit = BlackListUsersMaxCount // Limit to 10k logged out users to protect RAM
+					SizeLimit = BlackListUsersMaxCount, // Limit to 10k logged out users to protect RAM
 				};
 				return new LogoutCache(new MemoryCache(options), sp, configuration);
 			});

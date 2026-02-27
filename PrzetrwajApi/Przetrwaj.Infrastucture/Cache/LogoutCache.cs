@@ -17,28 +17,34 @@ public class LogoutCache : ILogoutCache
 		_services = services;
 		_configuration = configuration;
 		var CacheSettings = configuration.GetSection("Cache");
-		var BlackListTimeSpanHour = int.Parse(CacheSettings["BlackListTimeSpanHour"]);
+		var BlackListTimeSpanHour = double.Parse(CacheSettings["BlackListTimeSpanHour"]);
 		_banCacheDuration = TimeSpan.FromHours(BlackListTimeSpanHour);
+	}
+	public class UserJwis
+	{
+		public HashSet<string> Keys { get; set; } = [];
 	}
 
 	public bool IsLogedOut(string userId, string TokenId)
 	{
-		_cache.TryGetValue(userId, out ISet<string>? Tokens);
+		_cache.TryGetValue(userId, out UserJwis? Tokens);
 		if (Tokens is null) return false;
-		return Tokens.Contains(TokenId);
+		return Tokens.Keys.Contains(TokenId);
 	}
 
 	public void Logout(string userId, string TokenId)
 	{
-		Logout(userId, [TokenId]);
-	}
+		_cache.TryGetValue(userId, out UserJwis? UserJwis);
+		//var List = new List<string>(TokenIds);
+		if (UserJwis == null) UserJwis = new UserJwis();
+		//List.AddRange(UserJwis.Keys);
+		UserJwis.Keys.Add(TokenId);
+		var options = new MemoryCacheEntryOptions
+		{
+			Size = UserJwis.Keys.Count,
+			AbsoluteExpirationRelativeToNow = _banCacheDuration,
+		};
+		_cache.Set(userId, UserJwis, options);
 
-	public void Logout(string userId, IEnumerable<string> TokenIds)
-	{
-		_cache.TryGetValue(userId, out IEnumerable<string>? Tokens);
-		var List = new List<string>(TokenIds);
-		if (Tokens != null)
-			List.AddRange(Tokens);
-		_cache.Set(userId, List.ToHashSet(), _banCacheDuration);
 	}
 }

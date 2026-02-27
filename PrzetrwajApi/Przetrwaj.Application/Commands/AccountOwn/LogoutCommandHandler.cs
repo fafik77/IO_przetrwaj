@@ -14,6 +14,6 @@ public class LogoutCommandHandler : ICommandHandler<LogoutCommand>
 
 	public async Task Handle(LogoutCommand request, CancellationToken cancellationToken)
 	{
-		await _jwtService.BlockTokenAsync(request.UserId, request.TokenId);
+		await _jwtService.BlockTokenAsync(request.UserId, request.TokenId, cancellationToken);
 	}
 }

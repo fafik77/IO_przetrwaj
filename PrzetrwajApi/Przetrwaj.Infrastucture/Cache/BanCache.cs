@@ -20,7 +20,7 @@ public class BanCache : IBanCache
 		_cache = cache;
 		_services = services;
 		var CacheSettings = configuration.GetSection("Cache");
-		var BlackListTimeSpanHour = int.Parse(CacheSettings["BlackListTimeSpanHour"]);
+		var BlackListTimeSpanHour = double.Parse(CacheSettings["BlackListTimeSpanHour"]);
 		_banCacheDuration = TimeSpan.FromHours(BlackListTimeSpanHour);
 		_configuration = configuration;
 	}

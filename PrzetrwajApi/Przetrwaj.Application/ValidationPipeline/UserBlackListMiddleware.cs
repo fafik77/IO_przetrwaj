@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Przetrwaj.Domain.Abstractions;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Przetrwaj.Application.ValidationPipeline;
@@ -34,7 +35,7 @@ public class UserBlackListMiddleware
 			}
 
 			var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-			var tokenId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+			var jti = context.User.FindFirstValue(JwtRegisteredClaimNames.Jti);
 			if (userId != null)
 			{
 				// 2. Check the memory cache
@@ -51,8 +52,9 @@ public class UserBlackListMiddleware
 					});
 					return; // Stop the request here
 				}
-				else if (_logoutCache.IsLogedOut(userId, tokenId))
+				else if (_logoutCache.IsLogedOut(userId, jti))
 				{
+					context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 					return; // Stop the request here
 				}
 			}

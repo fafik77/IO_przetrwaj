@@ -22,7 +22,7 @@ public class ExceptionCasting
 	public string Status { get; set; }
 	public HttpStatusCode StatusCode { get; set; }
 	public ErrorDetails? Error { get; set; }
-	public DateTimeOffset Timestamp { get; set; }
+	public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.UtcNow;
 
 	public static explicit operator ExceptionCasting(BaseException exception)
 	{

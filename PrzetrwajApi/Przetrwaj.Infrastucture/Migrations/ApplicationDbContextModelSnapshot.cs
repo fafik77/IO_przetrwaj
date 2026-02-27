@@ -515,6 +515,29 @@ namespace Przetrwaj.Infrastucture.Migrations
                     b.ToTable("Comments", "przetrwaj");
                 });
 
+            modelBuilder.Entity("Przetrwaj.Domain.Entities.UserJwtRefresh", b =>
+                {
+					b.Property<string>("UserId")
+						.HasColumnType("text");
+
+                    b.Property<string>("Jwi")
+                        .HasColumnType("text");
+
+					b.Property<string>("RefreshToken")
+						.IsRequired()
+						.HasColumnType("text");
+
+					b.Property<short>("UsesLeft")
+						.HasColumnType("smallint");
+
+					b.Property<DateTimeOffset>("ValidTill")
+						.HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "Jwi");
+
+                    b.ToTable("UserJwtRefresh", "auth");
+                });
+
             modelBuilder.Entity("Przetrwaj.Domain.Entities.Vote", b =>
                 {
                     b.Property<string>("IdPost")
@@ -735,6 +758,15 @@ namespace Przetrwaj.Infrastucture.Migrations
                     b.Navigation("IdAutorNavigation");
 
                     b.Navigation("IdPostNavigation");
+                });
+
+            modelBuilder.Entity("Przetrwaj.Domain.Entities.UserJwtRefresh", b =>
+                {
+                    b.HasOne("Przetrwaj.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Przetrwaj.Domain.Entities.Vote", b =>

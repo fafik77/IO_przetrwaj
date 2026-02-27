@@ -29,7 +29,7 @@ public static class Extensions
 		services.AddHostedService<PostArchivingService>();
 		services.AddHostedService<ModeratorRolePendingNotificationService>();
 		services.AddScoped<IAddPostService, AddPostService>();
-		services.AddSingleton<IJwtService, JwtService>();
+		services.AddScoped<IJwtService, JwtService>();
 		return services;
 	}
 }

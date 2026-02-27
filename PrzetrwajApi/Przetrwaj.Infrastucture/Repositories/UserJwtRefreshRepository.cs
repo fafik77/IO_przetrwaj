@@ -1,42 +1,64 @@
-﻿using Przetrwaj.Domain.Abstractions;
+﻿using Microsoft.EntityFrameworkCore;
+using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Infrastucture.Context;
 
 namespace Przetrwaj.Infrastucture.Repositories;
 
 public class UserJwtRefreshRepository : IUserJwtRefreshRepository
 {
-	public Task<UserJwtRefresh> AddAsync(UserJwtRefresh userJwtRefresh, CancellationToken ct)
+	private readonly ApplicationDbContext _dbContext;
+
+	public UserJwtRefreshRepository(ApplicationDbContext dbContext)
 	{
-		throw new NotImplementedException();
+		_dbContext = dbContext;
 	}
 
-	public void Delete(UserJwtRefresh userJwtRefresh)
+	public async Task<UserJwtRefresh> AddAsync(UserJwtRefresh userJwtRefresh, CancellationToken ct)
 	{
-		throw new NotImplementedException();
+		await _dbContext.UserJwtRefresh.AddAsync(userJwtRefresh, ct);
+		return userJwtRefresh;
 	}
 
-	public void Delete(string userId, string tokenId)
+	public async Task DeleteAsync(UserJwtRefresh userJwtRefresh, CancellationToken ct)
 	{
-		throw new NotImplementedException();
+		_dbContext.UserJwtRefresh
+			.Remove(userJwtRefresh);
 	}
 
-	public void DeleteAll(string userId)
+	public async Task DeleteAsync(string userId, string tokenId, CancellationToken ct)
 	{
-		throw new NotImplementedException();
+		await _dbContext.UserJwtRefresh
+			.Where(e => e.UserId == userId && e.Jwi == tokenId)
+			.ExecuteDeleteAsync(ct);
 	}
 
-	public Task<IList<UserJwtRefresh>> GetByIdAsync(string userId, CancellationToken ct)
+	public async Task DeleteAllAsync(string userId, CancellationToken ct)
 	{
-		throw new NotImplementedException();
+		await _dbContext.UserJwtRefresh
+			.Where(e => e.UserId == userId)
+			.ExecuteDeleteAsync(ct);
 	}
 
-	public Task<UserJwtRefresh> GetByIdAsync(string userId, string tokenId, CancellationToken ct)
+	public async Task<IList<UserJwtRefresh>> GetByIdAsync(string userId, CancellationToken ct)
 	{
-		throw new NotImplementedException();
+		return
+			await _dbContext.UserJwtRefresh
+			.AsNoTracking()
+			.Where(e => e.UserId == userId)
+			.ToListAsync(ct);
+	}
+
+	public async Task<UserJwtRefresh?> GetByIdAsync(string userId, string tokenId, CancellationToken ct)
+	{
+		return
+			await _dbContext.UserJwtRefresh
+			.Where(e => e.UserId == userId && e.Jwi == tokenId)
+			.FirstOrDefaultAsync(ct);
 	}
 
 	public void Update(UserJwtRefresh userJwtRefresh)
 	{
-		throw new NotImplementedException();
+		_dbContext.UserJwtRefresh.Update(userJwtRefresh);
 	}
 }

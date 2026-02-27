@@ -7,12 +7,10 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Przetrwaj.Application;
-using Przetrwaj.Application.Commands;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models;
-using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Infrastucture;
 using Przetrwaj.Infrastucture.Context;
 using Przetrwaj.Presentation;
@@ -77,39 +75,41 @@ builder.Services.AddCors(options =>
 #region Auth
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
+if (key.Length <= 20) throw new ArgumentException("Invalid JWT.Key (Not set)");
 builder.Services.AddAuthentication(
-	options =>
+options =>
+{
+	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+//.AddCookie(AuthenticationCookie, options =>
+//{
+//	options.Cookie.Name = AuthenticationCookie;
+//})
+.AddJwtBearer(options =>
+{
+	options.IncludeErrorDetails = true;
+	options.TokenValidationParameters = new TokenValidationParameters
 	{
-		options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-		options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-		options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-	})
-	//.AddCookie(AuthenticationCookie, options =>
-	//{
-	//	options.Cookie.Name = AuthenticationCookie;
-	//})
-	.AddJwtBearer(options =>
-	{
-		options.IncludeErrorDetails = true;
-		options.TokenValidationParameters = new TokenValidationParameters
-		{
-			IssuerSigningKey = new SymmetricSecurityKey(key),
-			ValidIssuer = jwtSettings["Issuer"],
-			ValidAudience = jwtSettings["Audience"],
-			ClockSkew = TimeSpan.FromSeconds(5),
-			ValidateIssuerSigningKey = true,
-			ValidateIssuer = true,
-			ValidateLifetime = true,
-			ValidateAudience = true,
-		};
-	})
-	.AddGoogle(options =>
-	{
-		options.ClientId = oauthSettings?.Google?.ClientId ?? string.Empty;
-		options.ClientSecret = oauthSettings?.Google?.ClientSecret ?? string.Empty;
-		// This maps the Google claim to the standard .NET NameIdentifier
-		options.SignInScheme = IdentityConstants.ExternalScheme;
-	});
+		IssuerSigningKey = new SymmetricSecurityKey(key),
+		ValidIssuer = jwtSettings["Issuer"],
+		ValidAudience = jwtSettings["Audience"],
+		ClockSkew = TimeSpan.FromSeconds(5),
+		ValidateIssuerSigningKey = true,
+		ValidateIssuer = true,
+		ValidateLifetime = true,
+		ValidateAudience = true,
+		//ValidAlgorithms = [SecurityAlgorithms.HmacSha256Signature],
+	};
+})
+.AddGoogle(options =>
+{
+	options.ClientId = oauthSettings?.Google?.ClientId ?? string.Empty;
+	options.ClientSecret = oauthSettings?.Google?.ClientSecret ?? string.Empty;
+	// This maps the Google claim to the standard .NET NameIdentifier
+	options.SignInScheme = IdentityConstants.ExternalScheme;
+});
 //.AddIdentityCookies();
 // cookie for multiple .Net apps https://learn.microsoft.com/en-us/aspnet/core/security/cookie-sharing?view=aspnetcore-9.0
 builder.Services.AddAuthorization(opt =>
@@ -161,11 +161,11 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>() // Specifies that Identity should use EF Core and your DbContext
 .AddDefaultTokenProviders(); // Required for generating tokens (e.g., password reset)
-//builder.Services.ConfigureApplicationCookie(options =>
-//{
-//	// Cookie settings
-//	options.Cookie.HttpOnly = true;
-//	options.ExpireTimeSpan = TimeSpan.FromHours(8);
+							 //builder.Services.ConfigureApplicationCookie(options =>
+							 //{
+							 //	// Cookie settings
+							 //	options.Cookie.HttpOnly = true;
+							 //	options.ExpireTimeSpan = TimeSpan.FromHours(8);
 
 //	//options.LoginPath = "/Identity/Account/Login";
 //	//options.AccessDeniedPath = "/Identity/Account/AccessDenied";

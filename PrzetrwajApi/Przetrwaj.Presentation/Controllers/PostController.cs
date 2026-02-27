@@ -6,6 +6,7 @@ using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
 using Przetrwaj.Application.Quaries.Posts;
 using Przetrwaj.Domain;
+using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Posts;
@@ -46,13 +47,27 @@ public partial class PostController : Controller
 		}
 	}
 
-	[HttpGet]
+	[HttpGet("Map")]
 	[SwaggerOperation("Get all posts for map display.")]
 	[ProducesResponseType(typeof(IEnumerable<PostMinimalCategoryRegion>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetAllPosts(CancellationToken CT)
 	{
 		var posts = await _mediator.Send(new GetAllPostsMinimalQuery(), CT);
 		return Ok(posts);
+	}
+
+	[HttpGet]
+	[SwaggerOperation("Get all matching posts, sort in order of relevance")]
+	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
+	public async Task<IActionResult> GetMatchingPosts(
+		[FromQuery] int RegionId,
+		[FromQuery] int? Impediment,
+		[FromQuery] RegionPrecision? Level,
+		CancellationToken CT)
+	{
+		return BadRequest("WIP");
+		//var posts = await _mediator.Send(new GetAllPostsMinimalQuery(), CT);
+		//return Ok(posts);
 	}
 
 	//KL Done

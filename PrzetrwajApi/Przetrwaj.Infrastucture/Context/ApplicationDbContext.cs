@@ -18,6 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	public DbSet<UserComment> Comments { get; set; }
 	public DbSet<Vote> Votes { get; set; }
 	public DbSet<Impediment> Impediments { get; set; }
+	public DbSet<UserJwtRefresh> UserJwtRefresh { get; set; }
 
 	#region Views and TPH mappings
 	/// <summary>
@@ -41,6 +42,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 		// MUST call the base method first to configure Identity tables
 		base.OnModelCreating(builder);
 		builder.HasDefaultSchema("przetrwaj");
+		builder.Entity<UserJwtRefresh>().ToTable("UserJwtRefresh", "auth");
 
 		// --- 1. Category Inheritance (TPH) Configuration ---
 		builder.Entity<Category>()
@@ -179,6 +181,20 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.WithMany()
 			.HasForeignKey(u => u.GminaId)          // Foreign Key is PowiatId in AppUser
 			.OnDelete(DeleteBehavior.SetNull);      // Prevent deleting a Region if users are linked
+
+
+		// --- 2. UserJwtRefresh Entity Configuration ---
+
+		builder.Entity<UserJwtRefresh>()
+			.HasKey(k => new { k.UserId, k.Jwi });
+
+		// one AppUser has many UserJwtRefresh
+		builder.Entity<UserJwtRefresh>().HasOne<AppUser>()  // UserJwtRefresh has one AppUser
+			.WithMany()                                     // AppUser has many UserJwtRefresh
+			.HasForeignKey(e => e.UserId)                   // FK is UserId in UserJwtRefresh
+			.OnDelete(DeleteBehavior.Cascade);              // Delete all users tokens when the user is deleted
+
+
 
 		// --- 3. Seed data ---
 		builder.Entity<IdentityRole>().HasData(

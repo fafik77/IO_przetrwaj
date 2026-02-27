@@ -1,7 +1,6 @@
 ﻿using Przetrwaj.Domain.Models.Dtos;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
 namespace Przetrwaj.Domain.Entities;
 
 public enum RegionPrecision

@@ -59,7 +59,7 @@ public static class Extensions
 
 		//the order matters
 		app.UseAuthentication();
-		app.UseMiddleware<BanMiddleware>();
+		app.UseMiddleware<UserBlackListMiddleware>();
 		app.UseAuthorization();
 
 		app.MapControllers();

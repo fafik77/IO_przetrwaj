@@ -35,6 +35,7 @@ public class PostArchivingService : BackgroundService
 	{
 		using var scope = _services.CreateScope();
 		var postRepository = scope.ServiceProvider.GetRequiredService<IPostRepository>();
+		///change this method to return list<post ids> of inactive Posts
 		var posts = await postRepository.GetAllWithVotesStatusROAsync(cancellationToken);
 
 		var idsToDeactivate = posts

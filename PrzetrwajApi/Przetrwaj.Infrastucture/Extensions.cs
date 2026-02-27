@@ -24,18 +24,31 @@ namespace Przetrwaj.Infrastucture
 			services.AddScoped<IPostRepository, PostRepository>();
 			services.AddScoped<IAttachmentRepository, AttachmentRepository>();
 			services.AddScoped<IImpedimentsRepository, ImpedimentsRepository>();
+			services.AddScoped<IUserJwtRefreshRepository, UserJwtRefreshRepository>();
 
 			services.AddScoped<IStatisticsService, StatisticsService>();
 
+			var CacheSettings = configuration.GetSection("Cache");
+			var BlackListUsersMaxCount = int.Parse(CacheSettings["BlackListUsersMaxCount"]);
 			services.AddSingleton<IBanCache>(sp =>
 			{
 				// A completely separate memory pool just for bans
 				var options = new MemoryCacheOptions
 				{
-					SizeLimit = 10000 // Limit to 10k banned users to protect RAM
+					SizeLimit = BlackListUsersMaxCount // Limit to 10k banned users to protect RAM
 				};
-				return new BanCache(new MemoryCache(options), sp);
+				return new BanCache(new MemoryCache(options), sp, configuration);
 			});
+			services.AddSingleton<ILogoutCache>(sp =>
+			{
+				// A completely separate memory pool just for logged out users
+				var options = new MemoryCacheOptions
+				{
+					SizeLimit = BlackListUsersMaxCount // Limit to 10k logged out users to protect RAM
+				};
+				return new LogoutCache(new MemoryCache(options), sp, configuration);
+			});
+
 			return services;
 		}
 	}

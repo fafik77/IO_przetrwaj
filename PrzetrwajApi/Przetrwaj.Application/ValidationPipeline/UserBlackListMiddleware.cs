@@ -1,21 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
 using Przetrwaj.Domain.Abstractions;
-using Przetrwaj.Domain.Models;
 using System.Security.Claims;
 
 namespace Przetrwaj.Application.ValidationPipeline;
 
-public class BanMiddleware
+public class UserBlackListMiddleware
 {
 	private readonly RequestDelegate _next;
 	private readonly IBanCache _banCache;
+	private readonly ILogoutCache _logoutCache;
 
-	public BanMiddleware(RequestDelegate next, IBanCache banCache)
+	public UserBlackListMiddleware(RequestDelegate next, IBanCache banCache, ILogoutCache logoutCache)
 	{
 		_next = next;
 		_banCache = banCache;
+		_logoutCache = logoutCache;
 	}
 
 	public async Task InvokeAsync(HttpContext context)
@@ -34,6 +34,7 @@ public class BanMiddleware
 			}
 
 			var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+			var tokenId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 			if (userId != null)
 			{
 				// 2. Check the memory cache
@@ -45,9 +46,13 @@ public class BanMiddleware
 					{
 						error = "Banned",
 						message = $"Twoje konto zostało zablokowane dnia {banInfo.BanDate}" +
-						$" przez Moderatora {banInfo.BannedBy.Name} {banInfo.BannedBy.Surname} z {banInfo.BannedBy.Region?.Name}\n" +
-						$"Powód: {banInfo.BanReason}.\nSkontaktuj się z administratorem."
+						$" przez Moderatora {banInfo.BannedBy?.Name ?? string.Empty} {banInfo.BannedBy?.Surname ?? string.Empty} z {banInfo.BannedBy?.Region?.Name ?? string.Empty}\n" +
+						$"Powód: {banInfo.BanReason}.\nSkontaktuj się z moderatorem lub administratorem."
 					});
+					return; // Stop the request here
+				}
+				else if (_logoutCache.IsLogedOut(userId, tokenId))
+				{
 					return; // Stop the request here
 				}
 			}

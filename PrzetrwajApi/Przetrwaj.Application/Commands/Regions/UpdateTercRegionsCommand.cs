@@ -70,7 +70,7 @@ public class UpdateTercRegionsCommandHandler : ICommandHandler<UpdateTercRegions
 			results.Error = new ErrorDetails { Code = ex.InnerException?.GetType().Name ?? "Database Error", Message = ex.Message };
 			results.Success = false;
 		}
-		results.Timestamp = DateTime.Now;
+		results.Timestamp = DateTimeOffset.Now;
 		return results;
 	}
 

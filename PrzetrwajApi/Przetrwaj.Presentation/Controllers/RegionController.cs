@@ -94,7 +94,7 @@ public class RegionController : Controller
 
 	[HttpPost("UpdateTercRegions")]
 	[SwaggerOperation("Add or Update TERC Regions (Moderator)")]
-	[Authorize(UserRoles.Moderator)]
+	//[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(UpdateTercRegionsResults), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(UpdateTercRegionsResults), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]

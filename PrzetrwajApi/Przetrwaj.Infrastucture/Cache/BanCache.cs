@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions.Users;
@@ -12,11 +13,16 @@ public class BanCache : IBanCache
 	private readonly IMemoryCache _cache;
 	private readonly TimeSpan _banCacheDuration = TimeSpan.FromHours(8); //cookies are set for 8 hours so this one also for 8h (login is only valid for 30min by Default)
 	private readonly IServiceProvider _services;
+	private readonly IConfiguration _configuration;
 
-	public BanCache(IMemoryCache cache, IServiceProvider services)
+	public BanCache(IMemoryCache cache, IServiceProvider services, IConfiguration configuration)
 	{
 		_cache = cache;
 		_services = services;
+		var CacheSettings = configuration.GetSection("Cache");
+		var BlackListTimeSpanHour = int.Parse(CacheSettings["BlackListTimeSpanHour"]);
+		_banCacheDuration = TimeSpan.FromHours(BlackListTimeSpanHour);
+		_configuration = configuration;
 	}
 
 	public void BanUser(string userId)

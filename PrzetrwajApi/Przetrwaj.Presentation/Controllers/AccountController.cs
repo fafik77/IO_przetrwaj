@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.AccountOwn;
 using Przetrwaj.Application.Commands.Confirm;
-using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
@@ -13,6 +12,7 @@ using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -50,7 +50,7 @@ public class AccountController : Controller
 	{
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
-			return NotFound((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 404 User for some reason does not exist
+			return BadRequest((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 400 User for some reason does not exist
 
 		try
 		{
@@ -78,7 +78,7 @@ public class AccountController : Controller
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
-			return NotFound((ExceptionCasting)new InvalidCookieException("Invalid Cookie/Token")); // Returns a 404 User for some reason does not exist
+			return BadRequest((ExceptionCasting)new InvalidCookieException("Invalid Cookie/Token")); // Returns a 400 User for some reason does not exist
 		var requ = new UpdateAccountInternallCommand
 		{
 			UserId = currentUserId,
@@ -158,13 +158,48 @@ public class AccountController : Controller
 		}
 	}
 
+	[Authorize]
 	[HttpPost("Logout")]
-	[SwaggerOperation("Logout")]
+	[SwaggerOperation("Logout (Owner)")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	public async Task<IActionResult> Logout()
 	{
-		await _signInManager.SignOutAsync();
-		//await HttpContext.SignOutAsync(AuthenticationCookie);
+		var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		var jti = User.FindFirstValue(JwtRegisteredClaimNames.Jti);
+		if (UserId is null)
+			return BadRequest((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 400 User for some reason does not exist
+
+		await _mediator.Send(new LogoutCommand { UserId = UserId, TokenId = jti });
+
+		await _signInManager.SignOutAsync();    //drop all potential cookies
+		return NoContent();
+	}
+
+	[Authorize]
+	[HttpPost("LogoutAllSessions")]
+	[SwaggerOperation("Logout all sessions (Owner)")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	public async Task<IActionResult> LogoutAllSessions()
+	{
+		var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		var jti = User.FindFirstValue(JwtRegisteredClaimNames.Jti);
+		if (UserId is null)
+			return BadRequest((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 400 User for some reason does not exist
+
+
+		await _signInManager.SignOutAsync();    //drop all potential cookies
+		return NoContent();
+	}
+
+	[HttpPost("RefreshToken")]
+	[SwaggerOperation("Refresh user JWT token providing the RefreshToken (Owner)")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	public async Task<IActionResult> RefreshToken([FromHeader(Name = "Authorization")] List<string> Authorizations)
+	{
+		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		if (currentUserId is null)
+			return BadRequest((ExceptionCasting)new InvalidCookieException("Invalid Cookie")); // Returns a 400 User for some reason does not exist
+
 		return NoContent();
 	}
 

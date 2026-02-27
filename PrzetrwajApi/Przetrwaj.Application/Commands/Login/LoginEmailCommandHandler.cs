@@ -28,9 +28,6 @@ public class LoginEmailCommandHandler : ICommandHandler<LoginEmailCommand, JwtTo
 		var dto = (UserWithPersonalDataDto)registeredUser;
 		var roles = await _userManager.GetRolesAsync(registeredUser);
 		dto.Roles = roles;
-		return new JwtTokenDto
-		{
-			Token = _jwtService.GenerateToken(dto)
-		};
+		return await _jwtService.GenerateTokenAsync(dto);
 	}
 }

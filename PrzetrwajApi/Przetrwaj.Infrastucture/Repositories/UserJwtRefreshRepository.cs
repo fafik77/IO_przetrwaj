@@ -39,6 +39,12 @@ public class UserJwtRefreshRepository : IUserJwtRefreshRepository
 			.Where(e => e.UserId == userId)
 			.ExecuteDeleteAsync(ct);
 	}
+	public async Task DeleteEntriesOlderThanAsync(DateTimeOffset dateTimeOffset, CancellationToken ct)
+	{
+		await _dbContext.UserJwtRefresh
+			.Where(e => e.ValidTill <= dateTimeOffset)
+			.ExecuteDeleteAsync(ct);
+	}
 
 	public async Task<IList<UserJwtRefresh>> GetByIdAsync(string userId, CancellationToken ct)
 	{
@@ -61,4 +67,5 @@ public class UserJwtRefreshRepository : IUserJwtRefreshRepository
 	{
 		_dbContext.UserJwtRefresh.Update(userJwtRefresh);
 	}
+
 }

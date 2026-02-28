@@ -22,7 +22,7 @@ public class AddCommentCommandHandler : ICommandHandler<AddCommentInternalComman
 
 	public async Task<CommentDto> Handle(AddCommentInternalCommand request, CancellationToken cancellationToken)
 	{
-		if (!await _postRepository.ExistsPostIdAsync(request.IdPost, cancellationToken))
+		if (!await _postRepository.ExistsActivePostIdAsync(request.IdPost, cancellationToken))
 			throw new PostNotFoundException(request.IdPost);
 		var user = await _userRepository.GetByIdAsync(request.IdAutor, cancellationToken);
 		var comment = new UserComment

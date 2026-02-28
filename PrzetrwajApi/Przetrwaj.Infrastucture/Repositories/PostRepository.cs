@@ -238,6 +238,12 @@ internal class PostRepository : IPostRepository
 		return await _context.Posts.AsNoTracking().Where(p => p.IdPost == idPost).AnyAsync(cancellationToken);
 	}
 
+	public async Task<bool> ExistsActivePostIdAsync(string idPost, CancellationToken cancellationToken = default)
+	{
+		idPost = idPost.ToLower();
+		return await _context.Posts.AsNoTracking().Where(p => p.IdPost == idPost && p.Active == true).AnyAsync(cancellationToken);
+	}
+
 	public async Task<IEnumerable<PostVotesStatusDto>> GetAllWithVotesStatusROAsync(CancellationToken cancellationToken = default)
 	{
 		var posts = await _context.Posts

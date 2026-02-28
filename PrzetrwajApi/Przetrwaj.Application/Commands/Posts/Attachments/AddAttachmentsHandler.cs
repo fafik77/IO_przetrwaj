@@ -40,7 +40,7 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 			Timestamp = DateTimeOffset.UtcNow,
 		};
 		var post = await _postRepository.GetPostWithAttachmentsByIdAsync(request.IdPost, cancellationToken);
-		if (post is null)
+		if (post is null || post.Active == false)
 			return (AddAttachmentsResult)new PostNotFoundException(request.IdPost);
 
 		//check if requester made the Post
@@ -65,10 +65,10 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 
 		foreach (var itemAtt in request.Items)
 		{
-			
-		//}
-		//for (int att = 0; att != request.Files.Count; ++att)
-		//{
+
+			//}
+			//for (int att = 0; att != request.Files.Count; ++att)
+			//{
 			if (attCount >= maxAttachments) break;
 			IFormFile file = itemAtt.File;
 			///check if file is an image type

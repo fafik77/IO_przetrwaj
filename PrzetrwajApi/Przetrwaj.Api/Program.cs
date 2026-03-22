@@ -231,18 +231,6 @@ app.UseRouting(); // Added this explicitly beffore UseCors (New .Net thing)
 app.UseCors(AllowPrzetrwajOrigins);
 app.UsePresentation();
 
-app.MapPost("RefreshToken", ([FromBody] TokenRequest request) =>
-{
-	//this endpoint is not Authorized as that would require a valid Token in the first place
-	///@see https://medium.com/@MatinGhanbari/building-a-secure-api-with-asp-net-core-jwt-and-refresh-tokens-03dac37b4055
-	///for info of implementation.
-	///The backend has an /auth/refreshToken
-	/// If the frontend calls an api in the backend, and the token is expired, it returns 401 unauthorized
-	/// The frontend recognizes that it received a 401, and automatically calls /auth/refreshToken passing the tokens, 
-	///  if that one returns 200 Ok, then it redoes the first api call that originally returned 401.
-	/// If Both return 401, then the frontend redirects the user to the login page.
-});
-
 
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions

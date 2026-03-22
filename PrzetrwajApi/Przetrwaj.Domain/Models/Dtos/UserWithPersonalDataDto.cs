@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Domain.Models.Dtos;
 
-public class UserWithPersonalDataDto
+public record UserWithPersonalDataDto
 {
 	public required string Id { get; set; }
 	[EmailAddress]

@@ -1,6 +1,6 @@
 ﻿namespace Przetrwaj.Domain.Models;
 
-public class JwtTokenDto
+public record JwtTokenDto
 {
 	public string? Token { get; set; }
 	public string? RefreshToken { get; set; }

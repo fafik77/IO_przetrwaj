@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Przetrwaj.Domain.Models.Dtos;
 
-public class VoteDto
+public record VoteDto
 {
 	[AllowNull]
 	public bool? IsUpvoteOrNull { get; set; } = null;

@@ -17,3 +17,9 @@ public abstract class Category
 
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 }
+
+public enum CategoryType
+{
+	Danger,
+	Resource,
+}

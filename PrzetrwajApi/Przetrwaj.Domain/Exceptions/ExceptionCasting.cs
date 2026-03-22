@@ -56,7 +56,7 @@ public class ExceptionCasting
 }
 
 
-public class ErrorDetails
+public record ErrorDetails
 {
 	public string Code { get; set; } = string.Empty;
 	public string Message { get; set; } = string.Empty;

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.AccountOwn;
 
-public class LogoutAllSesionsCommand : ICommand
+public record LogoutAllSesionsCommand : ICommand
 {
 	[Required]
 	public required string UserId { get; set; }

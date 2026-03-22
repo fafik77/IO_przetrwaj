@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.AccountOwn;
 
-public class UpdateAccountCommand
+public record UpdateAccountCommand
 {
 	[MaxLength(64)]
 	public string? Name { get; set; }

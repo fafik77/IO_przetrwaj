@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Domain.Models;
 
-public class RegisterEmailInfo
+public record RegisterEmailInfo
 {
 	[Required]
 	[EmailAddress]

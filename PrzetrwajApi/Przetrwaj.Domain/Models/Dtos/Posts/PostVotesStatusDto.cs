@@ -1,6 +1,6 @@
 ﻿namespace Przetrwaj.Domain.Models.Dtos.Posts;
 
-public class PostVotesStatusDto
+public record PostVotesStatusDto
 {
 	public required string Id { get; set; }
 	public bool Active { get; set; }

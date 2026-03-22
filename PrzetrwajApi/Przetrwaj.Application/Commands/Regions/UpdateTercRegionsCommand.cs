@@ -37,7 +37,7 @@ public class UpdateTercRegionsCommandHandler : ICommandHandler<UpdateTercRegions
 			results.Error = new ErrorDetails
 			{
 				Code = nameof(NothingChangedException),
-				Message = "InvalidFile"
+				Message = "InvalidFile, espected .csv"
 			};
 			return results;
 		}
@@ -45,6 +45,15 @@ public class UpdateTercRegionsCommandHandler : ICommandHandler<UpdateTercRegions
 		using var fs = request.File.OpenReadStream();
 		var parsedRegions = TercParser.Parse(fs);
 		fs.Close();
+		if (parsedRegions.gmi.Count == 0)
+		{
+			results.Error = new ErrorDetails
+			{
+				Code = nameof(NothingChangedException),
+				Message = "No valid content"
+			};
+			return results;
+		}
 		var regions = await _regionRepository.GetAllAsync(ct);
 		var listNew = parsedRegions;
 		var listCurrent = regions;

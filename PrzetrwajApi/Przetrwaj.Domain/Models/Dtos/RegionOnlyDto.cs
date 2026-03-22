@@ -2,7 +2,7 @@
 
 namespace Przetrwaj.Domain.Models.Dtos;
 
-public class RegionOnlyDto
+public record RegionOnlyDto
 {
 	public int Id { get; set; }
 	/// Gmi?, Pow (, Woj)?

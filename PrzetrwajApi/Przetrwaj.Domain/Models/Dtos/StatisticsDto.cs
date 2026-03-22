@@ -1,6 +1,6 @@
 ﻿namespace Przetrwaj.Domain.Models.Dtos;
 
-public class StatisticsDto
+public record StatisticsDto
 {
 	public int RegionsWoj { get; set; }
 	public int RegionsPow { get; set; }

@@ -31,7 +31,7 @@ public class TercParser
 			gmi = [];
 		}
 	}
-	internal class TERCItem
+	internal record TERCItem
 	{
 		public string WOJ { get; set; }
 		public string POW { get; set; }

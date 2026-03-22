@@ -217,12 +217,6 @@ internal class PostRepository : IPostRepository
 		_context.Posts.Update(post);
 	}
 
-	public async Task SetInactiveBulkAsync(IReadOnlyList<string> postIds, CancellationToken cancellationToken = default)
-	{
-		await _context.Posts
-			.Where(p => postIds.Contains(p.IdPost)) // SQL translates this to: WHERE "IdPost" IN (...)
-			.ExecuteUpdateAsync(setters => setters.SetProperty(p => p.Active, false), cancellationToken);
-	}
 	public async Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default)
 	{
 		idPost = idPost.ToLower();
@@ -244,19 +238,12 @@ internal class PostRepository : IPostRepository
 		return await _context.Posts.AsNoTracking().Where(p => p.IdPost == idPost && p.Active == true).AnyAsync(cancellationToken);
 	}
 
-	public async Task<IEnumerable<PostVotesStatusDto>> GetAllWithVotesStatusROAsync(CancellationToken cancellationToken = default)
+	public async Task<int> ArchiveInactivePostsAsync(CancellationToken ct = default)
 	{
-		var posts = await _context.Posts
-			.AsNoTracking()
-			.Where(p => p.Active == true)
-			.Select(p => new PostVotesStatusDto
-			{
-				Id = p.IdPost,
-				Active = p.Active,
-				VotePositive = p.Votes.LongCount(v => v.IsUpvote),
-				VoteNegative = p.Votes.LongCount(v => !v.IsUpvote),
-			})
-			.ToListAsync(cancellationToken);
-		return posts;
+		// This performs the entire filter AND update in a single SQL query
+		int affectedRows = await _context.Posts
+			.Where(p => p.Active && p.Votes.LongCount(v => !v.IsUpvote) > p.Votes.LongCount(v => v.IsUpvote))
+			.ExecuteUpdateAsync(s => s.SetProperty(p => p.Active, false), ct);
+		return affectedRows;
 	}
 }

@@ -3,7 +3,7 @@ using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions.Regions;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 
-namespace Przetrwaj.Application.Quaries.Posts;
+namespace Przetrwaj.Application.Quaries.Dangers;
 
 public class GetDangerPostsInRegionQueryHandler
 	: IQueryHandler<GetDangerPostsInRegionQuery, IEnumerable<PostOverviewDto>>

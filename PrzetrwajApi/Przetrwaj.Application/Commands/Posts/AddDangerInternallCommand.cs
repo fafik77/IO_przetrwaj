@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class AddDangerInternallCommand : ICommand<PostCompleteDataDto>
+public record AddDangerInternallCommand : ICommand<PostCompleteDataDto>
 {
 	public required AddPostCommand AddPostCommand { get; set; }
 	public CategoryType Category { get; set; } = CategoryType.Danger;

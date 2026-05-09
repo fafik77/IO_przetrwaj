@@ -2,9 +2,9 @@
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using System.ComponentModel.DataAnnotations;
 
-namespace Przetrwaj.Application.Quaries.Posts;
+namespace Przetrwaj.Application.Quaries.Dangers;
 
-public class GetDangerPostsInRegionQuery : IQuery<IEnumerable<PostOverviewDto>>
+public record GetDangerPostsInRegionQuery : IQuery<IEnumerable<PostOverviewDto>>
 {
     [Required]
     public int IdRegion { get; set; }

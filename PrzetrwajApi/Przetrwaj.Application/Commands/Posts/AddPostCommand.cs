@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class AddPostCommand
+public record AddPostCommand
 {
 	[Required]
 	[MaxLength(200)]
@@ -19,8 +19,5 @@ public class AddPostCommand
 	[Required]
 	public required LatLong LatLong { get; set; }
 	public RegionPrecision RegionPrecision { get; set; } = RegionPrecision.GMI;
-
-	//public IList<string>? AlternateDescriptions { get; set; }
-	//public IFormFileCollection? Files { get; set; }
 }
 

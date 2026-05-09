@@ -23,3 +23,10 @@ public enum CategoryType
 	Danger,
 	Resource,
 }
+
+public enum CategoryTypeFilter
+{
+	Danger,
+	Resource,
+	Both
+}

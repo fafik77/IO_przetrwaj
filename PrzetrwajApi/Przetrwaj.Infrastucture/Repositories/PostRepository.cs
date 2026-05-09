@@ -3,6 +3,7 @@ using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Posts;
 using Przetrwaj.Domain.Helpers;
+using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Przetrwaj.Infrastucture.Context;
@@ -140,6 +141,11 @@ internal class PostRepository : IPostRepository
 			.FirstOrDefaultAsync(u => u.IdPost == idPost, cancellationToken);
 		return post;
 	}
+	public async Task<IEnumerable<PostMinimalCategoryRegion>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default)
+	{
+		return await _context.PostMinimalViews.AsNoTracking().Where(p => p.Active == true).ToListAsync(cancellationToken);
+	}
+
 
 	private async Task<IEnumerable<PostOverviewDto>> FillInPostDataAfterFetch(IEnumerable<PostOverviewDto> posts, CancellationToken cancellationToken)
 	{
@@ -154,17 +160,6 @@ internal class PostRepository : IPostRepository
 		return posts;
 	}
 
-	public async Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
-	{
-		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(idRegion);
-
-		var posts = await _context.PostsDangerRO
-			.Where(p => p.IdWojOnly == Woj || p.IdPowOnly == Pow || p.IdGmiOnly == Gmi || p.IdWojOnly == 0)
-			.OrderByDescending(k => k.DateCreated)
-			.Select(p => SelectAsPostOverview(p))
-			.ToListAsync(cancellationToken);
-		return await FillInPostDataAfterFetch(posts, cancellationToken);
-	}
 	/// <summary>
 	/// This function is the Func(in, out) of _context.Select(), has to follow the code to SQL rules
 	/// </summary>
@@ -195,20 +190,51 @@ internal class PostRepository : IPostRepository
 		};
 	}
 
-	public async Task<IEnumerable<PostMinimalCategoryRegion>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default)
+	public async Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
 	{
-		return await _context.PostMinimalViews.AsNoTracking().Where(p => p.Active == true).ToListAsync(cancellationToken);
-	}
+		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(idRegion);
 
-	public async Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
-	{
-		var regions = RegionCompoundHelper.RegionSplit(idRegion);
-
-		var posts = await _context.PostsResourcesRO
-			.Where(p => p.IdWojOnly == regions.Woj || p.IdPowOnly == regions.Pow || p.IdGmiOnly == regions.Gmi || p.IdWojOnly == 0)
+		var posts = await _context.PostsDangerRO
+			.Where(p => p.IdGmiOnly == Gmi || p.IdPowOnly == Pow || p.IdWojOnly == Woj || p.IdWojOnly == 0)
+			.OrderByDescending(k => k.DateCreated)
 			.Select(p => SelectAsPostOverview(p))
 			.ToListAsync(cancellationToken);
 		return await FillInPostDataAfterFetch(posts, cancellationToken);
+	}
+	public async Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
+	{
+		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(idRegion);
+
+		var posts = await _context.PostsResourcesRO
+			.Where(p => p.IdGmiOnly == Gmi || p.IdPowOnly == Pow || p.IdWojOnly == Woj || p.IdWojOnly == 0)
+			.Select(p => SelectAsPostOverview(p))
+			.ToListAsync(cancellationToken);
+		return await FillInPostDataAfterFetch(posts, cancellationToken);
+	}
+	/// <summary>
+	/// The new optimal metod to get Posts
+	/// </summary>
+	/// <param name="filter"></param>
+	/// <param name="ct"></param>
+	/// <returns></returns>
+	public async Task<IEnumerable<PostOverviewDto>> GetMatchingPostsAsync(MatchingPostsFilter filter, CancellationToken ct = default)
+	{
+		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(filter.RegionId);
+		CategoryType? type = filter.CategoryFilter switch
+		{
+			CategoryTypeFilter.Danger => CategoryType.Danger,
+			CategoryTypeFilter.Resource => CategoryType.Resource,
+			_ => null
+		};
+
+		var posts = await _context.Posts
+			.AsNoTracking()
+			.Where(p => p.Active == true && (type == null || p.CategoryType == type))
+			.Where(p => p.IdGmiOnly == Gmi || p.IdPowOnly == Pow || p.IdWojOnly == Woj || p.IdWojOnly == 0)
+			.OrderByDescending(p => p.DateCreated)
+			.Select(p => SelectAsPostOverview(p))
+			.ToListAsync(ct);
+		return await FillInPostDataAfterFetch(posts, ct);
 	}
 
 

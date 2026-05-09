@@ -305,8 +305,8 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	[RequestFormLimits(MultipartBodyLengthLimit = 52428800)] //up to 50 MB
-	[RequestSizeLimit(52428800)] //up to 50 MB
+	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
+	[RequestSizeLimit(50 << 20)] //up to 50 MB
 	public async Task<IActionResult> AddAttachment(string id, [FromForm] AddAttachments attachments, CancellationToken CT)
 	{
 		var req = new AddAttachmentsInternal
@@ -331,7 +331,7 @@ public partial class PostController : Controller
 	//the only thing is to mark it not Active (Mod only)
 
 
-	[HttpPut("{id}")]
+	[HttpPut("{id}/MarkAsInactive")]
 	[SwaggerOperation("Mark a post as Not Active (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]

@@ -10,7 +10,6 @@ using Przetrwaj.Application;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Models;
 using Przetrwaj.Infrastucture;
 using Przetrwaj.Infrastucture.Context;
 using Przetrwaj.Presentation;
@@ -37,6 +36,7 @@ builder.Services.Configure<OAuth>(
 );
 /// the bound "OAuth" section
 var oauthSettings = builder.Configuration.GetSection("OAuth").Get<OAuth>();
+var frontEndSettings = builder.Configuration.GetSection("FrontEnd").Get<FrontEndSettings>();
 
 // 1. Add the handler to the container
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -55,7 +55,7 @@ builder.Services.AddCors(options =>
 			WithOrigins(
 				"https://localhost:7173",
 				"https://localhost",
-				"https://przetrwaj-front.grayflower-7f624026.polandcentral.azurecontainerapps.io"
+				frontEndSettings.Url
 			)
 			.AllowAnyHeader()
 			.AllowAnyMethod()
@@ -83,10 +83,6 @@ options =>
 	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 	options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-//.AddCookie(AuthenticationCookie, options =>
-//{
-//	options.Cookie.Name = AuthenticationCookie;
-//})
 .AddJwtBearer(options =>
 {
 	options.IncludeErrorDetails = true;
@@ -110,7 +106,6 @@ options =>
 	// This maps the Google claim to the standard .NET NameIdentifier
 	options.SignInScheme = IdentityConstants.ExternalScheme;
 });
-//.AddIdentityCookies();
 // cookie for multiple .Net apps https://learn.microsoft.com/en-us/aspnet/core/security/cookie-sharing?view=aspnetcore-9.0
 builder.Services.AddAuthorization(opt =>
 {
@@ -159,31 +154,9 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 	options.User.RequireUniqueEmail = true;
 	options.SignIn.RequireConfirmedAccount = true;
 })
-.AddEntityFrameworkStores<ApplicationDbContext>() // Specifies that Identity should use EF Core and your DbContext
+.AddEntityFrameworkStores<ApplicationDbContext>() // Specifies that Identity should use EF Core and this DbContext
 .AddDefaultTokenProviders(); // Required for generating tokens (e.g., password reset)
-							 //builder.Services.ConfigureApplicationCookie(options =>
-							 //{
-							 //	// Cookie settings
-							 //	options.Cookie.HttpOnly = true;
-							 //	options.ExpireTimeSpan = TimeSpan.FromHours(8);
 
-//	//options.LoginPath = "/Identity/Account/Login";
-//	//options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-//	options.SlidingExpiration = true;
-
-//	options.Events.OnRedirectToLogin = context =>
-//	{
-//		// Instead of redirecting to /Account/Login, return 401
-//		context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-//		return Task.CompletedTask;
-//	};
-//	options.Events.OnRedirectToAccessDenied = context =>
-//	{
-//		// Instead of redirecting to AccessDenied, return 403
-//		context.Response.StatusCode = StatusCodes.Status403Forbidden;
-//		return Task.CompletedTask;
-//	};
-//});
 builder.Services.AddAuthentication(options =>   //re-apply JWT as default
 {
 	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

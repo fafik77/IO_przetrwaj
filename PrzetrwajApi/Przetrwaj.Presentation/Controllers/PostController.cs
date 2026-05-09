@@ -47,7 +47,7 @@ public partial class PostController : Controller
 		}
 	}
 
-	[HttpGet("Map")]
+	[HttpGet("map")]
 	[SwaggerOperation("Get all posts for map display.")]
 	[ProducesResponseType(typeof(IEnumerable<PostMinimalCategoryRegion>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetAllPosts(CancellationToken CT)
@@ -71,7 +71,7 @@ public partial class PostController : Controller
 	}
 
 	//KL Done
-	[HttpGet("Region/{id}/Danger")]
+	[HttpGet("region/{id}/danger")]
 	[SwaggerOperation("Get all Danger posts in region")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -89,7 +89,7 @@ public partial class PostController : Controller
 	}
 
 	//KL Done
-	[HttpGet("Region/{id}/Resource")]
+	[HttpGet("region/{id}/resource")]
 	[SwaggerOperation("Get all Resource posts in region")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -107,7 +107,7 @@ public partial class PostController : Controller
 	}
 
 
-	[HttpGet("Authored/{id}")]
+	[HttpGet("authored/{id}")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -125,7 +125,7 @@ public partial class PostController : Controller
 		}
 	}
 
-	[HttpPost("{id}/Comment")]
+	[HttpPost("{id}/comment")]
 	[SwaggerOperation("Add a comment to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(CommentDto), StatusCodes.Status201Created)]
@@ -152,7 +152,7 @@ public partial class PostController : Controller
 	}
 
 	//KL Done
-	[HttpPost("{id}/VotePositive")]
+	[HttpPost("{id}/vote-positive")]
 	[SwaggerOperation("Add a Positive vote to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -185,7 +185,7 @@ public partial class PostController : Controller
 	}
 
 	//KL Done
-	[HttpPost("{id}/VoteNegative")]
+	[HttpPost("{id}/vote-negative")]
 	[SwaggerOperation("Add a Negative vote to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -218,7 +218,7 @@ public partial class PostController : Controller
 	}
 
 	//KL Done, PN exposed
-	[HttpGet("{id}/Vote")]
+	[HttpGet("{id}/vote")]
 	[SwaggerOperation("Get user Vote status on Post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(VoteDto), StatusCodes.Status200OK)]
@@ -243,7 +243,7 @@ public partial class PostController : Controller
 
 
 	//ToDo: implement CustomCategory checking (allow it only if Category.id/Name == inne)
-	[HttpPost("Danger")]
+	[HttpPost("danger")]
 	[SwaggerOperation("Add a Danger post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
@@ -271,7 +271,7 @@ public partial class PostController : Controller
 	}
 
 	//ToDo: implement CustomCategory checking (allow it only if Category.id/Name == inne)
-	[HttpPost("Resource")]
+	[HttpPost("resource")]
 	[SwaggerOperation("Add a Resource post (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
@@ -298,7 +298,7 @@ public partial class PostController : Controller
 		}
 	}
 
-	[HttpPost("{id}/Attachment")]
+	[HttpPost("{id}/attachment")]
 	[SwaggerOperation("Add Attachments to post (Owner of the post)(max 50 MiB request)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status201Created)]
@@ -331,7 +331,7 @@ public partial class PostController : Controller
 	//the only thing is to mark it not Active (Mod only)
 
 
-	[HttpPut("{id}/MarkAsInactive")]
+	[HttpPut("{id}/mark-inactive")]
 	[SwaggerOperation("Mark a post as Not Active (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]

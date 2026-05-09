@@ -55,7 +55,7 @@ public class UserController : Controller
 	}
 
 
-	[HttpGet("{id}/Posts")]
+	[HttpGet("{id}/posts")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -73,7 +73,7 @@ public class UserController : Controller
 		}
 	}
 
-	[HttpGet("WIP/{id}/Comments")]
+	[HttpGet("WIP/{id}/comments")]
 	[SwaggerOperation("Get all comments made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -83,7 +83,7 @@ public class UserController : Controller
 	}
 
 
-	[HttpPost("MakeModerator")]
+	[HttpPost("make-moderator")]
 	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
@@ -102,7 +102,7 @@ public class UserController : Controller
 		}
 	}
 
-	[HttpPost("MakeAdmin")]
+	[HttpPost("make-admin")]
 	[SwaggerOperation("Grant Admin role to user by Id or Email (Admin)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
@@ -127,7 +127,7 @@ public class UserController : Controller
 		}
 	}
 
-	[HttpGet("ModeratorPending")]
+	[HttpGet("pending-moderators")]
 	[SwaggerOperation("Gets users with Moderator Pending status (Admin)")]
 	[ProducesResponseType(typeof(IEnumerable<ModeratorPendingStatus>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetModeratorPending(CancellationToken cancellationToken)
@@ -144,7 +144,7 @@ public class UserController : Controller
 	}
 
 
-	[HttpPost("Ban")]
+	[HttpPost("ban")]
 	[Authorize(UserRoles.Moderator)]
 	[SwaggerOperation("Ban a User by Id or Email (Moderator, Admin)")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]

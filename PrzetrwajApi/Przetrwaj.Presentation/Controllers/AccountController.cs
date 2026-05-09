@@ -101,7 +101,7 @@ public class AccountController : Controller
 	}
 
 
-	[HttpGet("Confirm-email")]
+	[HttpGet("confirm-email")]
 	[SwaggerOperation("Confirm Email using the code attached in email")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
@@ -122,7 +122,7 @@ public class AccountController : Controller
 		}
 	}
 
-	[HttpGet("Confirm-email-change")]
+	[HttpGet("confirm-email-change")]
 	[SwaggerOperation("Confirm Email Change using the code attached in the email")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
@@ -143,7 +143,7 @@ public class AccountController : Controller
 		}
 	}
 
-	[HttpPost("WIP/Forgot-password")]
+	[HttpPost("WIP/forgot-password")]
 	[SwaggerOperation("Forgot password, request a reset")]
 	[ProducesResponseType(typeof(UserGeneralDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
@@ -164,7 +164,7 @@ public class AccountController : Controller
 	}
 
 	[Authorize]
-	[HttpPost("Logout")]
+	[HttpPost("logout")]
 	[SwaggerOperation("Logout (Owner)")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	public async Task<IActionResult> Logout()
@@ -181,7 +181,7 @@ public class AccountController : Controller
 	}
 
 	[Authorize]
-	[HttpPost("Logout-all-sessions")]
+	[HttpPost("logout-all-sessions")]
 	[SwaggerOperation("Logout all sessions (Owner)")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	public async Task<IActionResult> LogoutAllSessions()
@@ -196,7 +196,7 @@ public class AccountController : Controller
 		return NoContent();
 	}
 
-	[HttpPost("Refresh-token")]
+	[HttpPost("refresh-token")]
 	[SwaggerOperation("Refresh user JWT token providing the RefreshToken (Owner)")]
 	[ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]

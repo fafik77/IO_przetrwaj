@@ -1,5 +1,4 @@
-﻿using Przetrwaj.Domain.Models;
-using Przetrwaj.Domain.Models.Dtos;
+﻿using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Domain.Abstractions;
 

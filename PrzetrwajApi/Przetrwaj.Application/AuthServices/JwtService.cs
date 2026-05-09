@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,16 +14,16 @@ namespace Przetrwaj.Application.AuthServices;
 
 public class JwtService : IJwtService
 {
-	private readonly IConfiguration _config;
 	private readonly ILogoutCache _logoutCache;
 	private readonly IUserJwtRefreshRepository _userJwtRefreshRepository;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IUserRepository _userRepository;
 	private readonly UserManager<AppUser> _userManager;
+	private readonly JwtSettings _jwtSettings;
 
-	public JwtService(IConfiguration config, ILogoutCache logoutCache, IUserJwtRefreshRepository userJwtRefreshRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, UserManager<AppUser> userManager)
+	public JwtService(IOptions<JwtSettings> options, ILogoutCache logoutCache, IUserJwtRefreshRepository userJwtRefreshRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, UserManager<AppUser> userManager)
 	{
-		_config = config;
+		_jwtSettings = options.Value;
 		_logoutCache = logoutCache;
 		_userJwtRefreshRepository = userJwtRefreshRepository;
 		_unitOfWork = unitOfWork;
@@ -105,7 +105,7 @@ public class JwtService : IJwtService
 			UserId = user.Id,
 			Jwi = Jti,
 			RefreshToken = res.RefreshToken,
-			ValidTill = DateTimeOffset.UtcNow.AddHours(double.Parse(_config["Jwt:RefreshTokenValidHours"])),
+			ValidTill = DateTimeOffset.UtcNow.AddHours(_jwtSettings.RefreshTokenValidHours),
 		};
 		return (res, userJwt);
 	}
@@ -119,16 +119,16 @@ public class JwtService : IJwtService
 
 	private string MakeTokenWithClaims(List<Claim> claims)
 	{
-		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
 		var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
 		var tokenHandler = new JwtSecurityTokenHandler();
 		var tokenDesc = new SecurityTokenDescriptor
 		{
-			Issuer = _config["Jwt:Issuer"],
-			Audience = _config["Jwt:Audience"],
+			Issuer = _jwtSettings.Issuer,
+			Audience = _jwtSettings.Audience,
 			Subject = new ClaimsIdentity(claims),
-			Expires = DateTime.UtcNow.AddHours(double.Parse(_config["Jwt:ValidHours"])),
+			Expires = DateTime.UtcNow.AddHours(_jwtSettings.ValidHours),
 			SigningCredentials = creds
 		};
 

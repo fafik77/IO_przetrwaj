@@ -1,5 +1,5 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
-using Przetrwaj.Domain.Models;
+using Przetrwaj.Domain.Models.Dtos;
 using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.Login;

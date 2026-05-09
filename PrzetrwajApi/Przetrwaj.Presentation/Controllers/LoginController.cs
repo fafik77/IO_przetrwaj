@@ -8,6 +8,7 @@ using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Models;
+using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;

@@ -3,22 +3,21 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Przetrwaj.Application.Commands.AccountOwn;
 using Przetrwaj.Application.Commands.Confirm;
+using Przetrwaj.Application.Helpers;
+using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Auth;
-using Przetrwaj.Domain.Exceptions.Users;
-using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 using Swashbuckle.AspNetCore.Annotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace Przetrwaj.Presentation.Controllers;
 
@@ -32,24 +31,24 @@ namespace Przetrwaj.Presentation.Controllers;
 [Produces("application/json")]
 public class AccountController : Controller
 {
-	private readonly IConfiguration _config;
 	private readonly IMediator _mediator;
 	private readonly SignInManager<AppUser> _signInManager;
 	private readonly IAuthService _authService;
 	private readonly UserManager<AppUser> _userManager;
+	IOptions<JwtSettings> _options;
 
-	public AccountController(IConfiguration config, IMediator mediator, SignInManager<AppUser> signInManager, IAuthService authService, UserManager<AppUser> userManager)
+	public AccountController(IMediator mediator, SignInManager<AppUser> signInManager, IAuthService authService, UserManager<AppUser> userManager, IOptions<JwtSettings> options)
 	{
-		_config = config;
 		_mediator = mediator;
 		_signInManager = signInManager;
 		_authService = authService;
 		_userManager = userManager;
+		_options = options;
 	}
 
 	[HttpGet]
 	[Authorize]
-	[SwaggerOperation("Gets user own details (Owner only)")]
+	[SwaggerOperation("Gets user own details (Owner)")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetUserOwnInfo()
@@ -74,7 +73,7 @@ public class AccountController : Controller
 
 	[HttpPut]
 	[Authorize]
-	[SwaggerOperation("Updates user own account (Owner only)")]
+	[SwaggerOperation("Updates user own account (Owner)")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -102,7 +101,7 @@ public class AccountController : Controller
 	}
 
 
-	[HttpGet("ConfirmEmail")]
+	[HttpGet("Confirm-email")]
 	[SwaggerOperation("Confirm Email using the code attached in email")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
@@ -123,7 +122,7 @@ public class AccountController : Controller
 		}
 	}
 
-	[HttpGet("ConfirmEmailChange")]
+	[HttpGet("Confirm-email-change")]
 	[SwaggerOperation("Confirm Email Change using the code attached in the email")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
@@ -144,7 +143,7 @@ public class AccountController : Controller
 		}
 	}
 
-	[HttpPost("WIP/ForgotPassword")]
+	[HttpPost("WIP/Forgot-password")]
 	[SwaggerOperation("Forgot password, request a reset")]
 	[ProducesResponseType(typeof(UserGeneralDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
@@ -182,7 +181,7 @@ public class AccountController : Controller
 	}
 
 	[Authorize]
-	[HttpPost("LogoutAllSessions")]
+	[HttpPost("Logout-all-sessions")]
 	[SwaggerOperation("Logout all sessions (Owner)")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	public async Task<IActionResult> LogoutAllSessions()
@@ -197,12 +196,12 @@ public class AccountController : Controller
 		return NoContent();
 	}
 
-	[HttpPost("RefreshToken")]
+	[HttpPost("Refresh-token")]
 	[SwaggerOperation("Refresh user JWT token providing the RefreshToken (Owner)")]
 	[ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> RefreshToken(
-		[FromHeader(Name = "Authorization")] List<string> Authorizations,
+		[FromAuthorizationHeader] List<string> Authorizations,
 		[FromBody] RefreshTokenCommand request,
 		CancellationToken ct
 	)
@@ -217,11 +216,10 @@ public class AccountController : Controller
 		/// If Both return 401, then the frontend redirects the user to the login page.
 
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-		if (Authorizations.Count != 1) return BadRequest((ExceptionCasting)new UserNotFoundException("invalid Authorization"));
+		var authorizationHelper = new AuthorizationHelper(_options);
 		try
 		{
-			var token = Authorizations[0].Substring("Bearer ".Length);
-			var claims = GetPrincipalFromExpiredToken(token);
+			var claims = authorizationHelper.GetPrincipalClaimsFromTokens(Authorizations);
 
 			var UserId = claims.FindFirstValue(ClaimTypes.NameIdentifier);
 			var jti = claims.FindFirstValue(JwtRegisteredClaimNames.Jti);
@@ -249,28 +247,4 @@ public class AccountController : Controller
 		}
 	}
 
-
-	private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
-	{
-		var tokenValidationParameters = new TokenValidationParameters
-		{
-			ValidateAudience = true,
-			ValidateIssuer = true,
-			ValidateIssuerSigningKey = true,
-			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"])),
-			ValidateLifetime = false, // We want to get claims from expired token
-			ValidAudience = _config["Jwt:Audience"],
-			ValidIssuer = _config["Jwt:Issuer"],
-			ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
-		};
-
-		var tokenHandler = new JwtSecurityTokenHandler();
-		var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-
-		if (!(securityToken is JwtSecurityToken jwtSecurityToken) ||
-			!jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-			throw new SecurityTokenException("Invalid token");
-
-		return principal;
-	}
 }

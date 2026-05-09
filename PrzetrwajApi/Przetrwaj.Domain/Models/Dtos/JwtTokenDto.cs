@@ -1,4 +1,4 @@
-﻿namespace Przetrwaj.Domain.Models;
+﻿namespace Przetrwaj.Domain.Models.Dtos;
 
 public record JwtTokenDto
 {

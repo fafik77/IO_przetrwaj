@@ -5,7 +5,6 @@ using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Exceptions.Users;
-using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 using System.Security.Claims;
 

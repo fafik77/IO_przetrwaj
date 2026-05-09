@@ -34,6 +34,10 @@ builder.Services.Configure<FrontEndSettings>(
 builder.Services.Configure<OAuth>(
 	builder.Configuration.GetSection("OAuth")
 );
+// Bind the "Jwt" section to the JwtSettings class
+builder.Services.Configure<JwtSettings>(
+	builder.Configuration.GetSection("Jwt")
+);
 /// the bound "OAuth" section
 var oauthSettings = builder.Configuration.GetSection("OAuth").Get<OAuth>();
 var frontEndSettings = builder.Configuration.GetSection("FrontEnd").Get<FrontEndSettings>();

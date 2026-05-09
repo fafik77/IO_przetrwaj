@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Regions;
 using Przetrwaj.Application.Quaries.Regions;
+using Przetrwaj.Application.Queries.Regions;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
@@ -58,7 +59,7 @@ public class RegionController : Controller
 	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetGmi(CancellationToken cancellationToken)
 	{
-		var res = await _mediator.Send(new GetGmiRegionsQuarry(), cancellationToken);
+		var res = await _mediator.Send(new GetGmiRegionsQuery(), cancellationToken);
 		return Ok(res);
 	}
 
@@ -94,7 +95,7 @@ public class RegionController : Controller
 		return StatusCode((int)res.StatusCode, res);
 	}
 
-	[HttpPost("[action]")]
+	[HttpPost("WIP/[action]")]
 	[SwaggerOperation("Add or Update Region bounds (.gml) (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(UpdateRegionBoundsResults), StatusCodes.Status200OK)]
@@ -110,16 +111,22 @@ public class RegionController : Controller
 		return StatusCode((int)res.StatusCode, res);
 	}
 
-	[HttpPost("[action]")]
+	[HttpPost("from-location")]
 	[SwaggerOperation("Get region from location")]
 	[ProducesResponseType(typeof(IRegionInfo), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> FromLocation([FromBody] LatLong region, CancellationToken ct)
 	{
-		return NoContent();
-		//if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-		//var res = await _mediator.Send(region, ct);
-		//return StatusCode((int)res.StatusCode, res);
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		try
+		{
+			var res = await _mediator.Send(new RegionFromLocationQuery() { location = region }, ct);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
 	}
 
 }

@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Quaries\AccountQuaries\**" />
-    <EmbeddedResource Remove="Quaries\AccountQuaries\**" />
-    <None Remove="Quaries\AccountQuaries\**" />
+    <Compile Remove="Queries\AccountQuaries\**" />
+    <EmbeddedResource Remove="Queries\AccountQuaries\**" />
+    <None Remove="Queries\AccountQuaries\**" />
   </ItemGroup>
 
   <ItemGroup>

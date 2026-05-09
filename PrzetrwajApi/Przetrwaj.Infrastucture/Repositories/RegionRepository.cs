@@ -1,9 +1,14 @@
-﻿using LazyCache;
+﻿using Dapper;
+using LazyCache;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions._base;
+using Przetrwaj.Domain.Exceptions.Regions;
 using Przetrwaj.Domain.Helpers;
 using Przetrwaj.Domain.Models;
+using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Infrastucture.Context;
 using System.Collections.Frozen;
 
@@ -12,17 +17,32 @@ namespace Przetrwaj.Infrastucture.Repositories;
 
 public class RegionRepository : IRegionRepository
 {
+	private readonly NpgsqlDataSource _postgisDataSource;
 	private readonly IDbContextFactory<ApplicationDbContext> _contextFactoryRO;
 	private readonly ApplicationDbContext _dbContext;
 	private readonly IAppCache _cache;
 	private const string RegionsCacheKey = "Regions";
 	private readonly TimeSpan _cacheDuration = TimeSpan.FromHours(24); // Long duration for static data
+	static private readonly string _gminaRGCSql = @"
+		SELECT jpt_kod_je, jpt_nazwa_
+		FROM gminy 
+		WHERE ST_Contains(
+			geom,
+			ST_Transform(ST_SetSRID(ST_MakePoint(@lon, @lat), 4326), 2180)
+		) LIMIT 1;";
 
-	public RegionRepository(IAppCache cache, IDbContextFactory<ApplicationDbContext> contextFactory, ApplicationDbContext dbContext)
+	public RegionRepository(IAppCache cache, IDbContextFactory<ApplicationDbContext> contextFactory, ApplicationDbContext dbContext, NpgsqlDataSource dataSource)
 	{
 		_cache = cache;
 		_contextFactoryRO = contextFactory;
 		_dbContext = dbContext;
+		_postgisDataSource = dataSource;
+	}
+
+	private async Task<GminaRGCResult?> GetGminaByCoordinatesAsync(LatLong latLong)
+	{
+		using var connection = await _postgisDataSource.OpenConnectionAsync();
+		return await connection.QueryFirstOrDefaultAsync<GminaRGCResult>(_gminaRGCSql, new { lon = latLong.Long, lat = latLong.Lat });
 	}
 
 	public async Task<AllRegions> GetAllAsync(CancellationToken ct)
@@ -105,5 +125,14 @@ public class RegionRepository : IRegionRepository
 	{
 		_dbContext.Set<T>().Update(region);
 		_cache.Remove(RegionsCacheKey); //invalidate cache
+	}
+
+	public async Task<IRegionInfo?> RegionFromLocationAsync(LatLong location, CancellationToken ct = default)
+	{
+		var gmina = await GetGminaByCoordinatesAsync(location);
+		if (gmina is null) throw new LocationNotInPolandException(location);
+		var res = await GetByIdAsync(gmina.Jpt_kod_je, ct);
+		if (res is null) throw new RegionNotFoundException(gmina.Jpt_kod_je);
+		return res;
 	}
 }

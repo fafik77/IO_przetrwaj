@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Infrastucture.Cache;
 using Przetrwaj.Infrastucture.Context;
@@ -16,6 +17,17 @@ namespace Przetrwaj.Infrastucture
 		{
 			var connectionString = configuration.GetConnectionString("Database");
 			services.AddDbContextFactory<ApplicationDbContext>(ctx => ctx.UseNpgsql(connectionString));
+
+			var postGisSchema = configuration.GetValue<string>("PostGis:schema") ?? "public";
+			var connectionBuilder = new NpgsqlConnectionStringBuilder(connectionString)
+			{
+				SearchPath = $"{postGisSchema},public"
+			};
+			// Register NpgsqlDataSource as a Singleton (Best practice for performance)
+			services.AddSingleton(sp =>
+			{
+				return new NpgsqlDataSourceBuilder(connectionBuilder.ConnectionString).Build();
+			});
 
 			services.AddScoped<IUnitOfWork, UnitOfWork>();  //AddScoped makes this per request, Transient makes a new instance every time its called
 			services.AddScoped<IUserRepository, UserRepository>();

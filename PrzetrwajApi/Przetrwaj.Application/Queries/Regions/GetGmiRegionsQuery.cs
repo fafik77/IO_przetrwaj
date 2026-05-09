@@ -3,5 +3,5 @@ using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Quaries.Regions;
 
-public class GetGmiRegionsQuarry : IQuery<IEnumerable<RegionOnlyDto>>
+public class GetGmiRegionsQuery : IQuery<IEnumerable<RegionOnlyDto>>
 { }

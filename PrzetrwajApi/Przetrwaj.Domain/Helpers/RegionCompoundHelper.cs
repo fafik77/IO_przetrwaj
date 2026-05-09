@@ -14,7 +14,7 @@ public class RegionCompoundHelper
 
 		if (CompoundRegionId > 10000)
 		{
-			Region.Gmi = CompoundRegionId;
+			Region.Gmi = (CompoundRegionId / 10) * 10;  //removes the last 1 digit from format (2-2-2-1)
 			Region.Pow = (short)(CompoundRegionId / 1000);
 			Region.Woj = (short)(CompoundRegionId / 100000);
 		}
@@ -25,6 +25,6 @@ public class RegionCompoundHelper
 		if (RegionId < 100) return RegionId * 100_000;
 		if (RegionId < 10000) return RegionId * 1_000;
 		if (RegionId < 100000) return RegionId * 10;
-		return RegionId;
+		return (RegionId / 10) * 10;    //removes the last 1 digit from format (2-2-2-1)
 	}
 }

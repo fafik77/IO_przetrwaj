@@ -13,34 +13,28 @@ using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture;
 using Przetrwaj.Infrastucture.Context;
 using Przetrwaj.Presentation;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-//const string AuthenticationCookie = "cookie";
 
 // Bind the "Email" section to the EmailSettings class
 builder.Services.Configure<EmailSettings>(
 	builder.Configuration.GetSection("Email"));
 // Bind the "Attachments" section to the AttachmentSettings class
 builder.Services.Configure<AttachmentSettings>(
-	builder.Configuration.GetSection("Attachments")
-);
+	builder.Configuration.GetSection("Attachments"));
 // Bind the "FrontEnd" section to the FrontEndSettings class
 builder.Services.Configure<FrontEndSettings>(
-	builder.Configuration.GetSection("FrontEnd")
-);
+	builder.Configuration.GetSection("FrontEnd"));
 // Bind the "OAuth" section to the OAuth class
 builder.Services.Configure<OAuth>(
-	builder.Configuration.GetSection("OAuth")
-);
+	builder.Configuration.GetSection("OAuth"));
 // Bind the "Jwt" section to the JwtSettings class
 builder.Services.Configure<JwtSettings>(
-	builder.Configuration.GetSection("Jwt")
-);
-/// the bound "OAuth" section
+	builder.Configuration.GetSection("Jwt"));
+// the bound sections
 var oauthSettings = builder.Configuration.GetSection("OAuth").Get<OAuth>();
 var frontEndSettings = builder.Configuration.GetSection("FrontEnd").Get<FrontEndSettings>();
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 
 // 1. Add the handler to the container
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -77,9 +71,7 @@ builder.Services.AddCors(options =>
 #endregion
 
 #region Auth
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
-if (key.Length <= 20) throw new ArgumentException("Invalid JWT.Key (Not set)");
+if (jwtSettings is null || jwtSettings.KeyBytes.Length <= 20) throw new ArgumentException("Invalid JWT.Key (Not set)");
 builder.Services.AddAuthentication(
 options =>
 {
@@ -92,9 +84,9 @@ options =>
 	options.IncludeErrorDetails = true;
 	options.TokenValidationParameters = new TokenValidationParameters
 	{
-		IssuerSigningKey = new SymmetricSecurityKey(key),
-		ValidIssuer = jwtSettings["Issuer"],
-		ValidAudience = jwtSettings["Audience"],
+		IssuerSigningKey = new SymmetricSecurityKey(jwtSettings.KeyBytes),
+		ValidIssuer = jwtSettings.Issuer,
+		ValidAudience = jwtSettings.Audience,
 		ClockSkew = TimeSpan.FromSeconds(5),
 		ValidateIssuerSigningKey = true,
 		ValidateIssuer = true,
@@ -117,7 +109,6 @@ builder.Services.AddAuthorization(opt =>
 	opt.AddPolicy(UserRoles.User, policy =>
 	{   // this is an or gate
 		policy.RequireAuthenticatedUser(); //any registered user with any role that is able to log in
-										   //policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin);
 	});
 
 	// Policy 2: Moderator+ access

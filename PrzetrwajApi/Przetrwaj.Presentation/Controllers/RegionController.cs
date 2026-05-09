@@ -95,25 +95,9 @@ public class RegionController : Controller
 		return StatusCode((int)res.StatusCode, res);
 	}
 
-	[HttpPost("WIP/[action]")]
-	[SwaggerOperation("Add or Update Region bounds (.gml) (Moderator)")]
-	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(typeof(UpdateRegionBoundsResults), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(UpdateRegionBoundsResults), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	[RequestFormLimits(MultipartBodyLengthLimit = 200 << 20)] //up to 200 MB
-	[RequestSizeLimit(200 << 20)] //up to 200 MB
-	public async Task<IActionResult> UpdateRegionBounds([FromForm] UpdateRegionBoundsCommand region, CancellationToken ct)
-	{
-		return NoContent();
-		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-		var res = await _mediator.Send(region, ct);
-		return StatusCode((int)res.StatusCode, res);
-	}
-
 	[HttpPost("from-location")]
 	[SwaggerOperation("Get region from location")]
-	[ProducesResponseType(typeof(IRegionInfo), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> FromLocation([FromBody] LatLong region, CancellationToken ct)
 	{

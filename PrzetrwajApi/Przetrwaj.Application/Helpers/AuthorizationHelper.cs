@@ -4,7 +4,6 @@ using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain.Exceptions.Auth;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace Przetrwaj.Application.Helpers;
 
@@ -32,7 +31,7 @@ public class AuthorizationHelper
 			ValidateAudience = true,
 			ValidateIssuer = true,
 			ValidateIssuerSigningKey = true,
-			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key)),
+			IssuerSigningKey = new SymmetricSecurityKey(_jwtSettings.KeyBytes),
 			ValidateLifetime = false,   // We want to get claims from expired token
 			ValidAudience = _jwtSettings.Audience,
 			ValidIssuer = _jwtSettings.Issuer,

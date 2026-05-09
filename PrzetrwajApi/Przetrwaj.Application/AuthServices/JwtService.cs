@@ -8,7 +8,6 @@ using Przetrwaj.Domain.Models.Dtos;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Przetrwaj.Application.AuthServices;
 
@@ -119,7 +118,7 @@ public class JwtService : IJwtService
 
 	private string MakeTokenWithClaims(List<Claim> claims)
 	{
-		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+		var key = new SymmetricSecurityKey(_jwtSettings.KeyBytes);
 		var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
 		var tokenHandler = new JwtSecurityTokenHandler();

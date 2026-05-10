@@ -65,7 +65,7 @@ public class RegionController : Controller
 
 	[HttpGet("{id}")]
 	[SwaggerOperation("Get Region with TERC id")]
-	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(RegionOnlyWithinDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
 	{

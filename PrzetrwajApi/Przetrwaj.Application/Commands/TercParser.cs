@@ -23,7 +23,7 @@ public class TercParser
 	{
 		public List<RegionWoj> woj; //16
 		public List<RegionPow> pow; //380
-		public List<RegionGmi> gmi; //2511 (should be 2479) 32 too many
+		public List<RegionGmi> gmi; //2479. (was 32 too many(2511) if "dzielnica", "delegatura" were included)
 		public TercRegionResults()
 		{
 			woj = [];
@@ -79,20 +79,18 @@ public class TercParser
 				var gmina = new RegionGmi
 				{
 					PowId = powId,
-					Id = powId * 100 + int.Parse(item.GMI),
+					Id = powId * 100 + int.Parse(item.GMI), //skip the last 1 digit
 					Name = item.NAZWA,
 				};
 				//add only if it does not exist already (compare the full Compund Key)
 				if (!results.gmi.Where(g =>
-					(g.Id == gmina.Id) //|| (g.PowId == gmina.PowId && g.Name.Equals(gmina.Name, StringComparison.InvariantCultureIgnoreCase))
+					(g.Id == gmina.Id)
 				).Any())
 				{
 					results.gmi.Add(gmina);
 				}
 			}
 		}
-		//so there was 32 gmi too many, now we are about 100 short?
-		//var freq = results.gmi.GroupBy(x => x.Name).OrderByDescending(x => x.Count()).ToDictionary(x => x.Key, x => x.Count());
 		return results;
 	}
 }

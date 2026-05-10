@@ -5,7 +5,7 @@ using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Quaries.Regions;
 
-public class GetRegionQuarryHandler : IQueryHandler<GetRegionQuarry, RegionOnlyDto>
+public class GetRegionQuarryHandler : IQueryHandler<GetRegionQuarry, RegionOnlyWithinDto>
 {
 	private readonly IRegionRepository _regionRepository;
 
@@ -14,11 +14,11 @@ public class GetRegionQuarryHandler : IQueryHandler<GetRegionQuarry, RegionOnlyD
 		_regionRepository = regionRepository;
 	}
 
-	public async Task<RegionOnlyDto> Handle(GetRegionQuarry request, CancellationToken cancellationToken)
+	public async Task<RegionOnlyWithinDto> Handle(GetRegionQuarry request, CancellationToken cancellationToken)
 	{
 		var res = await _regionRepository.GetByIdAsync(request.IdRegion, cancellationToken);
 		if (res is null) throw new RegionNotFoundException(request.IdRegion);
-		var dto = RegionOnlyDto.Map(res)!;
+		var dto = RegionOnlyWithinDto.Map(res)!;
 		var parents = new List<string>();
 		var parentId = res.ParentId;
 		while (parentId != 0)

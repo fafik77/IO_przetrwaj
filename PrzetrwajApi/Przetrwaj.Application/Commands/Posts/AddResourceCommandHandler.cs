@@ -27,6 +27,6 @@ public class AddResourceCommandHandler : ICommandHandler<AddResourceInternallCom
 			Title = request.AddPostCommand.Title,
 			CategoryType = request.Category
 		};
-		return await _addPostService.FillPostFromData(post, request.AddPostCommand, categories, request.Claims, cancellationToken);
+		return await _addPostService.FillPostFromDataAndAddAsync(post, request.AddPostCommand, categories, request.ClaimsPrincipal, cancellationToken);
 	}
 }

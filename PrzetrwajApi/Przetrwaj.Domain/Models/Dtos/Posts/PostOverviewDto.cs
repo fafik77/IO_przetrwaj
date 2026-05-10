@@ -15,5 +15,4 @@ public class PostOverviewDto
 
 	public long VotePositive { get; set; }
 	public long VoteNegative { get; set; }
-	public float? VoteRatio { get; set; } = null;
 }

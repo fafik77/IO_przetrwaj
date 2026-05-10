@@ -1,7 +1,11 @@
 ﻿using Przetrwaj.Application.Commands.Posts;
+using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Posts;
+using Przetrwaj.Domain.Exceptions.Regions;
+using Przetrwaj.Domain.Helpers;
 using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using System.Security.Claims;
@@ -11,8 +15,8 @@ namespace Przetrwaj.Application.Services;
 
 public interface IAddPostService
 {
-	public Task<PostCompleteDataDto> FillPostFromData(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, IEnumerable<Claim> Claims, CancellationToken cancellationToken);
-	public (short Woj, short Pow, int Gmi) RegionFromLocation(LatLong latLong, RegionPrecision regionPrecision);
+	public Task<PostCompleteDataDto> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, ClaimsPrincipal ClaimsPrincipal, CancellationToken cancellationToken);
+	public Task<(short Woj, short Pow, int Gmi)> RegionFromLocationAsync(LatLong latLong, RegionPrecision regionPrecision, CancellationToken ct);
 }
 
 internal class AddPostService : IAddPostService
@@ -32,18 +36,19 @@ internal class AddPostService : IAddPostService
 		_regionRepository = regionRepository;
 	}
 
-	public async Task<PostCompleteDataDto> FillPostFromData(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, IEnumerable<Claim> Claims, CancellationToken cancellationToken)
+	public async Task<PostCompleteDataDto> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, ClaimsPrincipal ClaimsPrincipal, CancellationToken ct)
 	{
 		#region Claims to RegionPrecision Visibility check
 		switch (addPostData.RegionPrecision)
 		{
 			case RegionPrecision.PL:
 			case RegionPrecision.WOJ:
-				//case RegionPrecision.POW:
+			case RegionPrecision.POW:
 				{
-					throw new NotImplementedException();
-					//if(Claims.Contains(UserRoles.Moderator))
-					break;
+					if (ClaimsPrincipal.IsInRole(UserRoles.Moderator) ||
+						ClaimsPrincipal.IsInRole(UserRoles.Admin))
+						break;
+					throw new PermissionDeniedException("Not enough privilages");
 				}
 			default: break;
 		}
@@ -79,11 +84,11 @@ internal class AddPostService : IAddPostService
 		post.IdCategory = addPostData.IdCategory;
 		post.CustomCategory = addPostData.CustomCategory ?? string.Empty;
 
-		var region = RegionFromLocation(addPostData.LatLong, addPostData.RegionPrecision);
+		var region = await RegionFromLocationAsync(addPostData.LatLong, addPostData.RegionPrecision, ct);
 		switch (addPostData.RegionPrecision)
 		{
 			case RegionPrecision.PL:
-				post.IdGmiOnly = 0;
+				post.IdWojOnly = 0;
 				break;
 			case RegionPrecision.WOJ:
 				post.IdWojOnly = region.Woj;
@@ -102,8 +107,8 @@ internal class AddPostService : IAddPostService
 
 		try
 		{
-			await _postRepository.AddAsync(post, cancellationToken);
-			await _unitOfWork.SaveChangesAsync(cancellationToken);
+			await _postRepository.AddAsync(post, ct);
+			await _unitOfWork.SaveChangesAsync(ct);
 		}
 		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
 		{
@@ -112,12 +117,12 @@ internal class AddPostService : IAddPostService
 		return (PostCompleteDataDto)post!;
 	}
 
-	public (short Woj, short Pow, int Gmi) RegionFromLocation(LatLong latLong, RegionPrecision regionPrecision)
+	public async Task<(short Woj, short Pow, int Gmi)> RegionFromLocationAsync(LatLong latLong, RegionPrecision regionPrecision, CancellationToken ct)
 	{
-		(short Woj, short Pow, int Gmi) Region = new();
-		throw new NotImplementedException();
-		throw new LocationOutsideOfPolandBoundsException($"Lat: {latLong.Lat}, Long: {latLong.Long}");
-		return Region;
+		var region = await _regionRepository.RegionFromLocationAsync(latLong, ct);
+		if (region is null)
+			throw new LocationNotInPolandException(latLong);
+		return RegionCompoundHelper.RegionSplit(region.Id);
 	}
 
 }

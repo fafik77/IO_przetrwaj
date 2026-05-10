@@ -50,7 +50,7 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		if (userRoles.Contains(UserRoles.Admin) || (moderatorIsAdmin && userRoles.Contains(UserRoles.Moderator)))
 		{   //Admin can not be banned. Moderator can only be banned by Admin (authorization levels).
 			var rolesStr = string.Join(", ", userRoles);
-			throw new UnauthorizedException($"User {request.UserIdOrEmail} has roles: {rolesStr}. You {moderator.Name} {moderator.Surname} do not have permissions to ban them.");
+			throw new PermissionDeniedException($"User {request.UserIdOrEmail} has roles: {rolesStr}. You {moderator.Name} {moderator.Surname} do not have permissions to ban them.");
 		}
 
 		user.BanDate = DateTimeOffset.UtcNow;

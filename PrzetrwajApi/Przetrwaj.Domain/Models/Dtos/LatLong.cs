@@ -7,6 +7,6 @@ public record LatLong(double Lat, double Long)
 
 	public override string ToString()
 	{
-		return $"(lat={Lat}, lon={Long})";
+		return $"(lat={Lat}, long={Long})";
 	}
 }

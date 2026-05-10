@@ -18,8 +18,6 @@ public interface IPostRepository
 	public Task<bool> ExistsActivePostIdAsync(string idPost, CancellationToken cancellationToken = default);
 	public Task<Post?> GetRWPostByIdAsync(string idPost, CancellationToken cancellationToken = default);
 	public Task<Post?> GetPostWithAttachmentsByIdAsync(string idPost, CancellationToken cancellationToken = default);
-	public Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default);
-	public Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default);
 	public Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default);
 	public Task<IEnumerable<PostMinimalCategoryRegion>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default);
 	Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default);

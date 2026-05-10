@@ -10,6 +10,6 @@ public record AddDangerInternallCommand : ICommand<PostCompleteDataDto>
 	public required AddPostCommand AddPostCommand { get; set; }
 	public CategoryType Category { get; set; } = CategoryType.Danger;
 	public required string IdAutor { get; set; }
-	public required IEnumerable<Claim> Claims { get; set; }
+	public required ClaimsPrincipal ClaimsPrincipal { get; set; }
 }
 

@@ -11,18 +11,18 @@ public class AuthorizationHelper
 {
 	private readonly JwtSettings _jwtSettings;
 
-	public AuthorizationHelper(IOptions<JwtSettings> options)
+	public AuthorizationHelper(IOptions<JwtSettings> options, bool ValidateLifetime = true)
 	{
 		_jwtSettings = options.Value;
 	}
 
-	public ClaimsPrincipal GetPrincipalClaimsFromTokens(List<string> authorizationTokens)
+	public ClaimsPrincipal GetPrincipalClaimsFromTokens(List<string> authorizationTokens, bool ValidateLifetime = true)
 	{
 		if (authorizationTokens.Count != 1) throw new InvalidAuthorizationException("Invalid authorization token");
 		return GetPrincipalClaimsFromToken(authorizationTokens[0]);
 	}
 
-	public ClaimsPrincipal GetPrincipalClaimsFromToken(string authorizationToken)
+	public ClaimsPrincipal GetPrincipalClaimsFromToken(string authorizationToken, bool ValidateLifetime = true)
 	{
 		if (authorizationToken.StartsWith("Bearer ")) authorizationToken = authorizationToken.Substring("Bearer ".Length);
 
@@ -32,7 +32,7 @@ public class AuthorizationHelper
 			ValidateIssuer = true,
 			ValidateIssuerSigningKey = true,
 			IssuerSigningKey = new SymmetricSecurityKey(_jwtSettings.KeyBytes),
-			ValidateLifetime = false,   // We want to get claims from expired token
+			ValidateLifetime = ValidateLifetime,   // We want to get claims from expired token
 			ValidAudience = _jwtSettings.Audience,
 			ValidIssuer = _jwtSettings.Issuer,
 			ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
@@ -47,4 +47,7 @@ public class AuthorizationHelper
 
 		return principal;
 	}
+
+	static public string? GetUserId(ClaimsPrincipal claims) => claims.FindFirstValue(ClaimTypes.NameIdentifier);
+	static public string? GetJti(ClaimsPrincipal claims) => claims.FindFirstValue(JwtRegisteredClaimNames.Jti);
 }

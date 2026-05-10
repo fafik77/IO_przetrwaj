@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
-using Przetrwaj.Application.Quaries.Dangers;
+using Przetrwaj.Application.Helpers;
 using Przetrwaj.Application.Quaries.Posts;
-using Przetrwaj.Application.Quaries.Resources;
+using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
@@ -25,22 +26,39 @@ namespace Przetrwaj.Presentation.Controllers;
 public partial class PostController : Controller
 {
 	private readonly IMediator _mediator;
+	private readonly IOptions<JwtSettings> _jwtOptions;
 
-	public PostController(IMediator mediator)
+	public PostController(IMediator mediator, IOptions<JwtSettings> jwtOptions)
 	{
 		_mediator = mediator;
+		_jwtOptions = jwtOptions;
 	}
 
 
 	[HttpGet("{id}")]
-	[SwaggerOperation("Get post with all content. Vote status in NOT included(use Get: /Post/{id}/Vote)")]
+	[SwaggerOperation("Get post with all content. (contains MyVote)")]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetById(string id, CancellationToken CT)
+	public async Task<IActionResult> GetById(
+		[FromAuthorizationHeader] List<string> Authorizations,
+		[FromRoute] string id,
+		CancellationToken CT)
 	{
+		string? userId = null;
 		try
 		{
 			var post = await _mediator.Send(new GetPostByIdQuery { Id = id }, CT);
+			if (Authorizations.Count == 1)
+			{
+				var helper = new AuthorizationHelper(_jwtOptions);
+				var claims = helper.GetPrincipalClaimsFromTokens(Authorizations);
+				userId = AuthorizationHelper.GetUserId(claims);
+			}
+			if (userId != null)
+			{	//auto get user's own vote on this post
+				var vote = await _mediator.Send(new GetUserVoteQuery { PostId = id, UserId = userId }, CT);
+				post.MyVote = vote;
+			}
 			return Ok(post);
 		}
 		catch (BaseException ex)
@@ -65,6 +83,7 @@ public partial class PostController : Controller
 		[FromQuery] int RegionId,
 		[FromQuery] int? Impediment,
 		[FromQuery] RegionPrecision? Level,
+		[FromQuery] CategoryTypeFilter? category,
 		CancellationToken CT)
 	{
 		return BadRequest("WIP");
@@ -72,41 +91,6 @@ public partial class PostController : Controller
 		//return Ok(posts);
 	}
 
-	//KL Done
-	[HttpGet("region/{id}/danger")]
-	[SwaggerOperation("Get all Danger posts in region")]
-	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetDangerInRegion(int id, CancellationToken CT)
-	{
-		try
-		{
-			var posts = await _mediator.Send(new GetDangerPostsInRegionQuery { IdRegion = id }, CT);
-			return Ok(posts);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
-
-	//KL Done
-	[HttpGet("region/{id}/resource")]
-	[SwaggerOperation("Get all Resource posts in region")]
-	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetResourceInRegion(int id, CancellationToken CT)
-	{
-		try
-		{
-			var posts = await _mediator.Send(new GetResourcePostsInRegionQuery { IdRegion = id }, CT);
-			return Ok(posts);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
 
 
 	[HttpGet("authored/{id}")]
@@ -259,7 +243,7 @@ public partial class PostController : Controller
 			AddPostCommand = newPost,
 			// Set user from cookie
 			IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
-			Claims = User.FindAll(ClaimTypes.Role),
+			ClaimsPrincipal = User,
 		};
 		try
 		{
@@ -287,7 +271,7 @@ public partial class PostController : Controller
 			AddPostCommand = newPost,
 			// Set user from cookie
 			IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
-			Claims = User.FindAll(ClaimTypes.Role),
+			ClaimsPrincipal = User,
 		};
 		try
 		{

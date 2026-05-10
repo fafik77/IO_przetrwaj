@@ -17,13 +17,12 @@ public class PostCompleteDataDto
 
 	public UserGeneralDtoSimpleRegion? Author { get; set; }
 	public DateTimeOffset DateCreated { get; set; }
+	public VoteDto? MyVote { get; set; } = null;
 
 
 	///To add all this bellow
 	public long VotePositive { get; set; }
 	public long VoteNegative { get; set; }
-	//public long VoteSum { get; set; }
-	//public float VoteRatio { get; set; }
 
 	public virtual IEnumerable<CommentDto?>? Comments { get; set; } = [];
 	public virtual IEnumerable<AttachmentDto?> Attachments { get; set; } = [];

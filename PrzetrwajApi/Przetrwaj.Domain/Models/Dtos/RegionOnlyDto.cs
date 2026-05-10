@@ -5,10 +5,7 @@ namespace Przetrwaj.Domain.Models.Dtos;
 public record RegionOnlyDto
 {
 	public int Id { get; set; }
-	/// Gmi?, Pow (, Woj)?
 	public required string Name { get; set; }
-	public string? In { get; set; }
-	//public LatLong? LatLong { get; set; }
 
 	public static RegionOnlyDto? Map(IRegionInfo? region)
 	{
@@ -16,7 +13,20 @@ public record RegionOnlyDto
 		{
 			Id = region.Id,
 			Name = region.Name,
-			//LatLong = region.LatLong
+		};
+	}
+}
+
+public record RegionOnlyWithinDto : RegionOnlyDto
+{
+	public string? In { get; set; }
+
+	public static RegionOnlyWithinDto? Map(IRegionInfo? region)
+	{
+		return region is null ? null : new RegionOnlyWithinDto
+		{
+			Id = region.Id,
+			Name = region.Name,
 		};
 	}
 }

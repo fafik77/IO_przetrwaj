@@ -21,7 +21,7 @@ internal class PostRepository : IPostRepository
 		_regionRepository = regionRepository;
 	}
 
-
+	#region Add to Posts
 	public async Task<Post> AddAsync(Post item, CancellationToken cancellationToken = default)
 	{
 		await _context.Posts.AddAsync(item, cancellationToken);
@@ -53,6 +53,7 @@ internal class PostRepository : IPostRepository
 			throw new AlreadyVotedException("Already Voted");
 		}
 	}
+	#endregion Add to Post
 
 	public async Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default)
 	{
@@ -75,6 +76,7 @@ internal class PostRepository : IPostRepository
 			Title = p.Title,
 			Description = p.Description,
 			CategoryType = p.CategoryType,
+			LatLong = p.Lat == null ? null : new LatLong(p.Lat!.Value, p.Long!.Value),
 			Comments = p.Comments
 			.OrderByDescending(x => x.DateCreated)
 			.Select(c => new CommentDto
@@ -152,10 +154,6 @@ internal class PostRepository : IPostRepository
 		foreach (var post in posts)
 		{
 			post.Region = RegionOnlyDto.Map(await _regionRepository.GetByIdAsync(post.Region?.Id ?? 0, cancellationToken));
-			var votes = post.VotePositive + post.VoteNegative;
-			post.VoteRatio = (votes > 0)
-				? ((float)post.VotePositive / votes * 100)
-				: 100;
 		}
 		return posts;
 	}
@@ -190,27 +188,6 @@ internal class PostRepository : IPostRepository
 		};
 	}
 
-	public async Task<IEnumerable<PostOverviewDto>> GetDangerByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
-	{
-		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(idRegion);
-
-		var posts = await _context.PostsDangerRO
-			.Where(p => p.IdGmiOnly == Gmi || p.IdPowOnly == Pow || p.IdWojOnly == Woj || p.IdWojOnly == 0)
-			.OrderByDescending(k => k.DateCreated)
-			.Select(p => SelectAsPostOverview(p))
-			.ToListAsync(cancellationToken);
-		return await FillInPostDataAfterFetch(posts, cancellationToken);
-	}
-	public async Task<IEnumerable<PostOverviewDto>> GetResourceByRegionAsync(int idRegion, CancellationToken cancellationToken = default)
-	{
-		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(idRegion);
-
-		var posts = await _context.PostsResourcesRO
-			.Where(p => p.IdGmiOnly == Gmi || p.IdPowOnly == Pow || p.IdWojOnly == Woj || p.IdWojOnly == 0)
-			.Select(p => SelectAsPostOverview(p))
-			.ToListAsync(cancellationToken);
-		return await FillInPostDataAfterFetch(posts, cancellationToken);
-	}
 	/// <summary>
 	/// The new optimal metod to get Posts
 	/// </summary>

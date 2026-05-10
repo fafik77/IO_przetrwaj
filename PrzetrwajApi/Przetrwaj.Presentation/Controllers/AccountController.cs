@@ -219,7 +219,7 @@ public class AccountController : Controller
 		var authorizationHelper = new AuthorizationHelper(_options);
 		try
 		{
-			var claims = authorizationHelper.GetPrincipalClaimsFromTokens(Authorizations);
+			var claims = authorizationHelper.GetPrincipalClaimsFromTokens(Authorizations, ValidateLifetime: false);
 
 			var UserId = claims.FindFirstValue(ClaimTypes.NameIdentifier);
 			var jti = claims.FindFirstValue(JwtRegisteredClaimNames.Jti);

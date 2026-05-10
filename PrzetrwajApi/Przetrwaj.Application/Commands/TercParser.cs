@@ -46,6 +46,14 @@ public class TercParser
 		var results = new TercRegionResults();
 		foreach (var item in itemList)
 		{
+			if (item.NAZWA_DOD.Equals("delegatura", StringComparison.OrdinalIgnoreCase) ||
+				item.NAZWA_DOD.Equals("dzielnica", StringComparison.OrdinalIgnoreCase)
+				)
+			{
+				//skip regions that are: "dzielnica", "delegatura"
+				continue;
+			}
+
 			if (string.IsNullOrEmpty(item.POW))
 			{
 				results.woj.Add(new RegionWoj

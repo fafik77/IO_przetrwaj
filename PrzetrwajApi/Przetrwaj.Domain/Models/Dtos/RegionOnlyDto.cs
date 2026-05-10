@@ -8,7 +8,7 @@ public record RegionOnlyDto
 	/// Gmi?, Pow (, Woj)?
 	public required string Name { get; set; }
 	public string? In { get; set; }
-	public LatLong? LatLong { get; set; }
+	//public LatLong? LatLong { get; set; }
 
 	public static RegionOnlyDto? Map(IRegionInfo? region)
 	{
@@ -16,7 +16,7 @@ public record RegionOnlyDto
 		{
 			Id = region.Id,
 			Name = region.Name,
-			LatLong = region.LatLong
+			//LatLong = region.LatLong
 		};
 	}
 }

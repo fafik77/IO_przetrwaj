@@ -14,7 +14,6 @@ public interface IRegionInfo
 {
 	public int Id { get; }
 	public string Name { get; set; }
-	public LatLong? LatLong { get; }
 	public short ParentId { get; }
 }
 //source TERYT: TERC_Urzedowy, ULIC_Urzedowy
@@ -32,7 +31,6 @@ public class RegionWoj : IRegionInfo
 
 
 	int IRegionInfo.Id => Id * 100_000;
-	LatLong? IRegionInfo.LatLong => null;
 	public short ParentId => 0;
 }
 //Powiat
@@ -55,7 +53,6 @@ public class RegionPow : IRegionInfo
 	public virtual ICollection<RegionGmi> Gminy { get; set; } = [];
 
 	int IRegionInfo.Id => Id * 1_000;
-	LatLong IRegionInfo.LatLong => new LatLong(Lat, Long);
 	public short ParentId => WojId;
 }
 //Gmina
@@ -79,6 +76,5 @@ public class RegionGmi : IRegionInfo
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
 	int IRegionInfo.Id => Id * 10;
-	LatLong IRegionInfo.LatLong => new LatLong(Lat, Long);
 	public short ParentId => PowId;
 }

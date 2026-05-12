@@ -30,36 +30,13 @@ public class RegionController : Controller
 	[HttpGet]
 	[SwaggerOperation("Get Regions")]
 	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+	public async Task<IActionResult> GetAll(
+		[FromQuery] string? nameLike,
+		[FromQuery] RegionPrecision? precision,
+		[FromQuery] int? ParentId,
+		CancellationToken ct)
 	{
-		var res = await _mediator.Send(new GetRegionsQuarry(), cancellationToken);
-		return Ok(res);
-	}
-
-	[HttpGet("woj")]
-	[SwaggerOperation("Get Regions Województwa")]
-	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetWoj(CancellationToken cancellationToken)
-	{
-		var res = await _mediator.Send(new GetWojRegionsQuarry(), cancellationToken);
-		return Ok(res);
-	}
-
-	[HttpGet("pow")]
-	[SwaggerOperation("Get Regions Powiaty")]
-	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetPow(CancellationToken cancellationToken)
-	{
-		var res = await _mediator.Send(new GetPowRegionsQuarry(), cancellationToken);
-		return Ok(res);
-	}
-
-	[HttpGet("gmi")]
-	[SwaggerOperation("Get Regions Gminy")]
-	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetGmi(CancellationToken cancellationToken)
-	{
-		var res = await _mediator.Send(new GetGmiRegionsQuery(), cancellationToken);
+		var res = await _mediator.Send(new GetRegionsQuarry() { NameLike = nameLike, Precision = precision, ParentId = ParentId }, ct);
 		return Ok(res);
 	}
 

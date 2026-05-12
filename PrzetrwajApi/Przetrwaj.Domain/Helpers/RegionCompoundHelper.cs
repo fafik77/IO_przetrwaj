@@ -19,6 +19,7 @@ public class RegionCompoundHelper
 		}
 		else if (CompoundRegionId > 10000)
 		{
+			CompoundRegionId = UnifyRegionId(CompoundRegionId); // make sure the input is 7 digit (not 6)
 			Region.Gmi = (CompoundRegionId / 10);  //removes the last 1 digit from format (2-2-2-1)
 			Region.Pow = (short)(CompoundRegionId / 1000);
 			Region.Woj = (short)(CompoundRegionId / 100000);
@@ -37,5 +38,17 @@ public class RegionCompoundHelper
 		if (RegionId < 100000) return RegionId * 10;
 		if (RegionId < 1000000) return RegionId * 10;
 		return (RegionId / 10) * 10;    //removes the last 1 digit from format (2-2-2-1)
+	}
+	/// <summary>
+	/// gets the deepest region id
+	/// </summary>
+	/// <param name="RegionId">TERC region id</param>
+	/// <returns>2, 4, 7 digit region id ww-pp-gg-0</returns>
+	public static int DeepestRegionId(int RegionId)
+	{
+		var split = RegionSplit(RegionId);
+		if (split.Gmi % 1_00 != 0) return split.Gmi;
+		if (split.Pow % 1_00 != 0) return split.Pow;
+		return split.Woj;
 	}
 }

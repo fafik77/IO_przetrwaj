@@ -6,6 +6,6 @@ public record MatchingPostsFilter
 {
 	public int RegionId { get; set; }
 	public int? Impediment { get; set; }
-	public RegionPrecision? Level { get; set; }
-	public CategoryTypeFilter CategoryFilter { get; set; } = CategoryTypeFilter.Both;
+	public RegionPrecision? MaxLevel { get; set; } = RegionPrecision.PL;
+	public CategoryTypeFilter? CategoryFilter { get; set; } = CategoryTypeFilter.Both;
 }

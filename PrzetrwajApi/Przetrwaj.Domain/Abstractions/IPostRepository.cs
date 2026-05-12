@@ -1,4 +1,5 @@
 ﻿using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 
 namespace Przetrwaj.Domain.Abstractions;
@@ -21,6 +22,7 @@ public interface IPostRepository
 	public Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default);
 	public Task<IEnumerable<PostMinimalCategoryRegion>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default);
 	Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default);
+	public Task<IEnumerable<PostOverviewDto>> GetMatchingPostsAsync(MatchingPostsFilter filter, CancellationToken ct = default);
 	#endregion //Get
 
 	public Task<Attachment> AddAttachmentAsync(Attachment attachment, CancellationToken cancellationToken = default);

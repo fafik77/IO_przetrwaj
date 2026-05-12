@@ -7,6 +7,7 @@ using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
 using Przetrwaj.Application.Helpers;
 using Przetrwaj.Application.Quaries.Posts;
+using Przetrwaj.Application.Queries.Posts;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
@@ -74,16 +75,33 @@ public partial class PostController : Controller
 	[HttpGet]
 	[SwaggerOperation("Get all matching posts, sort in order of relevance")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetMatchingPosts(
 		[FromQuery] int RegionId,
 		[FromQuery] int? Impediment,
-		[FromQuery] RegionPrecision? Level,
-		[FromQuery] CategoryTypeFilter? category,
+		[FromQuery] RegionPrecision? MaxLevel,
+		[FromQuery] CategoryTypeFilter? Category,
 		CancellationToken CT)
 	{
-		return BadRequest("WIP");
-		//var posts = await _mediator.Send(new GetAllPostsMinimalQuery(), CT);
-		//return Ok(posts);
+		var request = new GetAllMatchingPostsQuery
+		{
+			MatchingPostsFilter = new()
+			{
+				RegionId = RegionId,
+				Impediment = Impediment ?? 0,
+				MaxLevel = MaxLevel,
+				CategoryFilter = Category
+			}
+		};
+		try
+		{
+			var posts = await _mediator.Send(request, CT);
+			return Ok(posts);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
 	}
 
 

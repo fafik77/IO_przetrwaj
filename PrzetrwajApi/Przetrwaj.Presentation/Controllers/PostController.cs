@@ -47,18 +47,13 @@ public partial class PostController : Controller
 		string? userId = null;
 		try
 		{
-			var post = await _mediator.Send(new GetPostByIdQuery { Id = id }, CT);
 			if (Authorizations.Count == 1)
 			{
 				var helper = new AuthorizationHelper(_jwtOptions);
 				var claims = helper.GetPrincipalClaimsFromTokens(Authorizations);
 				userId = AuthorizationHelper.GetUserId(claims);
 			}
-			if (userId != null)
-			{	//auto get user's own vote on this post
-				var vote = await _mediator.Send(new GetUserVoteQuery { PostId = id, UserId = userId }, CT);
-				post.MyVote = vote;
-			}
+			var post = await _mediator.Send(new GetPostByIdQuery { Id = id, UserId = userId }, CT);
 			return Ok(post);
 		}
 		catch (BaseException ex)

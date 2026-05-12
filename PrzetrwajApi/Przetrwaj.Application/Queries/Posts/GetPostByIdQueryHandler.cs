@@ -26,6 +26,8 @@ public class GetPostByIdQueryHandler : IQueryHandler<GetPostByIdQuery, PostCompl
 		//var dto = (PostCompleteDataDto?)res;
 		string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
 		resDto.Attachments = resDto.Attachments.Select(a => AttachmentDto.Map(a, HttpPath)).ToList();
+		if (request.UserId != null)
+			resDto.MyVote = (VoteDto)await _postRepository.GetVoteAsync(request.Id, request.UserId, cancellationToken);
 		return resDto;
 	}
 }

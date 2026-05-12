@@ -196,7 +196,22 @@ internal class PostRepository : IPostRepository
 	/// <returns></returns>
 	public async Task<IEnumerable<PostOverviewDto>> GetMatchingPostsAsync(MatchingPostsFilter filter, CancellationToken ct = default)
 	{
+		//the user can set the region id and scope using those: RegionId, MaxLevel.
+		//supplying most exact id will yield everything up to least exact and "Polska"
+		//2-2-3
+		// -p-g
+		//if user wants to see only Pow then supplies id 2-2-0 and sets RegionPrecision.POW
+		//altough "Polska" will always be visible, thats just easier
 		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(filter.RegionId);
+		switch (filter.MaxLevel)
+		{
+			case RegionPrecision.GMI:
+				Woj = Pow = 0;
+				break;
+			case RegionPrecision.POW:
+				Woj = 0;
+				break;
+		}
 		CategoryType? type = filter.CategoryFilter switch
 		{
 			CategoryTypeFilter.Danger => CategoryType.Danger,

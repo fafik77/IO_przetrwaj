@@ -1,5 +1,4 @@
-﻿using Przetrwaj.Domain.Models.Dtos;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace Przetrwaj.Domain.Entities;
 
@@ -15,6 +14,7 @@ public interface IRegionInfo
 	public int Id { get; }
 	public string Name { get; set; }
 	public short ParentId { get; }
+	public RegionPrecision Type { get; }
 }
 //source TERYT: TERC_Urzedowy, ULIC_Urzedowy
 //Województwo || Polska{id=0}
@@ -32,6 +32,8 @@ public class RegionWoj : IRegionInfo
 
 	int IRegionInfo.Id => Id * 100_000;
 	public short ParentId => 0;
+
+	public RegionPrecision Type => Id == 0 ? RegionPrecision.PL : RegionPrecision.WOJ;
 }
 //Powiat
 public class RegionPow : IRegionInfo
@@ -54,6 +56,7 @@ public class RegionPow : IRegionInfo
 
 	int IRegionInfo.Id => Id * 1_000;
 	public short ParentId => WojId;
+	public RegionPrecision Type => RegionPrecision.POW;
 }
 //Gmina
 public class RegionGmi : IRegionInfo
@@ -77,4 +80,5 @@ public class RegionGmi : IRegionInfo
 
 	int IRegionInfo.Id => Id * 10;
 	public short ParentId => PowId;
+	public RegionPrecision Type => RegionPrecision.GMI;
 }

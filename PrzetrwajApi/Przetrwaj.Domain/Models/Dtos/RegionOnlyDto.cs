@@ -20,6 +20,7 @@ public record RegionOnlyDto
 public record RegionOnlyWithinDto : RegionOnlyDto
 {
 	public string? In { get; set; }
+	public RegionPrecision Type { get; set; }
 
 	public static RegionOnlyWithinDto? Map(IRegionInfo? region)
 	{
@@ -27,6 +28,7 @@ public record RegionOnlyWithinDto : RegionOnlyDto
 		{
 			Id = region.Id,
 			Name = region.Name,
+			Type = region.Type,
 		};
 	}
 }

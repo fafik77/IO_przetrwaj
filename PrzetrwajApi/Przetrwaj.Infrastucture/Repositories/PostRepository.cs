@@ -59,6 +59,7 @@ internal class PostRepository : IPostRepository
 	{
 		var posts = await _context.Posts
 			.Where(p => p.Active == true && p.IdAutor == idAuthor.ToLower())
+			.Include(p => p.IdCategoryNavigation)
 			.Select(p => SelectAsPostOverview(p))
 			.ToListAsync(cancellationToken);
 		return posts;
@@ -224,6 +225,7 @@ internal class PostRepository : IPostRepository
 			.Where(p => p.Active == true && (type == null || p.CategoryType == type))
 			.Where(p => p.IdGmiOnly == Gmi || p.IdPowOnly == Pow || p.IdWojOnly == Woj || p.IdWojOnly == 0)
 			.OrderByDescending(p => p.DateCreated)
+			.Include(p => p.IdCategoryNavigation)
 			.Select(p => SelectAsPostOverview(p))
 			.ToListAsync(ct);
 		return await FillInPostDataAfterFetch(posts, ct);

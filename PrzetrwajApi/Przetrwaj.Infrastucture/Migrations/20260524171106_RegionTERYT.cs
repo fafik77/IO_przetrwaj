@@ -20,6 +20,9 @@ namespace Przetrwaj.Infrastucture.Migrations
 			migrationBuilder.EnsureSchema(
 				name: "auth");
 
+			migrationBuilder.EnsureSchema(
+				name: "postgis");
+
 			migrationBuilder.CreateTable(
 				name: "AspNetRoles",
 				schema: "przetrwaj",

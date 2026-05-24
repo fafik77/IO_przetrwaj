@@ -12,7 +12,7 @@ public record UpdateAccountCommand
 	[MaxLength(64)]
 	[EmailAddress]
 	public string? Email { get; set; }
-	public short? PowiatId { get; set; }
+	//public short? PowiatId { get; set; }
 	public int? GminaId { get; set; }
 	public int? Impediments { get; set; }
 	[MaxLength(64)]

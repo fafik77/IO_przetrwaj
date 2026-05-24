@@ -110,7 +110,7 @@ public class AuthService : IAuthService
 	public async Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register)
 	{
 		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(register.IdRegion);
-		var PowExists = _regionRepository.GetByIdAsync(Pow);
+		//var PowExists = _regionRepository.GetByIdAsync(Pow);
 		var GmiExists = _regionRepository.GetByIdAsync(Gmi);
 		var user = new AppUser
 		{
@@ -118,7 +118,6 @@ public class AuthService : IAuthService
 			Name = register.Name,
 			Surname = register.Surname,
 			UserName = register.Email, // Typically, UserName is set to the email for login (its enforced unique)
-			PowiatId = PowExists is null ? null : Pow,
 			GminaId = GmiExists is null ? null : Gmi,
 			RegistrationDate = DateTimeOffset.UtcNow,
 			ModeratorRolePending = register.ModeratorRole,

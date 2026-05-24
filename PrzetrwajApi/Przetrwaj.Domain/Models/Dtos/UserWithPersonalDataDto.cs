@@ -30,7 +30,7 @@ public record UserWithPersonalDataDto
 			Email = registeredUser.Email,
 			Name = registeredUser.Name ?? "",
 			Surname = registeredUser.Surname ?? "",
-			Region = RegionOnlyDto.Map(registeredUser.RegionPowNavigation),
+			Region = RegionOnlyDto.Map(registeredUser.RegionNavigation),
 			SubRegion = registeredUser.GminaId,
 			BanInfo = registeredUser.BanDate is null ? null : new BanInfo
 			{

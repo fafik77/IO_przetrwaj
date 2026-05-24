@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Regions;
 using Przetrwaj.Domain.Helpers;
 using Przetrwaj.Domain.Models;
@@ -18,7 +17,7 @@ namespace Przetrwaj.Infrastucture.Repositories;
 public class RegionRepository : IRegionRepository
 {
 	private readonly NpgsqlDataSource _postgisDataSource;
-	private readonly IDbContextFactory<ApplicationDbContext> _contextFactoryRO;
+	//private readonly IDbContextFactory<ApplicationDbContext> _contextFactoryRO;
 	private readonly ApplicationDbContext _dbContext;
 	private readonly IAppCache _cache;
 	private const string RegionsCacheKey = "Regions";
@@ -31,10 +30,9 @@ public class RegionRepository : IRegionRepository
 			ST_Transform(ST_SetSRID(ST_MakePoint(@lon, @lat), 4326), 2180)
 		) LIMIT 1;";
 
-	public RegionRepository(IAppCache cache, IDbContextFactory<ApplicationDbContext> contextFactory, ApplicationDbContext dbContext, NpgsqlDataSource dataSource)
+	public RegionRepository(IAppCache cache, ApplicationDbContext dbContext, NpgsqlDataSource dataSource)
 	{
 		_cache = cache;
-		_contextFactoryRO = contextFactory;
 		_dbContext = dbContext;
 		_postgisDataSource = dataSource;
 	}
@@ -53,33 +51,16 @@ public class RegionRepository : IRegionRepository
 			entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
 
 			// IMPORTANT: Use AsNoTracking because these objects will live in RAM
-			var wojTask = ExecuteQueryAsync(ctx =>
-				ctx.RegionWoj.AsNoTracking().OrderBy(r => r.Id).ToListAsync(ct));
-			var powTask = ExecuteQueryAsync(ctx =>
-				ctx.RegionPow.AsNoTracking().OrderBy(r => r.Id).ToListAsync(ct));
-			var gmiTask = ExecuteQueryAsync(ctx =>
-				ctx.RegionGmi.AsNoTracking().OrderBy(r => r.Id).ToListAsync(ct));
+			var regionList = await _dbContext.Regions.AsNoTracking().OrderBy(r => r.Id).ToListAsync(ct);
 
-			await Task.WhenAll(wojTask, powTask, gmiTask);
-
-			var regions = new AllRegions
+			return new AllRegions
 			{
-				Woj = await wojTask,
-				Pow = await powTask,
-				Gmi = await gmiTask
+				CompundDict = regionList.ToFrozenDictionary(r => r.Id),
+				Woj = regionList.OfType<RegionWoj>().ToList(),
+				Pow = regionList.OfType<RegionPow>().ToList(),
+				Gmi = regionList.OfType<RegionGmi>().ToList(),
 			};
-
-			var list = new List<IRegionInfo>(regions.Woj);
-			list.AddRange(regions.Pow);
-			list.AddRange(regions.Gmi);
-			regions.CompundDict = list.ToFrozenDictionary(r => r.Id);
-			return regions;
 		});
-	}
-	private async Task<T> ExecuteQueryAsync<T>(Func<ApplicationDbContext, Task<T>> query)
-	{
-		using var context = await _contextFactoryRO.CreateDbContextAsync();
-		return await query(context);
 	}
 
 	public async Task<IRegionInfo?> GetByIdAsync(int id, CancellationToken ct)

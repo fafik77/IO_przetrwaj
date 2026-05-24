@@ -4,10 +4,10 @@ namespace Przetrwaj.Domain.Entities;
 
 public enum RegionPrecision
 {
-	PL,
-	WOJ,
-	POW,
-	GMI
+	PL = 0,
+	WOJ = 1,
+	POW = 2,
+	GMI = 3,
 }
 public interface IRegionInfo
 {
@@ -16,69 +16,38 @@ public interface IRegionInfo
 	public short ParentId { get; }
 	public RegionPrecision Type { get; }
 }
-//source TERYT: TERC_Urzedowy, ULIC_Urzedowy
-//Województwo || Polska{id=0}
-public class RegionWoj : IRegionInfo
+
+//source TERYT: TERC_Urzedowy
+public abstract class Region : IRegionInfo
 {
-	//2x Char
 	[Key]
-	[DatabaseGenerated(DatabaseGeneratedOption.None)] // Id set manualy
-	public short Id { get; set; }
-	public required string Name { get; set; }
-
-	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
-	public virtual ICollection<RegionPow> Powiaty { get; set; } = [];
-
-
-	int IRegionInfo.Id => Id * 100_000;
-	public short ParentId => 0;
-
-	public RegionPrecision Type => Id == 0 ? RegionPrecision.PL : RegionPrecision.WOJ;
-}
-//Powiat
-public class RegionPow : IRegionInfo
-{
-	//2x Char
-	//[Key]
-	public short WojId { get; set; }
-	//4x Char
-	[Key]
-	[DatabaseGenerated(DatabaseGeneratedOption.None)] // Id set manualy 
-	public short Id { get; set; }
-	public required string Name { get; set; }
-	public double Lat { get; set; }
-	public double Long { get; set; }
-
-	public virtual RegionWoj Woj { get; set; }
-	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
-	public virtual ICollection<AppUser> Users { get; set; } = new List<AppUser>();
-	public virtual ICollection<RegionGmi> Gminy { get; set; } = [];
-
-	int IRegionInfo.Id => Id * 1_000;
-	public short ParentId => WojId;
-	public RegionPrecision Type => RegionPrecision.POW;
-}
-//Gmina
-public class RegionGmi : IRegionInfo
-{
-	//2x Char
-	//[Key]
-	//public short WojId { get; set; }
-	//4x Char
-	//[Key]
-	public short PowId { get; set; }
-	//6(+1)x Char (where last one will be ignored as it violates the Name uniqness)
-	[Key]
-	[DatabaseGenerated(DatabaseGeneratedOption.None)] // Id set manualy
+	[DatabaseGenerated(DatabaseGeneratedOption.None)]
 	public int Id { get; set; }
 	public required string Name { get; set; }
-	public double Lat { get; set; }
-	public double Long { get; set; }
 
-	public virtual RegionPow Pow { get; set; }
+	public int? ParentId { get; set; }
+	public virtual Region? Parent { get; set; }
+	public virtual ICollection<Region> Children { get; set; } = new List<Region>();
+
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
-	int IRegionInfo.Id => Id * 10;
-	public short ParentId => PowId;
-	public RegionPrecision Type => RegionPrecision.GMI;
+
+	public abstract RegionPrecision Type { get; }
+	static public readonly string Type_ = "RegionType";
+	int IRegionInfo.Id => Id;
+	short IRegionInfo.ParentId => (short)(ParentId ?? 0);
+}
+
+//Województwo || Polska{id=0}
+public class RegionWoj : Region
+{
+	public override RegionPrecision Type => Id == 0 ? RegionPrecision.PL : RegionPrecision.WOJ;
+}
+public class RegionPow : Region
+{
+	public override RegionPrecision Type => RegionPrecision.POW;
+}
+public class RegionGmi : Region
+{
+	public override RegionPrecision Type => RegionPrecision.GMI;
 }

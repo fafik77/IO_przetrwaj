@@ -52,7 +52,6 @@ public class GoogleLoginResponseCommandHandler : ICommandHandler<GoogleLoginResp
 					EmailConfirmed = true,  // Google already verified this email
 					Name = info.Principal.FindFirstValue(ClaimTypes.GivenName),
 					Surname = info.Principal.FindFirstValue(ClaimTypes.Surname),
-					PowiatId = 0,
 				};
 				await _userManager.CreateAsync(user);
 			}

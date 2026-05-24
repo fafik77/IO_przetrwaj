@@ -30,8 +30,7 @@ public class UserRepository : IUserRepository
 		if (string.IsNullOrEmpty(id)) return null;
 		id = id.ToLower();
 		var res = await _dbContext.Users
-			.Include(u => u.RegionPowNavigation)
-			.Include(u => u.RegionGmiNavigation)
+			.Include(u => u.RegionNavigation)
 			.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 		return res;
 	}
@@ -41,8 +40,7 @@ public class UserRepository : IUserRepository
 		if (string.IsNullOrEmpty(email)) return null;
 		var normEmail = _userManager.NormalizeEmail(email);
 		var res = await _dbContext.Users
-			.Include(u => u.RegionPowNavigation)
-			.Include(u => u.RegionGmiNavigation)
+			.Include(u => u.RegionNavigation)
 			.FirstOrDefaultAsync(u => u.NormalizedEmail == normEmail, cancellationToken);
 		return res;
 	}
@@ -56,9 +54,9 @@ public class UserRepository : IUserRepository
 			{
 				Email = u.Email!,
 				Id = u.Id,
-				RegionId = u.PowiatId ?? 0 * 1_000,
-				RegionName = u.RegionPowNavigation == null ? "" :
-					u.RegionPowNavigation.Woj.Name + " - " + u.RegionPowNavigation.Name,
+				RegionId = u.GminaId ?? 0,
+				RegionName = u.RegionNavigation == null ? "" :
+					$"{u.RegionNavigation.Parent.Name} - {u.RegionNavigation.Parent.Name}",
 				Surname = u.Surname,
 				Name = u.Name,
 			})

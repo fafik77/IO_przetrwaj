@@ -84,20 +84,20 @@ internal class AddPostService : IAddPostService
 		post.IdCategory = addPostData.IdCategory;
 		post.CustomCategory = addPostData.CustomCategory ?? string.Empty;
 
-		var region = await RegionFromLocationAsync(addPostData.LatLong, addPostData.RegionPrecision, ct);
+		var (Woj, Pow, Gmi) = await RegionFromLocationAsync(addPostData.LatLong, addPostData.RegionPrecision, ct);
 		switch (addPostData.RegionPrecision)
 		{
 			case RegionPrecision.PL:
-				post.IdWojOnly = 0;
+				post.IdRegion = 0;
 				break;
 			case RegionPrecision.WOJ:
-				post.IdWojOnly = region.Woj;
+				post.IdRegion = Woj;
 				break;
 			case RegionPrecision.POW:
-				post.IdPowOnly = region.Pow;
+				post.IdRegion = Pow;
 				goto default;
 			case RegionPrecision.GMI:
-				post.IdGmiOnly = region.Gmi;
+				post.IdRegion = Gmi;
 				goto default;
 			default:
 				post.Lat = addPostData.LatLong.Lat;

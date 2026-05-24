@@ -8,5 +8,5 @@ public class AllRegions
 	public List<RegionWoj> Woj { get; set; } = [];
 	public List<RegionPow> Pow { get; set; } = [];
 	public List<RegionGmi> Gmi { get; set; } = [];
-	public FrozenDictionary<int, IRegionInfo> CompundDict { get; set; } = FrozenDictionary<int, IRegionInfo>.Empty;
+	public FrozenDictionary<int, Region> CompundDict { get; set; } = FrozenDictionary<int, Region>.Empty;
 }

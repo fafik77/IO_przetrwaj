@@ -12,8 +12,8 @@ using Przetrwaj.Infrastucture.Context;
 namespace Przetrwaj.Infrastucture.Migrations
 {
 	[DbContext(typeof(ApplicationDbContext))]
-	[Migration("20260227110600_UserJwtRefresh")]
-	partial class UserJwtRefresh
+	[Migration("20260524171106_RegionTERYT")]
+	partial class RegionTERYT
 	{
 		/// <inheritdoc />
 		protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -210,7 +210,9 @@ namespace Przetrwaj.Infrastucture.Migrations
 						.HasColumnType("integer");
 
 					b.Property<int>("Impediments")
-						.HasColumnType("integer");
+						.ValueGeneratedOnAdd()
+						.HasColumnType("integer")
+						.HasDefaultValue(0);
 
 					b.Property<bool>("LockoutEnabled")
 						.HasColumnType("boolean");
@@ -244,9 +246,6 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.Property<bool>("PhoneNumberConfirmed")
 						.HasColumnType("boolean");
 
-					b.Property<short?>("PowiatId")
-						.HasColumnType("smallint");
-
 					b.Property<DateTimeOffset>("RegistrationDate")
 						.HasColumnType("timestamp with time zone");
 
@@ -273,8 +272,6 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.HasIndex("NormalizedUserName")
 						.IsUnique()
 						.HasDatabaseName("UserNameIndex");
-
-					b.HasIndex("PowiatId");
 
 					b.ToTable("AspNetUsers", "przetrwaj");
 				});
@@ -378,14 +375,8 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.Property<int>("IdCategory")
 						.HasColumnType("integer");
 
-					b.Property<int?>("IdGmiOnly")
+					b.Property<int>("IdRegion")
 						.HasColumnType("integer");
-
-					b.Property<short?>("IdPowOnly")
-						.HasColumnType("smallint");
-
-					b.Property<short?>("IdWojOnly")
-						.HasColumnType("smallint");
 
 					b.Property<double?>("Lat")
 						.HasColumnType("double precision");
@@ -403,11 +394,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 
 					b.HasIndex("IdCategory");
 
-					b.HasIndex("IdGmiOnly");
-
-					b.HasIndex("IdPowOnly");
-
-					b.HasIndex("IdWojOnly");
+					b.HasIndex("IdRegion");
 
 					b.HasIndex("CategoryType", "Active")
 						.HasDatabaseName("IX_Post_Category_Active");
@@ -415,75 +402,30 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.ToTable("Posts", "przetrwaj");
 				});
 
-			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionGmi", b =>
+			modelBuilder.Entity("Przetrwaj.Domain.Entities.Region", b =>
 				{
 					b.Property<int>("Id")
 						.HasColumnType("integer");
 
-					b.Property<double>("Lat")
-						.HasColumnType("double precision");
-
-					b.Property<double>("Long")
-						.HasColumnType("double precision");
-
 					b.Property<string>("Name")
 						.IsRequired()
 						.HasColumnType("text");
 
-					b.Property<short>("PowId")
-						.HasColumnType("smallint");
+					b.Property<int?>("ParentId")
+						.HasColumnType("integer");
+
+					b.Property<int>("RegionType")
+						.HasColumnType("integer");
 
 					b.HasKey("Id");
 
-					b.HasIndex("PowId");
+					b.HasIndex("ParentId");
 
-					b.ToTable("RegionGmi", "przetrwaj");
-				});
+					b.ToTable("Regions", "przetrwaj");
 
-			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionPow", b =>
-				{
-					b.Property<short>("Id")
-						.HasColumnType("smallint");
+					b.HasDiscriminator<int>("RegionType");
 
-					b.Property<double>("Lat")
-						.HasColumnType("double precision");
-
-					b.Property<double>("Long")
-						.HasColumnType("double precision");
-
-					b.Property<string>("Name")
-						.IsRequired()
-						.HasColumnType("text");
-
-					b.Property<short>("WojId")
-						.HasColumnType("smallint");
-
-					b.HasKey("Id");
-
-					b.HasIndex("WojId");
-
-					b.ToTable("RegionPow", "przetrwaj");
-				});
-
-			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionWoj", b =>
-				{
-					b.Property<short>("Id")
-						.HasColumnType("smallint");
-
-					b.Property<string>("Name")
-						.IsRequired()
-						.HasColumnType("text");
-
-					b.HasKey("Id");
-
-					b.ToTable("RegionWoj", "przetrwaj");
-
-					b.HasData(
-						new
-						{
-							Id = (short)0,
-							Name = "Polska"
-						});
+					b.UseTphMappingStrategy();
 				});
 
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.UserComment", b =>
@@ -521,24 +463,20 @@ namespace Przetrwaj.Infrastucture.Migrations
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.UserJwtRefresh", b =>
 				{
 					b.Property<string>("UserId")
-						.HasColumnType("text")
-						.HasAnnotation("Relational:JsonPropertyName", "UID");
+						.HasColumnType("text");
 
 					b.Property<string>("Jwi")
 						.HasColumnType("text");
 
 					b.Property<string>("RefreshToken")
 						.IsRequired()
-						.HasColumnType("text")
-						.HasAnnotation("Relational:JsonPropertyName", "RT");
+						.HasColumnType("text");
 
 					b.Property<short>("UsesLeft")
-						.HasColumnType("smallint")
-						.HasAnnotation("Relational:JsonPropertyName", "UL");
+						.HasColumnType("smallint");
 
 					b.Property<DateTimeOffset>("ValidTill")
-						.HasColumnType("timestamp with time zone")
-						.HasAnnotation("Relational:JsonPropertyName", "VT");
+						.HasColumnType("timestamp with time zone");
 
 					b.HasKey("UserId", "Jwi");
 
@@ -575,8 +513,7 @@ namespace Przetrwaj.Infrastucture.Migrations
 
 					b.Property<string>("IdPost")
 						.IsRequired()
-						.HasColumnType("text")
-						.HasColumnName("IdPost");
+						.HasColumnType("text");
 
 					b.Property<double>("Lat")
 						.HasColumnType("double precision");
@@ -605,6 +542,34 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.HasBaseType("Przetrwaj.Domain.Entities.Category");
 
 					b.HasDiscriminator().HasValue(1);
+				});
+
+			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionGmi", b =>
+				{
+					b.HasBaseType("Przetrwaj.Domain.Entities.Region");
+
+					b.HasDiscriminator().HasValue(3);
+				});
+
+			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionPow", b =>
+				{
+					b.HasBaseType("Przetrwaj.Domain.Entities.Region");
+
+					b.HasDiscriminator().HasValue(2);
+				});
+
+			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionWoj", b =>
+				{
+					b.HasBaseType("Przetrwaj.Domain.Entities.Region");
+
+					b.HasDiscriminator().HasValue(1);
+
+					b.HasData(
+						new
+						{
+							Id = 0,
+							Name = "Polska"
+						});
 				});
 
 			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -660,19 +625,12 @@ namespace Przetrwaj.Infrastucture.Migrations
 
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.AppUser", b =>
 				{
-					b.HasOne("Przetrwaj.Domain.Entities.RegionGmi", "RegionGmiNavigation")
+					b.HasOne("Przetrwaj.Domain.Entities.Region", "RegionNavigation")
 						.WithMany()
 						.HasForeignKey("GminaId")
 						.OnDelete(DeleteBehavior.SetNull);
 
-					b.HasOne("Przetrwaj.Domain.Entities.RegionPow", "RegionPowNavigation")
-						.WithMany("Users")
-						.HasForeignKey("PowiatId")
-						.OnDelete(DeleteBehavior.SetNull);
-
-					b.Navigation("RegionGmiNavigation");
-
-					b.Navigation("RegionPowNavigation");
+					b.Navigation("RegionNavigation");
 				});
 
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.Attachment", b =>
@@ -700,52 +658,26 @@ namespace Przetrwaj.Infrastucture.Migrations
 						.OnDelete(DeleteBehavior.Restrict)
 						.IsRequired();
 
-					b.HasOne("Przetrwaj.Domain.Entities.RegionGmi", "RegionGmiNavigation")
+					b.HasOne("Przetrwaj.Domain.Entities.Region", "RegionNavigation")
 						.WithMany("Posts")
-						.HasForeignKey("IdGmiOnly")
-						.OnDelete(DeleteBehavior.Restrict);
-
-					b.HasOne("Przetrwaj.Domain.Entities.RegionPow", "RegionPowNavigation")
-						.WithMany("Posts")
-						.HasForeignKey("IdPowOnly")
-						.OnDelete(DeleteBehavior.Restrict);
-
-					b.HasOne("Przetrwaj.Domain.Entities.RegionWoj", "RegionWojNavigation")
-						.WithMany("Posts")
-						.HasForeignKey("IdWojOnly")
-						.OnDelete(DeleteBehavior.Restrict);
+						.HasForeignKey("IdRegion")
+						.OnDelete(DeleteBehavior.Restrict)
+						.IsRequired();
 
 					b.Navigation("IdAutorNavigation");
 
 					b.Navigation("IdCategoryNavigation");
 
-					b.Navigation("RegionGmiNavigation");
-
-					b.Navigation("RegionPowNavigation");
-
-					b.Navigation("RegionWojNavigation");
+					b.Navigation("RegionNavigation");
 				});
 
-			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionGmi", b =>
+			modelBuilder.Entity("Przetrwaj.Domain.Entities.Region", b =>
 				{
-					b.HasOne("Przetrwaj.Domain.Entities.RegionPow", "Pow")
-						.WithMany("Gminy")
-						.HasForeignKey("PowId")
-						.OnDelete(DeleteBehavior.Restrict)
-						.IsRequired();
+					b.HasOne("Przetrwaj.Domain.Entities.Region", "Parent")
+						.WithMany("Children")
+						.HasForeignKey("ParentId");
 
-					b.Navigation("Pow");
-				});
-
-			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionPow", b =>
-				{
-					b.HasOne("Przetrwaj.Domain.Entities.RegionWoj", "Woj")
-						.WithMany("Powiaty")
-						.HasForeignKey("WojId")
-						.OnDelete(DeleteBehavior.Restrict)
-						.IsRequired();
-
-					b.Navigation("Woj");
+					b.Navigation("Parent");
 				});
 
 			modelBuilder.Entity("Przetrwaj.Domain.Entities.UserComment", b =>
@@ -816,25 +748,11 @@ namespace Przetrwaj.Infrastucture.Migrations
 					b.Navigation("Votes");
 				});
 
-			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionGmi", b =>
+			modelBuilder.Entity("Przetrwaj.Domain.Entities.Region", b =>
 				{
-					b.Navigation("Posts");
-				});
-
-			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionPow", b =>
-				{
-					b.Navigation("Gminy");
+					b.Navigation("Children");
 
 					b.Navigation("Posts");
-
-					b.Navigation("Users");
-				});
-
-			modelBuilder.Entity("Przetrwaj.Domain.Entities.RegionWoj", b =>
-				{
-					b.Navigation("Posts");
-
-					b.Navigation("Powiaty");
 				});
 #pragma warning restore 612, 618
 		}

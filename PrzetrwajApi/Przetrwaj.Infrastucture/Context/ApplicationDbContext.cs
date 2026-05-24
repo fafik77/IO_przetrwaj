@@ -12,9 +12,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
 	public DbSet<Attachment> Attachments { get; set; }
 	public DbSet<Post> Posts { get; set; }
-	public DbSet<RegionWoj> RegionWoj { get; set; }
-	public DbSet<RegionPow> RegionPow { get; set; }
-	public DbSet<RegionGmi> RegionGmi { get; set; }
+	public DbSet<Region> Regions { get; set; }
 	public DbSet<UserComment> Comments { get; set; }
 	public DbSet<Vote> Votes { get; set; }
 	public DbSet<Impediment> Impediments { get; set; }
@@ -46,7 +44,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
 		// --- 1. Category Inheritance (TPH) Configuration ---
 		builder.Entity<Category>()
-			.HasDiscriminator<CategoryType>("Type")
+			.HasDiscriminator<CategoryType>(Category.Type_)
 			.HasValue<CategoryResource>(CategoryType.Resource)
 			.HasValue<CategoryDanger>(CategoryType.Danger);
 
@@ -54,8 +52,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 		{
 			entity.HasNoKey(); // Views usually don't have a PK in EF context
 			entity.ToView("View_PostMinimal", "przetrwaj");
-			// Match the property names if they differ from SQL columns
-			entity.Property(v => v.IdPost).HasColumnName("IdPost");
+			// Match the property names if they differ from SQL columns. Like:
+			//entity.Property(v => v.IdPost).HasColumnName("IdPost");
 		});
 
 		// --- 2. Vote Entity Configuration ---
@@ -103,16 +101,11 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 		// --- 2. Region___ Entity Configuration ---
 
 		// Relationship: Region_up (Principal) -> Region_down (Dependent)
-		builder.Entity<RegionGmi>()
-			.HasOne(p => p.Pow)                     // Gmi is in Pow
-			.WithMany(c => c.Gminy)                 // Pow has many Gmi
-			.HasForeignKey(p => p.PowId)            // Foreign Key is PowId (short)
-			.OnDelete(DeleteBehavior.Restrict);
-		builder.Entity<RegionPow>()
-			.HasOne(p => p.Woj)                     // Pow is in Woj
-			.WithMany(c => c.Powiaty)               // Woj has many Pow
-			.HasForeignKey(p => p.WojId)            // Foreign Key is WojId (short)
-			.OnDelete(DeleteBehavior.Restrict);
+		builder.Entity<Region>()
+			.HasDiscriminator<RegionPrecision>(Region.Type_)
+			.HasValue<RegionWoj>(RegionPrecision.WOJ)
+			.HasValue<RegionPow>(RegionPrecision.POW)
+			.HasValue<RegionGmi>(RegionPrecision.GMI);
 
 		// --- 2. Post Entity Configuration ---
 
@@ -132,19 +125,9 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
 		// Relationship: Region___ (Principal) -> Post (Dependent)
 		builder.Entity<Post>()
-			.HasOne(p => p.RegionWojNavigation)     // Post has one Region
+			.HasOne(p => p.RegionNavigation)     // Post has one Region
 			.WithMany(r => r.Posts)                 // Region has many Posts
-			.HasForeignKey(p => p.IdWojOnly)        // Foreign Key is IdWojOnly (short?) in Post
-			.OnDelete(DeleteBehavior.Restrict);
-		builder.Entity<Post>()
-			.HasOne(p => p.RegionPowNavigation)     // Post has one Region
-			.WithMany(r => r.Posts)                 // Region has many Posts
-			.HasForeignKey(p => p.IdPowOnly)        // Foreign Key is IdPowOnly (short?) in Post
-			.OnDelete(DeleteBehavior.Restrict);
-		builder.Entity<Post>()
-			.HasOne(p => p.RegionGmiNavigation)     // Post has one Region
-			.WithMany(r => r.Posts)                 // Region has many Posts
-			.HasForeignKey(p => p.IdGmiOnly)        // Foreign Key is IdGmiOnly (int?) in Post
+			.HasForeignKey(p => p.IdRegion)        // Foreign Key is IdWojOnly (short?) in Post
 			.OnDelete(DeleteBehavior.Restrict);
 
 		builder.Entity<Post>()
@@ -171,13 +154,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
 		// Relationship: Region___ (Principal) -> AppUser (Dependent)
 		builder.Entity<AppUser>()
-			.HasOne(u => u.RegionPowNavigation)     // AppUser has one Region
-			.WithMany(r => r.Users)                 // Region has many Users
-			.HasForeignKey(u => u.PowiatId)         // Foreign Key is PowiatId in AppUser
-			.OnDelete(DeleteBehavior.SetNull);      // Prevent deleting a Region if users are linked
-
-		builder.Entity<AppUser>()
-			.HasOne(u => u.RegionGmiNavigation)     // AppUser has one Region
+			.HasOne(u => u.RegionNavigation)     // AppUser has one Region
 			.WithMany()
 			.HasForeignKey(u => u.GminaId)          // Foreign Key is PowiatId in AppUser
 			.OnDelete(DeleteBehavior.SetNull);      // Prevent deleting a Region if users are linked
@@ -194,7 +171,10 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.HasForeignKey(e => e.UserId)                   // FK is UserId in UserJwtRefresh
 			.OnDelete(DeleteBehavior.Cascade);              // Delete all users tokens when the user is deleted
 
-
+		// --- default data ---
+		builder.Entity<AppUser>()
+			.Property(user => user.Impediments)
+			.HasDefaultValue(0);
 
 		// --- 3. Seed data ---
 		builder.Entity<IdentityRole>().HasData(

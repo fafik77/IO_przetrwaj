@@ -30,7 +30,7 @@ public class UpdateAccountCommandHandler : ICommandHandler<UpdateAccountInternal
 		var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
 		bool userHasPassword = await _userManager.HasPasswordAsync(user);
 		if (user is null) throw new UserNotFoundException(request.UserId);
-		if (request.Update.PowiatId != null) user.PowiatId = (short)request.Update.PowiatId;
+		//if (request.Update.PowiatId != null) user.PowiatId = (short)request.Update.PowiatId;
 		if (request.Update.Impediments != null) user.Impediments = (int)request.Update.Impediments;
 		user.GminaId = request.Update.GminaId; //is nullable, so null it
 		if (user.GminaId <= 0) user.GminaId = null; //null the invalid value

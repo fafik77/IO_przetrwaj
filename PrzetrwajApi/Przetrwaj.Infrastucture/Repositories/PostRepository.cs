@@ -89,7 +89,7 @@ internal class PostRepository : IPostRepository
 					Id = c.IdAutorNavigation.Id,
 					Name = c.IdAutorNavigation.Name ?? "",
 					Surname = c.IdAutorNavigation.Surname ?? "",
-					IdRegion = c.IdAutorNavigation.PowiatId ?? 0,
+					IdRegion = (c.IdAutorNavigation.GminaId ?? 0) / 100_000,
 					RegistrationDate = c.IdAutorNavigation.RegistrationDate,
 					BanDate = c.IdAutorNavigation.BanDate,
 				} : null
@@ -97,11 +97,7 @@ internal class PostRepository : IPostRepository
 			.ToList(),
 			DateCreated = p.DateCreated,
 			// we have to re-map the region (as this is on DB side) later in the code
-			Region = new RegionOnlyDto
-			{
-				Id = p.IdGmiOnly ?? p.IdPowOnly ?? p.IdWojOnly ?? 0,
-				Name = string.Empty,
-			},
+			Region = RegionOnlyDto.Map(p.RegionNavigation),
 			Author = (UserGeneralDtoSimpleRegion?)p.IdAutorNavigation,
 			// if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = p.CustomCategory.Length > 0 ? new CategoryDto
@@ -178,11 +174,7 @@ internal class PostRepository : IPostRepository
 				Name = p.CustomCategory,
 			}
 			: (CategoryDto?)p.IdCategoryNavigation,
-			Region = new RegionOnlyDto
-			{
-				Id = p.IdGmiOnly ?? p.IdPowOnly ?? p.IdWojOnly ?? 0,
-				Name = string.Empty,
-			},
+			Region = RegionOnlyDto.Map(p.RegionNavigation),
 			// --- VOTE CALCULATIONS (Executed on Database side) ---
 			VotePositive = p.Votes.LongCount(v => v.IsUpvote),
 			VoteNegative = p.Votes.LongCount(v => !v.IsUpvote),
@@ -223,7 +215,7 @@ internal class PostRepository : IPostRepository
 		var posts = await _context.Posts
 			.AsNoTracking()
 			.Where(p => p.Active == true && (type == null || p.CategoryType == type))
-			.Where(p => p.IdGmiOnly == Gmi || p.IdPowOnly == Pow || p.IdWojOnly == Woj || p.IdWojOnly == 0)
+			.Where(p => p.IdRegion == Gmi || p.IdRegion == Pow || p.IdRegion == Woj || p.IdRegion == 0)
 			.OrderByDescending(p => p.DateCreated)
 			.Include(p => p.IdCategoryNavigation)
 			.Select(p => SelectAsPostOverview(p))

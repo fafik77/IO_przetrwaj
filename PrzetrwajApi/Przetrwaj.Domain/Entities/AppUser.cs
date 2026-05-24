@@ -21,17 +21,13 @@ public class AppUser : IdentityUser
 	public DateTimeOffset? ModeratorSince { get; set; }
 
 	/// <summary>
-	/// Publicly visible info
-	/// </summary>
-	public short? PowiatId { get; set; }
-	/// <summary>
-	/// private preference for Post display sorting rules
+	/// private preference for Post display sorting rules.
+	/// publicly visible is only Woj
 	/// </summary>
 	public int? GminaId { get; set; }
 	public int Impediments { get; set; } = 0;
 
-	public virtual RegionPow? RegionPowNavigation { get; set; }
-	public virtual RegionGmi? RegionGmiNavigation { get; set; }
+	public virtual Region? RegionNavigation { get; set; }
 	public virtual ICollection<UserComment> Comments { get; set; } = new List<UserComment>();
 	public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 }

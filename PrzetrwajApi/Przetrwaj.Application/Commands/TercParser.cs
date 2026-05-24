@@ -58,6 +58,7 @@ public class TercParser
 			{
 				results.woj.Add(new RegionWoj
 				{
+					ParentId = 0,
 					Id = short.Parse(item.WOJ),
 					Name = item.NAZWA,
 				});
@@ -67,7 +68,7 @@ public class TercParser
 				var wojId = short.Parse(item.WOJ);
 				results.pow.Add(new RegionPow
 				{
-					WojId = wojId,
+					ParentId = wojId,
 					Id = (short)(wojId * 100 + int.Parse(item.POW)),
 					Name = item.NAZWA,
 				});
@@ -78,7 +79,7 @@ public class TercParser
 				var powId = (short)(wojId * 100 + int.Parse(item.POW));
 				var gmina = new RegionGmi
 				{
-					PowId = powId,
+					ParentId = powId,
 					Id = powId * 100 + int.Parse(item.GMI), //skip the last 1 digit
 					Name = item.NAZWA,
 				};

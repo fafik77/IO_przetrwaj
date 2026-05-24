@@ -19,7 +19,7 @@ public class UserGeneralDto
 			Id = registeredUser.Id,
 			Name = registeredUser.Name ?? "",
 			Surname = registeredUser.Surname ?? "",
-			Region = RegionOnlyDto.Map(registeredUser.RegionGmiNavigation),
+			Region = RegionOnlyDto.Map(registeredUser.RegionNavigation),
 			RegistrationDate = registeredUser.RegistrationDate,
 			BanDate = registeredUser.BanDate,
 		};

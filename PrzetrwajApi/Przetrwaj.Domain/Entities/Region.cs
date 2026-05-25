@@ -13,7 +13,7 @@ public interface IRegionInfo
 {
 	public int Id { get; }
 	public string Name { get; set; }
-	public short ParentId { get; }
+	public short? ParentId { get; }
 	public RegionPrecision Type { get; }
 }
 
@@ -35,7 +35,7 @@ public abstract class Region : IRegionInfo
 	public abstract RegionPrecision Type { get; }
 	static public readonly string Type_ = "RegionType";
 	int IRegionInfo.Id => Id;
-	short IRegionInfo.ParentId => (short)(ParentId ?? 0);
+	short? IRegionInfo.ParentId => (short?)(ParentId);
 }
 
 //Województwo || Polska{id=0}

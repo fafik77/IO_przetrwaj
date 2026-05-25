@@ -58,15 +58,15 @@ public class UpdateTercRegionsCommandHandler : ICommandHandler<UpdateTercRegions
 		var listNew = parsedRegions;
 		var listCurrent = regions;
 
-		var (res, count) = await Merge2ListsAsync(listNew.woj, listCurrent.Woj, RegionPrecision.WOJ, ct);
+		var (res, count) = await MergeUpdate2RegionListsAsync(listNew.woj, listCurrent.Woj, RegionPrecision.WOJ, ct);
 		results.Results.AddRange(res.Results);
 		results.WojCount = count;
 
-		(res, count) = await Merge2ListsAsync(listNew.pow, listCurrent.Pow, RegionPrecision.POW, ct);
+		(res, count) = await MergeUpdate2RegionListsAsync(listNew.pow, listCurrent.Pow, RegionPrecision.POW, ct);
 		results.Results.AddRange(res.Results);
 		results.PowCount = count;
 
-		(res, count) = await Merge2ListsAsync(listNew.gmi, listCurrent.Gmi, RegionPrecision.GMI, ct);
+		(res, count) = await MergeUpdate2RegionListsAsync(listNew.gmi, listCurrent.Gmi, RegionPrecision.GMI, ct);
 		results.Results.AddRange(res.Results);
 		results.GmiCount = count;
 
@@ -83,7 +83,16 @@ public class UpdateTercRegionsCommandHandler : ICommandHandler<UpdateTercRegions
 		return results;
 	}
 
-	private async Task<(UpdateTercRegionsResults res, short count)> Merge2ListsAsync<T>(IList<T> listNew, IList<T> listCurrent, RegionPrecision regionType, CancellationToken ct) where T : class, IRegionInfo
+	/// <summary>
+	/// This function takes in the new list and old list. Calculates: A*B, A-B, B-A and updates the database
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="listNew"></param>
+	/// <param name="listCurrent"></param>
+	/// <param name="regionType"></param>
+	/// <param name="ct"></param>
+	/// <returns>results of: A-B, B-A and the final count</returns>
+	private async Task<(UpdateTercRegionsResults res, short count)> MergeUpdate2RegionListsAsync<T>(IList<T> listNew, IList<T> listCurrent, RegionPrecision regionType, CancellationToken ct) where T : class, IRegionInfo
 	{
 		var results = new UpdateTercRegionsResults();
 		var comparer = new GenericCompare<T>(x => x.Id);

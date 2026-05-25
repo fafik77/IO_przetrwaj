@@ -65,13 +65,13 @@ public class RegionRepository : IRegionRepository
 
 	public async Task<IRegionInfo?> GetByIdAsync(int id, CancellationToken ct)
 	{
-		if (id < 0 || id > 100_00_000) return null; // filter out invalid ids
-		var regionId = RegionCompoundHelper.UnifyRegionId(id);
+		id = RegionCompoundHelper.UnifyRegionId(id);
 		// Don't go to DB. Use the cached list.
 		var allRegions = await GetAllAsync(ct);
-		return allRegions.CompundDict.GetValueOrDefault(regionId);
+		return allRegions.CompundDict.GetValueOrDefault(id);
 	}
 
+	#region CUD operations
 	public async Task AddAsync<T>(IEnumerable<T> regions, CancellationToken ct) where T : class, IRegionInfo
 	{
 		await _dbContext.Set<T>().AddRangeAsync(regions, ct);
@@ -107,6 +107,7 @@ public class RegionRepository : IRegionRepository
 		_dbContext.Set<T>().Update(region);
 		_cache.Remove(RegionsCacheKey); //invalidate cache
 	}
+	#endregion CUD operations
 
 	public async Task<IRegionInfo?> RegionFromLocationAsync(LatLong location, CancellationToken ct = default)
 	{

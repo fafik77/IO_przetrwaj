@@ -21,13 +21,14 @@ public class GetRegionQuarryHandler : IQueryHandler<GetRegionQuarry, RegionOnlyW
 		var dto = RegionOnlyWithinDto.Map(res)!;
 		var parents = new List<string>();
 		var parentId = res.ParentId;
-		while (parentId != 0)
+		while (parentId != null)
 		{
-			var parent = await _regionRepository.GetByIdAsync(parentId, cancellationToken);
-			parents.Add(parent.Name);
+			var parent = await _regionRepository.GetByIdAsync(parentId.Value, cancellationToken);
+			parents.Add(parent!.Name);
 			parentId = parent.ParentId;
 		}
-		dto.In = string.Join("; ", parents);
+		parents.Reverse();
+		dto.In = string.Join(" - ", parents);
 		return dto;
 	}
 }

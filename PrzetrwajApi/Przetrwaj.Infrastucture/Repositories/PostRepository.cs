@@ -191,7 +191,7 @@ internal class PostRepository : IPostRepository
 	{
 		//the user can set the region id and scope using those: RegionId, MaxLevel.
 		//supplying most exact id will yield everything up to least exact and "Polska"
-		//2-2-3
+		//2-2-2
 		// -p-g
 		//if user wants to see only Pow then supplies id 2-2-0 and sets RegionPrecision.POW
 		//altough "Polska" will always be visible, thats just easier

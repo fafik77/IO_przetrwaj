@@ -27,8 +27,6 @@ public class GetRegionsQuarryHandler : IQueryHandler<GetRegionsQuarry, IEnumerab
 			_ => res.CompundDict.Select(r => r.Value),
 		};
 		var ParentId = request.ParentId;
-		if (ParentId != null)
-			ParentId = RegionCompoundHelper.DeepestRegionId(ParentId.Value);
 		return regions
 			.Where(r => String.IsNullOrEmpty(request.NameLike) || r.Name.Contains(request.NameLike, StringComparison.OrdinalIgnoreCase))
 			.Where(r => ParentId == null || r.ParentId == ParentId)

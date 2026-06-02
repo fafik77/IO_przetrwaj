@@ -14,7 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Przetrwaj.Presentation.Controllers;
 
 [ApiController]
-[Route("category/danger")]
+[Route("Category/danger")]
 [Produces("application/json")]
 public class DangerCategoriesController : Controller
 {

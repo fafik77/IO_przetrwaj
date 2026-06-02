@@ -52,21 +52,23 @@ public class LoginController : Controller
 
 	[HttpGet("google")]
 	[SwaggerOperation("Login using Google gmail")]
+	[ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status302Found)]
+	[ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(BanInfo), StatusCodes.Status418ImATeapot)]
 	public async Task<IActionResult> GoogleLogin(string? returnUrl = null)
 	{
 		if (string.IsNullOrEmpty(returnUrl))
-			returnUrl = Request.Headers.Referer.ToString();
+			returnUrl = Request.Headers.Referer.ToString(); //auto fill in from requester site
 
-		var redirectUrl = Url.Action("GoogleResponse", new { returnUrl });
+		var redirectUrl = Url.Action(nameof(GoogleResponse), new { returnUrl });
 		if (redirectUrl is null) return NotFound("GoogleResponse endpoint not found");
-		var command = new GoogleLoginCommand(redirectUrl);
-		var properties = await _mediator.Send(command);
+		var properties = await _mediator.Send(new GoogleLoginCommand(redirectUrl));
 		return Challenge(properties, "Google");
 	}
 
 	[HttpGet("google-response")]
-	[SwaggerOperation("Login using Google gmail. Redirects back to frontend")]
-	[ProducesResponseType(StatusCodes.Status302Found)]
+	[SwaggerOperation("Login using Google gmail. Redirects back to frontend /login-callback")]
+	[ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status302Found)]
 	public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
 	{
 		// SECURITY CHECK: Ensure the URL is local or from allowed domains
@@ -74,11 +76,15 @@ public class LoginController : Controller
 		{
 			returnUrl = _frontEndSettings.Url; // Fallback to frontEnd Url
 		}
-		if (!returnUrl.EndsWith("/")) returnUrl += "/";
+		if (!returnUrl.EndsWith('/')) returnUrl += "/";
 		try
 		{
 			var result = await _mediator.Send(new GoogleLoginResponseCommand());
-			return Redirect($"{returnUrl}login-callback?token={result.Token}");
+
+			string safeToken = Uri.EscapeDataString(result.Token ?? string.Empty);
+			string safeRefreshToken = Uri.EscapeDataString(result.RefreshToken ?? string.Empty);
+			string safeSuccess = result.Success.ToString().ToLower();
+			return Redirect($"{returnUrl}login-callback?token={safeToken}&refreshToken={safeRefreshToken}&success={safeSuccess}");
 		}
 		catch (UserBannedException ex)
 		{
@@ -86,7 +92,7 @@ public class LoginController : Controller
 		}
 		catch (BaseException ex)
 		{
-			return Redirect($"{returnUrl}login-error/failed");
+			return Redirect($"{returnUrl}login-error/failed?msg={Uri.EscapeDataString(ex.Message)}");
 		}
 	}
 

@@ -74,7 +74,7 @@ public class AccountController : Controller
 	[HttpPut]
 	[Authorize]
 	[SwaggerOperation("Updates user own account (Owner)")]
-	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount, CancellationToken cancellationToken)
@@ -90,8 +90,8 @@ public class AccountController : Controller
 		};
 		try
 		{
-			var res = await _mediator.Send(requ, cancellationToken);
-			return Ok(res);
+			await _mediator.Send(requ, cancellationToken);
+			return NoContent();
 		}
 		catch (BaseException ex)
 		{
@@ -102,7 +102,7 @@ public class AccountController : Controller
 	[HttpPatch("password")]
 	[Authorize]
 	[SwaggerOperation("Updates user own account password (Owner)")]
-	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> UpdateUserAccountPassword(UpdateAccountPasswordCommand updateAccountPassword, CancellationToken cancellationToken)
@@ -118,8 +118,8 @@ public class AccountController : Controller
 		};
 		try
 		{
-			var res = await _mediator.Send(requ, cancellationToken);
-			return Ok(res);
+			await _mediator.Send(requ, cancellationToken);
+			return NoContent();
 		}
 		catch (BaseException ex)
 		{
@@ -130,7 +130,7 @@ public class AccountController : Controller
 	[HttpPatch("email")]
 	[Authorize]
 	[SwaggerOperation("Updates user own account email (Owner)")]
-	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status409Conflict)]
@@ -147,8 +147,8 @@ public class AccountController : Controller
 		};
 		try
 		{
-			var res = await _mediator.Send(requ, cancellationToken);
-			return Ok(res);
+			await _mediator.Send(requ, cancellationToken);
+			return NoContent();
 		}
 		catch (BaseException ex)
 		{
@@ -159,7 +159,7 @@ public class AccountController : Controller
 
 	[HttpGet("confirm-email")]
 	[SwaggerOperation("Confirm Email using the code attached in email")]
-	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> ConfirmEmail(string userId, string code, CancellationToken cancellationToken)
 	{
@@ -169,8 +169,8 @@ public class AccountController : Controller
 		var command = new ConfirmEmailCommand { UserId = userId, Code = code };
 		try
 		{
-			var res = await _mediator.Send(command, cancellationToken);
-			return Ok(res);
+			await _mediator.Send(command, cancellationToken);
+			return NoContent();
 		}
 		catch (BaseException ex)
 		{
@@ -180,7 +180,7 @@ public class AccountController : Controller
 
 	[HttpGet("confirm-email-change")]
 	[SwaggerOperation("Confirm Email Change using the code attached in the email")]
-	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> ConfirmEmailChange(string userId, string code, string newEmail, CancellationToken cancellationToken)
 	{
@@ -190,8 +190,8 @@ public class AccountController : Controller
 		var command = new ConfirmEmailChangeCommand { UserId = userId, Code = code, NewEmail = newEmail };
 		try
 		{
-			var res = await _mediator.Send(command, cancellationToken);
-			return Ok(res);
+			await _mediator.Send(command, cancellationToken);
+			return NoContent();
 		}
 		catch (BaseException ex)
 		{
@@ -201,7 +201,7 @@ public class AccountController : Controller
 
 	[HttpPost("WIP/forgot-password")]
 	[SwaggerOperation("Forgot password, request a reset")]
-	[ProducesResponseType(typeof(UserGeneralDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<IActionResult> ForgotPassword(ForgotPasswordCommand command, CancellationToken cancellationToken)
 	{
@@ -210,8 +210,8 @@ public class AccountController : Controller
 			return BadRequest((ExceptionCasting)ModelState);
 		try
 		{
-			var res = await _mediator.Send(command, cancellationToken);
-			return Ok(res);
+			await _mediator.Send(command, cancellationToken);
+			return NoContent();
 		}
 		catch (BaseException ex)
 		{

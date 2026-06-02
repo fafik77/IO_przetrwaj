@@ -94,16 +94,16 @@ public class UpdateAccountCommandHandler : ICommandHandler<UpdateAccountInternal
 		//change email requires old password
 		var normName = _userManager.NormalizeName(updateEmail.Email)!;
 		var normOldName = user.NormalizedUserName;
-		if (normName != normOldName)
-		{
-			//check if email is unique and password is correct
-			if (await _userManager.CheckPasswordAsync(user, updateEmail.OldPassword) == false)
-				throw new AccountEmailUpdateException("Incorrect Password");
-			if (await _userManager.FindByNameAsync(normName) != null)
-				throw new UserAlreadyExistsException(updateEmail.Email ?? user.Id);
-			//now generate a token and send an email
-			await _authService.GenerateChangeEmailTokenAsync(user, updateEmail.Email);
-		}
+		if (normName == normOldName)
+			return;
+
+		//check if email is unique and password is correct
+		if (await _userManager.CheckPasswordAsync(user, updateEmail.OldPassword) == false)
+			throw new AccountEmailUpdateException("Incorrect Password");
+		if (await _userManager.FindByNameAsync(normName) != null)
+			throw new UserAlreadyExistsException(updateEmail.Email ?? user.Id);
+		//now generate a token and send an email
+		await _authService.GenerateChangeEmailTokenAsync(user, updateEmail.Email);
 	}
 
 	private async Task UpdateGeneralInfo(AppUser user, UpdateAccountCommand update, CancellationToken ct)

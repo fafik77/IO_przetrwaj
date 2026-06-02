@@ -13,7 +13,6 @@ public record UserWithPersonalDataDto
 	public RegionOnlyDto? Region { get; set; }
 	public int? SubRegion { get; set; }
 	public IEnumerable<string> Roles { get; set; } = [];
-	public bool TwoFactorEnabled { get; set; }
 	public DateTimeOffset RegistrationDate { get; set; }
 	public int Impediments { get; set; }
 
@@ -41,7 +40,6 @@ public record UserWithPersonalDataDto
 				BannedById = registeredUser.BannedById ?? string.Empty,
 				BannedBy = null,
 			},
-			TwoFactorEnabled = registeredUser.TwoFactorEnabled,
 			RegistrationDate = registeredUser.RegistrationDate,
 			Impediments = registeredUser.Impediments,
 		};

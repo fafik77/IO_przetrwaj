@@ -12,6 +12,7 @@ public class BanInfo
 	[JsonPropertyName("Reason")]
 	public required string BanReason { get; set; }
 	//[JsonIgnore(Condition = JsonIgnoreCondition.Always)]
+	[JsonPropertyName("ById")]
 	public required string BannedById { get; set; }
 	[JsonPropertyName("By")]
 	public UserGeneralDto? BannedBy { get; set; }

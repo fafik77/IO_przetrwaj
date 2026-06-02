@@ -77,7 +77,6 @@ public class AccountController : Controller
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status409Conflict)]
 	public async Task<IActionResult> UpdateUserAccount(UpdateAccountCommand updateAccount, CancellationToken cancellationToken)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
@@ -88,6 +87,63 @@ public class AccountController : Controller
 		{
 			UserId = currentUserId,
 			Update = updateAccount
+		};
+		try
+		{
+			var res = await _mediator.Send(requ, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
+	}
+
+	[HttpPatch("password")]
+	[Authorize]
+	[SwaggerOperation("Updates user own account password (Owner)")]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> UpdateUserAccountPassword(UpdateAccountPasswordCommand updateAccountPassword, CancellationToken cancellationToken)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		if (currentUserId is null)
+			return BadRequest((ExceptionCasting)new InvalidCookieException("Invalid Cookie/Token")); // Returns a 400 User for some reason does not exist
+		var requ = new UpdateAccountInternallCommand
+		{
+			UserId = currentUserId,
+			Update = updateAccountPassword
+		};
+		try
+		{
+			var res = await _mediator.Send(requ, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
+	}
+
+	[HttpPatch("email")]
+	[Authorize]
+	[SwaggerOperation("Updates user own account email (Owner)")]
+	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status409Conflict)]
+	public async Task<IActionResult> UpdateUserAccountEmail(UpdateAccountEmailCommand updateAccountEmail, CancellationToken cancellationToken)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		if (currentUserId is null)
+			return BadRequest((ExceptionCasting)new InvalidCookieException("Invalid Cookie/Token")); // Returns a 400 User for some reason does not exist
+		var requ = new UpdateAccountInternallCommand
+		{
+			UserId = currentUserId,
+			Update = updateAccountEmail
 		};
 		try
 		{

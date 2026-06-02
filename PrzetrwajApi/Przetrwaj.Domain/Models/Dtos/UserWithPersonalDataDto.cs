@@ -15,6 +15,7 @@ public record UserWithPersonalDataDto
 	public IEnumerable<string> Roles { get; set; } = [];
 	public bool TwoFactorEnabled { get; set; }
 	public DateTimeOffset RegistrationDate { get; set; }
+	public int Impediments { get; set; }
 
 	/// <summary>
 	/// You have to include `BannedBy` yourself when making a Dto
@@ -42,6 +43,7 @@ public record UserWithPersonalDataDto
 			},
 			TwoFactorEnabled = registeredUser.TwoFactorEnabled,
 			RegistrationDate = registeredUser.RegistrationDate,
+			Impediments = registeredUser.Impediments,
 		};
 	}
 }

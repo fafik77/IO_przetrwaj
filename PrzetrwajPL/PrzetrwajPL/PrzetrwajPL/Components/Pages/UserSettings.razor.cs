@@ -61,7 +61,7 @@ namespace PrzetrwajPL.Components.Pages
 					await myRegionPicker.LoadRegionFromId(userRegionId);
 					return;
 				}
-				// 1. Fetch full data from API
+				// 1. Fetch full user data from API
 				var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 				var responseTask = client.GetAsync("/Account");
 

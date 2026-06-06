@@ -1,21 +1,43 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
+using Przetrwaj.CommonLibrary.Consts;
 
-namespace PrzetrwajPL.Components.Pages
+namespace PrzetrwajPL.Components.Pages;
+
+public partial class Logout
 {
-	public partial class Logout
+	[Inject]
+	private IHttpClientFactory ClientFactory { get; set; } = default!;
+
+	[CascadingParameter]
+	private HttpContext? HttpContext { get; set; }
+
+	protected override async Task OnInitializedAsync()
 	{
-		[CascadingParameter]
-		private HttpContext? httpContext { get; set; }
-		protected override async Task OnInitializedAsync()
+		await base.OnInitializedAsync();
+
+		if (HttpContext?.User?.Identity?.IsAuthenticated == true)
 		{
-			await base.OnInitializedAsync();
-			if (httpContext.User.Identity.IsAuthenticated)
+			try
 			{
-				//wyœlijcie request do `/account/logout` ¿eby wylogowaæ u¿ytkownika z api -PN
-				await httpContext.SignOutAsync();
-				httpContext.Response.Redirect("/logout"); //again use this over naviMgr
+				// Attach the Auth Header token
+				var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+
+				// invalidate the refresh token on the API side
+				await client.PostAsync("Account/logout", null);
 			}
+			catch (Exception ex)
+			{
+				// Log the exception but do not block the execution flow. 
+				// We still want to clear local cookies even if the backend is down.
+				Console.WriteLine($"B³¹d podczas uniewa¿niania tokenu w API: {ex.Message}");
+			}
+
+			// Clear local application session cookies
+			await HttpContext.SignOutAsync();
+
+			// Redirect to the root page
+			HttpContext.Response.Redirect("/");
 		}
 	}
 }

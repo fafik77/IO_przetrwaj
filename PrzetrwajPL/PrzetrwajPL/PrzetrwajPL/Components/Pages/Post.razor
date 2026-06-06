@@ -247,7 +247,7 @@
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var commentNew = new AddCommentCommand { Comment = newCommentContent };
 
-			var response = await client.PostAsJsonAsync($"/Post/{Id}/Comment", commentNew);
+			var response = await client.PostAsJsonAsync($"/Posts/{Id}/Comment", commentNew);
 
             if (response.IsSuccessStatusCode)
             {

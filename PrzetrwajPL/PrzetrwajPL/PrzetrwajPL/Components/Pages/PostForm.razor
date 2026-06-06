@@ -128,7 +128,7 @@
 		try
 		{
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-			var response = await client.PostAsJsonAsync("/Post/Danger", model);
+			var response = await client.PostAsJsonAsync("/Posts/Danger", model);
 
 			if (response.IsSuccessStatusCode)
 			{

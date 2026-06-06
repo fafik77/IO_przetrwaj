@@ -10,11 +10,14 @@ public partial class RegionPicker
 {
 	[Inject] private IJSRuntime JsRuntime { get; set; } = default!;
 
-	// Two-way binding for final selected ID (Gmina)
+	/// <summary>
+	/// Two-way binding for final selected ID (Gmina)
+	/// </summary>
 	[Parameter] public int SelectedRegionId { get; set; } = -1;
 	[Parameter] public EventCallback<int> SelectedRegionIdChanged { get; set; }
 
-	public string SelectedRegionName { get; private set; } = "Wybierz Region";
+	public static readonly string SelectRegionMsg = "Wybierz Region";
+	public string SelectedRegionName { get; private set; } = SelectRegionMsg;
 	private bool isGeolocationLoading = false;
 
 	// Hierarchical Lists
@@ -23,9 +26,9 @@ public partial class RegionPicker
 	private List<RegionOnlyDto>? gminy;
 
 	// Active Selections
-	private int? selectedWojId;
-	private int? selectedPowId;
-	private int? selectedGmiId;
+	public int? SelectedWojId { get; private set; }
+	public int? SelectedPowId { get; private set; }
+	public int? SelectedGmiId { get; private set; }
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -43,12 +46,26 @@ public partial class RegionPicker
 		}
 	}
 
+	private void SelectGmi(int? gmina = null, string? name = null)
+	{
+		if (gmina == null)
+		{
+			SelectedRegionId = -1;
+			SelectedRegionName = SelectRegionMsg;
+			return;
+		}
+		SelectedRegionId = gmina.Value;
+		SelectedRegionName = name ?? "Miejscowość bez nazwy!";
+	}
+
 	private async Task LoadWojewodztwa()
 	{
 		try
 		{
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			wojewodztwa = await client.GetFromJsonAsync<List<RegionOnlyDto>>($"/Regions?precision={RegionPrecision.WOJ}");
+			wojewodztwa?.RemoveAll(r => r.Id == 0); //remove "Polska"
+			wojewodztwa = wojewodztwa?.OrderBy(r => r.Name, Consts.PolishAlphabetComparer).ToList();
 			StateHasChanged();
 		}
 		catch (Exception)
@@ -61,14 +78,16 @@ public partial class RegionPicker
 	{
 		if (int.TryParse(e.Value?.ToString(), out var wojId) && wojId > 0)
 		{
-			selectedWojId = wojId;
-			selectedPowId = null;
-			selectedGmiId = null;
+			SelectedWojId = wojId;
+			SelectedPowId = null;
+			SelectedGmiId = null;
 			gminy = null;
 			powiaty = null;
 
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			powiaty = await client.GetFromJsonAsync<List<RegionOnlyDto>>($"/Regions?precision={RegionPrecision.POW}&ParentId={wojId}");
+			powiaty = powiaty?.OrderBy(r => r.Name, Consts.PolishAlphabetComparer).ToList();
+			SelectGmi();
 		}
 		else
 		{
@@ -81,21 +100,24 @@ public partial class RegionPicker
 	{
 		if (int.TryParse(e.Value?.ToString(), out var powId) && powId > 0)
 		{
-			selectedPowId = powId;
-			selectedGmiId = null;
+			SelectedPowId = powId;
+			SelectedGmiId = null;
 			gminy = null;
 
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			gminy = await client.GetFromJsonAsync<List<RegionOnlyDto>>($"/Regions?precision={RegionPrecision.GMI}&ParentId={powId}");
-			if (gminy.Count == 1)
+			gminy = gminy?.OrderBy(r => r.Name, Consts.PolishAlphabetComparer).ToList();
+			if (gminy != null && gminy.Count == 1)
 			{
-				selectedGmiId = gminy[0].Id;
+				await SelectGminaById(gminy[0].Id);
 			}
+			else
+				SelectGmi();
 		}
 		else
 		{
-			selectedPowId = null;
-			selectedGmiId = null;
+			SelectedPowId = null;
+			SelectedGmiId = null;
 			gminy = null;
 		}
 		StateHasChanged();
@@ -105,18 +127,21 @@ public partial class RegionPicker
 	{
 		if (int.TryParse(e.Value?.ToString(), out var gmiId) && gmiId > 0)
 		{
-			selectedGmiId = gmiId;
-			SelectedRegionId = gmiId;
-
-			var gmiItem = gminy?.FirstOrDefault(g => g.Id == gmiId);
-			if (gmiItem != null) SelectedRegionName = gmiItem.Name;
-
-			await SelectedRegionIdChanged.InvokeAsync(SelectedRegionId);
+			await SelectGminaById(gmiId);
 		}
 		else
 		{
-			selectedGmiId = null;
+			SelectedGmiId = null;
 		}
+	}
+	private async Task SelectGminaById(int gmiId)
+	{
+		SelectedGmiId = gmiId;
+
+		var gmiItem = gminy?.FirstOrDefault(g => g.Id == gmiId);
+		SelectGmi(gmiId, gmiItem?.Name);
+
+		await SelectedRegionIdChanged.InvokeAsync(SelectedRegionId);
 	}
 
 	public async Task LoadRegionFromId(int id)
@@ -128,9 +153,9 @@ public partial class RegionPicker
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			int currentId = id;
 
-			selectedGmiId = null;
-			selectedPowId = null;
-			selectedWojId = null;
+			SelectedGmiId = null;
+			SelectedPowId = null;
+			SelectedWojId = null;
 			string? resolvedLeafName = null;
 
 			// Traverse upwards until ParentId hits 0
@@ -144,17 +169,17 @@ public partial class RegionPicker
 
 				if (region.Type == RegionPrecision.GMI)
 				{
-					selectedGmiId = region.Id;
+					SelectedGmiId = region.Id;
 					currentId = region.ParentId;
 				}
 				else if (region.Type == RegionPrecision.POW)
 				{
-					selectedPowId = region.Id;
+					SelectedPowId = region.Id;
 					currentId = region.ParentId;
 				}
 				else if (region.Type == RegionPrecision.WOJ)
 				{
-					selectedWojId = region.Id;
+					SelectedWojId = region.Id;
 					currentId = 0; // Top reached, force loop exit
 				}
 				else
@@ -166,14 +191,14 @@ public partial class RegionPicker
 			// Synchronously load cascading sibling select vectors based on resolved layout paths
 			await LoadWojewodztwa();
 
-			if (selectedWojId.HasValue)
+			if (SelectedWojId.HasValue)
 			{
-				powiaty = await client.GetFromJsonAsync<List<RegionOnlyDto>>($"/Regions?precision={RegionPrecision.POW}&ParentId={selectedWojId}");
+				powiaty = await client.GetFromJsonAsync<List<RegionOnlyDto>>($"/Regions?precision={RegionPrecision.POW}&ParentId={SelectedWojId}");
 			}
 
-			if (selectedPowId.HasValue)
+			if (SelectedPowId.HasValue)
 			{
-				gminy = await client.GetFromJsonAsync<List<RegionOnlyDto>>($"/Regions?precision={RegionPrecision.GMI}&ParentId={selectedPowId}");
+				gminy = await client.GetFromJsonAsync<List<RegionOnlyDto>>($"/Regions?precision={RegionPrecision.GMI}&ParentId={SelectedPowId}");
 			}
 
 			if (!string.IsNullOrEmpty(resolvedLeafName))
@@ -234,9 +259,9 @@ public partial class RegionPicker
 
 	private void ResetSelections()
 	{
-		selectedWojId = null;
-		selectedPowId = null;
-		selectedGmiId = null;
+		SelectedWojId = null;
+		SelectedPowId = null;
+		SelectedGmiId = null;
 		powiaty = null;
 		gminy = null;
 	}

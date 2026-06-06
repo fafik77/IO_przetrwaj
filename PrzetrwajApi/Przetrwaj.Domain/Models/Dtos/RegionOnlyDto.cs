@@ -6,6 +6,7 @@ public record RegionOnlyDto
 {
 	public int Id { get; set; }
 	public required string Name { get; set; }
+	public int ParentId { get; set; }
 
 	public static RegionOnlyDto? Map(IRegionInfo? region)
 	{
@@ -13,6 +14,7 @@ public record RegionOnlyDto
 		{
 			Id = region.Id,
 			Name = region.Name,
+			ParentId = region.ParentId ?? 0
 		};
 	}
 }
@@ -29,6 +31,7 @@ public record RegionOnlyWithinDto : RegionOnlyDto
 			Id = region.Id,
 			Name = region.Name,
 			Type = region.Type,
+			ParentId = region.ParentId ?? 0
 		};
 	}
 }

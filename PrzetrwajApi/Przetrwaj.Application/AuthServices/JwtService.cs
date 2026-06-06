@@ -93,6 +93,7 @@ public class JwtService : IJwtService
 			new Claim(JwtRegisteredClaimNames.Jti, Jti),
 
 			new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+			new Claim("Region", user.Region?.Id.ToString() ?? "0"),
 			new Claim("Name", user.Name ?? string.Empty),
 			new Claim("Surname", user.Surname ?? string.Empty),
 		};

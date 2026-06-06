@@ -21,7 +21,7 @@ using System.Security.Claims;
 
 namespace Przetrwaj.Presentation.Controllers;
 
-[Route("[controller]")]
+[Route("[controller]s")]
 [ApiController]
 [Produces("application/json")]
 public partial class PostController : Controller

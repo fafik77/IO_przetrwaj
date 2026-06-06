@@ -22,7 +22,7 @@ namespace Przetrwaj.Presentation.Controllers;
 /// Do not confuse this one with 'AccountController',
 /// as this one does not return any sensitive data period.
 /// </summary>
-[Route("[controller]")]
+[Route("[controller]s")]
 [ApiController]
 [Produces("application/json")]
 public class UserController : Controller

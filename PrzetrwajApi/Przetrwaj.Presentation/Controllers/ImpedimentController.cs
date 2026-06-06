@@ -13,7 +13,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Przetrwaj.Presentation.Controllers;
 
 
-[Route("[controller]")]
+[Route("[controller]s")]
 [ApiController]
 [Produces("application/json")]
 public class ImpedimentController : Controller

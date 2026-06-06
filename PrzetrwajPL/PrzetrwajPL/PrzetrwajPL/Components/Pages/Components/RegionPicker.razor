@@ -2,36 +2,65 @@
 @using PrzetrwajPL.Models
 @inject IHttpClientFactory ClientFactory
 
-<div class="container">
-    <div class="dropdown" style="text-align: center">
-        <button type="button"
-                @onclick="ToggleDropdown"
-                class="dropbtn @(regions == null ? "loading-state" : "")"
-                disabled="@(regions == null)">
-            @if (regions == null)
+<div class="region-picker-box">
+    <div class="geo-action-row">
+        <button type="button" class="btn-geo" @onclick="RegionFromLocation" disabled="@isGeolocationLoading">
+            @if (isGeolocationLoading)
             {
-                <i class="fa fa-refresh fa-spin me-2"></i>
-            }
-            @SelectedRegionName
-
-            @if (regions != null)
-            {
-                <i class="fa fa-caret-down ms-2"></i>
-            }
-        </button>
-
-        <div class="@(isDropdownOpen ? "dropdown-content show" : "dropdown-content")">
-            @if (regions == null)
-            {
-                <p style="color: gray; font-weight:bold; padding: 10px;">Ładuje...</p>
+                <i class="fa fa-refresh fa-spin me-2"></i> <span>Lokalizowanie...</span>
             }
             else
             {
-                @foreach (var region in regions)
-                {
-                    <p @onclick="() => SelectRegion(region.Id, region.Name)">@region.Name</p>
-                }
+                <i class="fa fa-map-marker me-2"></i> <span>Użyj mojej lokalizacji</span>
             }
+        </button>
+        <span class="active-region-badge">@SelectedRegionName</span>
+    </div>
+
+    <div class="cascade-selectors">
+        @* Layer 1: Województwo *@
+        <div class="selector-group">
+            <label>Województwo:</label>
+            <select class="form-control-region" @onchange="HandleWojSelect" value="@selectedWojId">
+                <option value="">-- Wybierz Województwo --</option>
+                @if (wojewodztwa != null)
+                {
+                    @foreach (var woj in wojewodztwa)
+                    {
+                        <option value="@woj.Id">@woj.Name</option>
+                    }
+                }
+            </select>
+        </div>
+
+        @* Layer 2: Powiat *@
+        <div class="selector-group">
+            <label>Powiat:</label>
+            <select class="form-control-region" @onchange="HandlePowSelect" value="@selectedPowId" disabled="@(powiaty == null)">
+                <option value="">-- @(powiaty == null ? "Najpierw wybierz województwo" : "Wybierz Powiat") --</option>
+                @if (powiaty != null)
+                {
+                    @foreach (var pow in powiaty)
+                    {
+                        <option value="@pow.Id">@pow.Name</option>
+                    }
+                }
+            </select>
+        </div>
+
+        @* Layer 3: Gmina *@
+        <div class="selector-group">
+            <label>Gmina:</label>
+            <select class="form-control-region" @onchange="HandleGmiSelect" value="@selectedGmiId" disabled="@(gminy == null)">
+                <option value="">-- @(gminy == null ? "Najpierw wybierz powiat" : "Wybierz Gminę") --</option>
+                @if (gminy != null)
+                {
+                    @foreach (var gmi in gminy)
+                    {
+                        <option value="@gmi.Id">@gmi.Name</option>
+                    }
+                }
+            </select>
         </div>
     </div>
 </div>

@@ -99,13 +99,13 @@ public class AccountController : Controller
 	}
 
 	[HttpGet("refresh-cookie")]
-	public async Task<IResult> RefreshCookie(string redirectTo = "")
+	public async Task<IResult> RefreshCookie(string redirectTo = "", CancellationToken ct = default)
 	{
 		redirectTo = redirectTo.Trim();
-		if (!redirectTo.StartsWith("/")) redirectTo = "/" + redirectTo;
+		if (!redirectTo.StartsWith('/')) redirectTo = "/" + redirectTo;
 
 		var client = _ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-		var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("/Account");
+		var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("/Account", ct);
 
 		var claims = new List<Claim>
 		{

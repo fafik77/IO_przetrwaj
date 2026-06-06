@@ -79,7 +79,7 @@ else
 	{
 		if (firstRender)
 		{
-			await myRegionPicker.PickRegion(0);
+			// await myRegionPicker.LoadRegionFromId(0);
 			await GetUserInfo();
 		}
 	}
@@ -153,7 +153,7 @@ else
 			int region = 0;
 			if (int.TryParse(regionStr, out region))
 			{
-				await myRegionPicker.PickRegion(region);
+				await myRegionPicker.LoadRegionFromId(region);
 			}
 		}
 		catch (Exception) { }

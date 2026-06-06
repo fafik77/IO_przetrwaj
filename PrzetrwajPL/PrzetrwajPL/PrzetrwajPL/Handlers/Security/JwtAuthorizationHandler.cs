@@ -16,12 +16,14 @@ public class JwtAuthorizationHandler : DelegatingHandler
 	{
 		var context = _httpContextAccessor.HttpContext;
 
-		var token = await context.GetTokenAsync("access_token");
-		if (!string.IsNullOrEmpty(token))
+		if (context != null)
 		{
-			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+			var token = await context.GetTokenAsync("access_token");
+			if (!string.IsNullOrEmpty(token))
+			{
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+			}
 		}
-
 		return await base.SendAsync(request, cancellationToken);
 	}
 }

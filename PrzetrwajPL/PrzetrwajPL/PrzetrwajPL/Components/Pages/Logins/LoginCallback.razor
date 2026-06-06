@@ -1,12 +1,19 @@
 ﻿@page "/login-callback"
+@using Microsoft.AspNetCore.WebUtilities
 @using PrzetrwajPL.Security
 @rendermode InteractiveServer
 @inject NavigationManager Nav
-@inject AuthenticationStateProvider AuthProvider
 
 @code {
-	[Parameter, SupplyParameterFromQuery] 
+	[Parameter, SupplyParameterFromQuery]
 	public string? Token { get; set; }
+
+	[Parameter, SupplyParameterFromQuery]
+	public string? RefreshToken { get; set; }
+
+	[Parameter, SupplyParameterFromQuery]
+	public bool Success { get; set; }
+
 	[CascadingParameter]
 	private HttpContext? httpContext { get; set; }
 
@@ -14,12 +21,41 @@
 	{
 		if (!string.IsNullOrEmpty(Token))
 		{
-			// Redirect to the server-side endpoint to issue the cookie
-			httpContext.Response.Redirect($"/account/signin?token={Token}");
+			// Gather all parameters securely to prevent URL corruption when passing parrameters
+			var queryParams = new Dictionary<string, string?>
+			{
+				{ "token", Token },
+				{ "refreshToken", RefreshToken }
+			};
+
+			var redirectUrl = QueryHelpers.AddQueryString("/account/signin", queryParams);
+
+			// Safe execution checking for SSR vs Interactive Server Circuit
+			if (httpContext?.Response != null)
+			{
+				httpContext.Response.Redirect(redirectUrl);
+			}
+			else
+			{
+				// Force a true page load so the AccountController can establish a standard HTTP Cookie context
+				Nav.NavigateTo(redirectUrl, forceLoad: true);
+			}
 		}
 		else
 		{
+			RedirectToRoot();
+		}
+	}
+
+	private void RedirectToRoot()
+	{
+		if (httpContext?.Response != null)
+		{
 			httpContext.Response.Redirect("/");
+		}
+		else
+		{
+			Nav.NavigateTo("/", forceLoad: true);
 		}
 	}
 }

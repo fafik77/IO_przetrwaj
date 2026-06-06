@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.WebUtilities;
 using PrzetrwajPL.Models;
 using PrzetrwajPL.Requests;
 
@@ -10,7 +11,6 @@ namespace PrzetrwajPL.Components.Pages
 		[CascadingParameter]
 		private HttpContext? httpContext { get; set; }
 
-		private UserWithPersonalDataDto? user = null;
 		[SupplyParameterFromForm]
 		public LoginRequest loginRequest { get; set; } = new LoginRequest();
 		private string errorMessage = string.Empty;
@@ -38,9 +38,25 @@ namespace PrzetrwajPL.Components.Pages
 				if (response.IsSuccessStatusCode)
 				{
 					var result = await response.Content.ReadFromJsonAsync<JwtTokenDto>();
+					// Gather all parameters securely to prevent URL corruption when passing parrameters
+					var queryParams = new Dictionary<string, string?>
+					{
+						{ "token", result.Token },
+						{ "refreshToken", result.RefreshToken }
+					};
 
-					httpContext.Response.Redirect($"/account/signin?token={result.Token}");
-					//await LoginUser(result);
+					var redirectUrl = QueryHelpers.AddQueryString("/account/signin", queryParams);
+
+					// Safe execution checking for SSR vs Interactive Server Circuit
+					if (httpContext?.Response != null)
+					{
+						httpContext.Response.Redirect(redirectUrl);
+					}
+					else
+					{
+						// Force a true page load so the AccountController can establish a standard HTTP Cookie context
+						NavigationManager.NavigateTo(redirectUrl, forceLoad: true);
+					}
 				}
 				else if (response.StatusCode == (System.Net.HttpStatusCode)StatusCodes.Status418ImATeapot)
 				{

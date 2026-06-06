@@ -21,7 +21,7 @@ public class AccountController : Controller
 	}
 
 	[HttpGet("signin")]
-	public async Task<IResult> Signin(string token)
+	public async Task<IResult> Signin(string token, string? refreshToken)
 	{
 		if (string.IsNullOrEmpty(token))
 			return Results.LocalRedirect("/");
@@ -30,17 +30,15 @@ public class AccountController : Controller
 		if (!handler.CanReadToken(token)) return Results.BadRequest("Invalid Token");
 
 		var jwtToken = handler.ReadJwtToken(token);
-
-		// Extract claims exactly like your LoginUser method does
 		var claims = new List<Claim>();
 
-		// JWT standard claims to Identity claims mapping
-		var sub = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-		var email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
-		var region = jwtToken.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
-		var name = jwtToken.Claims.FirstOrDefault(c => c.Type == "Name")?.Value;
-		var surname = jwtToken.Claims.FirstOrDefault(c => c.Type == "Surname")?.Value;
-		var roles = jwtToken.Claims.Where(c => c.Type == "role");
+		// Case-insensitive matching logic on token payloads
+		var sub = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "sub", StringComparison.OrdinalIgnoreCase))?.Value;
+		var email = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "email", StringComparison.OrdinalIgnoreCase))?.Value;
+		var region = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "Region", StringComparison.OrdinalIgnoreCase))?.Value;
+		var name = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "Name", StringComparison.OrdinalIgnoreCase))?.Value;
+		var surname = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "Surname", StringComparison.OrdinalIgnoreCase))?.Value;
+		var roles = jwtToken.Claims.Where(c => string.Equals(c.Type, "role", StringComparison.OrdinalIgnoreCase));
 
 		if (!string.IsNullOrEmpty(sub))
 			claims.Add(new Claim(ClaimTypes.NameIdentifier, sub));
@@ -56,7 +54,7 @@ public class AccountController : Controller
 		if (!string.IsNullOrEmpty(surname))
 			claims.Add(new Claim("Surname", surname));
 
-		if (roles.Count() != 0)
+		if (roles.Any())
 		{
 			foreach (var r in roles)
 			{
@@ -65,32 +63,37 @@ public class AccountController : Controller
 		}
 		else
 		{
-			claims.Add(new Claim(ClaimTypes.Role, "User")); // Default fallback
+			claims.Add(new Claim(ClaimTypes.Role, "User"));
 		}
 
 		var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 		var principal = new ClaimsPrincipal(identity);
 
+		// Authentication kept for 31 days
 		var authProperties = new AuthenticationProperties
 		{
 			IsPersistent = true,
-			ExpiresUtc = jwtToken.ValidTo
+			ExpiresUtc = DateTimeOffset.UtcNow.AddDays(31)
 		};
-		// Store the actual string token so we can retrieve it later
-		authProperties.StoreTokens(new[]
+
+		// Bundle both tokens securely into the Cookie container
+		var tokensToStore = new List<AuthenticationToken>
 		{
 			new AuthenticationToken { Name = "access_token", Value = token }
-		});
+		};
+
+		if (!string.IsNullOrEmpty(refreshToken))
+		{
+			tokensToStore.Add(new AuthenticationToken { Name = "refresh_token", Value = refreshToken });
+		}
+
+		authProperties.StoreTokens(tokensToStore);
+
 		await _ContextAccessor.HttpContext.SignInAsync(
 			CookieAuthenticationDefaults.AuthenticationScheme,
 			principal,
 			authProperties);
-		//await _httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-		//	new AuthenticationProperties
-		//	{
-		//		IsPersistent = true,
-		//		ExpiresUtc = jwtToken.ValidTo
-		//	});
+
 		return Results.LocalRedirect("/");
 	}
 
@@ -100,7 +103,7 @@ public class AccountController : Controller
 		redirectTo = redirectTo.Trim();
 		if (!redirectTo.StartsWith("/")) redirectTo = "/" + redirectTo;
 
-		var client = _ClientFactory.CreateClient("ServerAPI"); 
+		var client = _ClientFactory.CreateClient("ServerAPI");
 		var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("/Account");
 
 		var claims = new List<Claim>
@@ -123,6 +126,6 @@ public class AccountController : Controller
 			principal,
 			new AuthenticationProperties { IsPersistent = true });
 		var succStr = "Zmiany zapisane pomyślnie";
-		return Results.LocalRedirect(redirectTo+$"?success={WebUtility.UrlEncode(succStr)}");
+		return Results.LocalRedirect(redirectTo + $"?success={WebUtility.UrlEncode(succStr)}");
 	}
 }

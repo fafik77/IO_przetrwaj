@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
+using Przetrwaj.CommonLibrary.Consts;
 using PrzetrwajPL.Models;
 using PrzetrwajPL.Requests;
 
@@ -24,7 +25,7 @@ namespace PrzetrwajPL.Components.Pages
 			errorMessage = string.Empty;
 			try
 			{
-				var client = ClientFactory.CreateClient("ServerAPI");
+				var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 				var response = await client.PostAsJsonAsync("/Register/email", registerRequest);
 				if (response.IsSuccessStatusCode)
 				{

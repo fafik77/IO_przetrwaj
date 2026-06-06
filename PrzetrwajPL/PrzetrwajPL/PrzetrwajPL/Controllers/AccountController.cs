@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Przetrwaj.CommonLibrary.Consts;
 using PrzetrwajPL.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 
-namespace PrzetrwajPL.Components.Controllers;
+namespace PrzetrwajPL.Controllers;
 
 [Route("account")]
 public class AccountController : Controller
@@ -103,7 +104,7 @@ public class AccountController : Controller
 		redirectTo = redirectTo.Trim();
 		if (!redirectTo.StartsWith("/")) redirectTo = "/" + redirectTo;
 
-		var client = _ClientFactory.CreateClient("ServerAPI");
+		var client = _ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 		var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("/Account");
 
 		var claims = new List<Claim>

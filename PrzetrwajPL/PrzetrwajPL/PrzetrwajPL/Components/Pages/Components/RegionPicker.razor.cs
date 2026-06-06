@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Przetrwaj.CommonLibrary.Consts;
 using PrzetrwajPL.Models;
 
 namespace PrzetrwajPL.Components.Pages.Components;
@@ -26,7 +27,7 @@ public partial class RegionPicker
 		{
 			try
 			{
-				var client = ClientFactory.CreateClient("ServerAPI");
+				var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 				regions = await client.GetFromJsonAsync<List<RegionOnlyDto>>("/Region");
 				SelectedRegionName = "Wybierz Region";
 				// If a default ID was passed from parent, find its name immediately

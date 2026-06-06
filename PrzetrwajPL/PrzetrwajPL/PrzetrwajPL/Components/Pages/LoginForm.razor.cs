@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
+using Przetrwaj.CommonLibrary.Consts;
 using PrzetrwajPL.Models;
 using PrzetrwajPL.Requests;
 
@@ -20,7 +21,7 @@ namespace PrzetrwajPL.Components.Pages
 		{
 			get
 			{
-				var apiPath = $"{ClientFactory.CreateClient("ServerAPI").BaseAddress}Login/google";
+				var apiPath = $"{ClientFactory.CreateClient(Consts.PrzetrwajApiClientName).BaseAddress}Login/google";
 				var currentUri = NavigationManager.BaseUri;
 				// Encode the URI so it can be passed safely in a query string
 				return $"{apiPath}?returnUrl={Uri.EscapeDataString(currentUri)}";
@@ -33,7 +34,7 @@ namespace PrzetrwajPL.Components.Pages
 			errorMessage = string.Empty;
 			try
 			{
-				var client = ClientFactory.CreateClient("ServerAPI");
+				var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 				var response = await client.PostAsJsonAsync("/Login/email", loginRequest);
 				if (response.IsSuccessStatusCode)
 				{

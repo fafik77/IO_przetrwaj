@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace PrzetrwajPL.Security;
+namespace PrzetrwajPL.Handlers.Security;
 
 public class JwtAuthProvider : AuthenticationStateProvider
 {

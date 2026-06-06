@@ -2,6 +2,7 @@
 
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
+@using Przetrwaj.CommonLibrary.Consts
 @using PrzetrwajPL;
 @using PrzetrwajPL.Models;
 @using PrzetrwajPL.Models.Posts;
@@ -165,7 +166,7 @@
 		isLoading = true;
 		try
 		{
-			var client = ClientFactory.CreateClient("ServerAPI");
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			post = await client.GetFromJsonAsync<PostCompleteDataDto>($"/Post/{Id}");
 		}
 		catch (Exception ex)
@@ -185,7 +186,7 @@
 
 		try
 		{
-			var client = ClientFactory.CreateClient("ServerAPI");
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var response = await client.PostAsync($"/Post/{Id}/VotePositive", null);
 
 			if (response.IsSuccessStatusCode)
@@ -216,7 +217,7 @@
 
 		try
 		{
-			var client = ClientFactory.CreateClient("ServerAPI");
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var response = await client.PostAsync($"/Post/{Id}/VoteNegative", null);
 
 			if (response.IsSuccessStatusCode)
@@ -243,7 +244,7 @@
 
 		try
 		{
-			var client = ClientFactory.CreateClient("ServerAPI");
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var commentNew = new AddCommentCommand { Comment = newCommentContent };
 
 			var response = await client.PostAsJsonAsync($"/Post/{Id}/Comment", commentNew);

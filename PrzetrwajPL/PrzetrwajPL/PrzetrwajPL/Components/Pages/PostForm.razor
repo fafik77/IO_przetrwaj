@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 
 @namespace PrzetrwajPL.Components.Pages.Components
+@using Przetrwaj.CommonLibrary.Consts
 @using PrzetrwajPL.Requests
 @using System.Text.RegularExpressions
 @inject IHttpClientFactory ClientFactory
@@ -126,7 +127,7 @@
 
 		try
 		{
-			var client = ClientFactory.CreateClient("ServerAPI");
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var response = await client.PostAsJsonAsync("/Post/Danger", model);
 
 			if (response.IsSuccessStatusCode)

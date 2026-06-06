@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Logic;
 using PrzetrwajPL.Requests;
 
@@ -36,7 +37,7 @@ namespace PrzetrwajPL.Components.Pages
 			isUploading = true;
 			try
 			{
-				var client = ClientFactory.CreateClient("ServerAPI");
+				var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 
 				// Pass the single unified list to the logic helper
 				(string url, MultipartFormDataContent data) = CreateUploadAttachments.CreateData(PostId, Attachments);

@@ -3,6 +3,7 @@
 
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavigationManager
+@using Przetrwaj.CommonLibrary.Consts
 @using PrzetrwajPL;
 @using PrzetrwajPL.Models
 @using PrzetrwajPL.Components.Pages.Components
@@ -127,7 +128,7 @@
 				return;
 			}
 			// 1. Fetch full data from API
-			var client = ClientFactory.CreateClient("ServerAPI");
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var responseTask = client.GetAsync("/Account");
 
 			var response = await responseTask;
@@ -172,7 +173,7 @@
 
 		try
 		{
-			var client = ClientFactory.CreateClient("ServerAPI");
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var response = await client.PutAsJsonAsync("/Account", userUpdateRequest);
 			if (response.IsSuccessStatusCode)
 			{

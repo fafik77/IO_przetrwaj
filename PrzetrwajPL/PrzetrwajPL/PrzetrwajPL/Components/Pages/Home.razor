@@ -2,6 +2,7 @@
 
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
+@using Przetrwaj.CommonLibrary.Consts
 @using PrzetrwajPL;
 @using PrzetrwajPL.Components.Pages.Components
 @using PrzetrwajPL.Models;
@@ -95,7 +96,7 @@ else
 			{
 				try
 				{
-					var client = ClientFactory.CreateClient("ServerAPI");
+					var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 					var dangers = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
 					if (dangers != null)
 					{
@@ -111,7 +112,7 @@ else
 			{
 				try
 				{
-					var client = ClientFactory.CreateClient("ServerAPI");
+					var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 					var resources = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Resource");
 					if (resources != null)
 					{

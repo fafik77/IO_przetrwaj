@@ -25,31 +25,10 @@ public class ImpedimentController : Controller
 		_mediator = mediator;
 	}
 
-	[HttpPost]
-	[Authorize(UserRoles.Moderator)]
-	[Consumes("application/json")]
-	[SwaggerOperation("Create a Impediment Id:[0; 31] (Moderator)")]
-	[ProducesResponseType(typeof(Impediment), StatusCodes.Status201Created)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	public async Task<IActionResult> Create([FromBody] AddImpedimentCommand cmd, CancellationToken ct)
-	{
-		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-		try
-		{
-			var created = await _mediator.Send(cmd, ct);
-			return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
-
 	[HttpPut]
 	[Authorize(UserRoles.Moderator)]
 	[Consumes("application/json")]
-	[SwaggerOperation("Update a Impediment Id:[0; 31] (Moderator)")]
+	[SwaggerOperation("Update/Create a Impediment Id:[0; 31] (Moderator)")]
 	[ProducesResponseType(typeof(Impediment), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]

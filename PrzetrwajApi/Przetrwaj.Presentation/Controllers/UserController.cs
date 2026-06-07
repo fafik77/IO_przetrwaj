@@ -102,6 +102,25 @@ public class UserController : Controller
 		}
 	}
 
+	[HttpPost("deny-moderator")]
+	[SwaggerOperation("Deny Moderator role to user by Id or Email (Admin)")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> DenyModeratorRole(DenyModeratorCommand userInfo, CancellationToken cancellationToken)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		try
+		{
+			var res = await _mediator.Send(userInfo, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
+	}
+
 	[HttpPost("make-admin")]
 	[SwaggerOperation("Grant Admin role to user by Id or Email (Admin)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]

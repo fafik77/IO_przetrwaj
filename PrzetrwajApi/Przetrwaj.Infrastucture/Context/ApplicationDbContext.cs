@@ -17,6 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	public DbSet<Vote> Votes { get; set; }
 	public DbSet<Impediment> Impediments { get; set; }
 	public DbSet<UserJwtRefresh> UserJwtRefresh { get; set; }
+	public static readonly string przetrwajSchema = "przetrwaj";
 
 	#region Views and TPH mappings
 	/// <summary>
@@ -39,8 +40,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	{
 		// MUST call the base method first to configure Identity tables
 		base.OnModelCreating(builder);
-		builder.HasDefaultSchema("przetrwaj");
-		builder.Entity<UserJwtRefresh>().ToTable("UserJwtRefresh", "auth");
+		builder.HasDefaultSchema(przetrwajSchema);
+		builder.Entity<UserJwtRefresh>().ToTable(nameof(UserJwtRefresh), "auth");
 
 		// --- 1. Category Inheritance (TPH) Configuration ---
 		builder.Entity<Category>()
@@ -48,10 +49,18 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.HasValue<CategoryResource>(CategoryType.Resource)
 			.HasValue<CategoryDanger>(CategoryType.Danger);
 
+
+		// --- 1. Region___ Entity Configuration ---
+		builder.Entity<Region>()
+			.HasDiscriminator<RegionPrecision>(Region.Type_)
+			.HasValue<RegionWoj>(RegionPrecision.WOJ)
+			.HasValue<RegionPow>(RegionPrecision.POW)
+			.HasValue<RegionGmi>(RegionPrecision.GMI);
+
 		builder.Entity<PostMinimalCategoryRegion>(entity =>
 		{
 			entity.HasNoKey(); // Views usually don't have a PK in EF context
-			entity.ToView("View_PostMinimal", "przetrwaj");
+			entity.ToView("View_PostMinimal", przetrwajSchema);
 			// Match the property names if they differ from SQL columns. Like:
 			//entity.Property(v => v.IdPost).HasColumnName("IdPost");
 		});
@@ -96,16 +105,6 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.HasForeignKey(c => c.IdAutor)          // Foreign Key is IdAutor in UserComment
 													// Prevent deleting a User from automatically deleting their Comments
 			.OnDelete(DeleteBehavior.Restrict);
-
-
-		// --- 2. Region___ Entity Configuration ---
-
-		// Relationship: Region_up (Principal) -> Region_down (Dependent)
-		builder.Entity<Region>()
-			.HasDiscriminator<RegionPrecision>(Region.Type_)
-			.HasValue<RegionWoj>(RegionPrecision.WOJ)
-			.HasValue<RegionPow>(RegionPrecision.POW)
-			.HasValue<RegionGmi>(RegionPrecision.GMI);
 
 		// --- 2. Post Entity Configuration ---
 

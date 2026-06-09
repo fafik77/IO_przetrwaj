@@ -57,8 +57,15 @@ public class LoginController : Controller
 	[ProducesResponseType(typeof(BanInfo), StatusCodes.Status418ImATeapot)]
 	public async Task<IActionResult> GoogleLogin(string? returnUrl = null)
 	{
-		if (string.IsNullOrEmpty(returnUrl))
-			returnUrl = Request.Headers.Referer.ToString(); //auto fill in from requester site
+		if (string.IsNullOrEmpty(returnUrl))  //auto fill in from requester site
+		{
+			// Check Origin first, fallback to Referer if available
+			var requesterUrl = Request.Headers.Origin.ToString();
+			if (string.IsNullOrEmpty(requesterUrl))
+				requesterUrl = Request.Headers.Referer.ToString();
+
+			returnUrl = requesterUrl;
+		}
 
 		var redirectUrl = Url.Action(nameof(GoogleResponse), new { returnUrl });
 		if (redirectUrl is null) return NotFound("GoogleResponse endpoint not found");

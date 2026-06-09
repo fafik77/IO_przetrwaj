@@ -6,4 +6,5 @@ namespace Przetrwaj.Application.Commands.Register;
 
 public record RegisterEmailCommand : RegisterEmailInfo, ICommand<UserWithPersonalDataDto>
 {
+	public string? ReturnUrl { get; set; }
 }

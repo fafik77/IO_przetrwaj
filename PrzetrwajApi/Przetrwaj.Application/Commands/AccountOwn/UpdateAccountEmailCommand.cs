@@ -12,4 +12,7 @@ public record UpdateAccountEmailCommand : IUpdateAccountCommand
 	[MaxLength(64)]
 	[PasswordPropertyText]
 	public required string OldPassword { get; set; }
+
+	[MaxLength(128)]
+	public string? ReturnUrl { get; set; }
 }

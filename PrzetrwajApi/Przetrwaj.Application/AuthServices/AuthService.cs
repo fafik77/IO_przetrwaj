@@ -51,12 +51,12 @@ public class AuthService : IAuthService
 		throw new InvalidConfirmationException("Email confirmation failed.");
 	}
 
-	public async Task GenerateChangeEmailTokenAsync(AppUser user, string newEmail)
+	public async Task GenerateChangeEmailTokenAsync(AppUser user, string newEmail, string? returnUrl)
 	{
 		// 1. Generate the Code
 		var ChangeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
 		ConfirmEmailChangeInfo values = new() { UserId = user.Id, Code = ChangeEmailToken, NewEmail = newEmail };
-		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmailChange", values);
+		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "confirm-email-change", values, returnUrl);
 		// send the email
 		await _emailSender.SendEmailAsync(newEmail, subject: "Potwierdź zmianę adresu e-mail - Przetrwaj.pl",
 		$@"<h2>Witaj {user.Name}!</h2>
@@ -107,10 +107,9 @@ public class AuthService : IAuthService
 		throw new InvalidLoginException("Bad login attempt");
 	}
 
-	public async Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register)
+	public async Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register, string? returnUrl)
 	{
 		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(register.IdRegion);
-		//var PowExists = _regionRepository.GetByIdAsync(Pow);
 		var GmiExists = await _regionRepository.GetByIdAsync(Gmi);
 		var user = new AppUser
 		{
@@ -138,7 +137,7 @@ public class AuthService : IAuthService
 		// 1. Generate the Code
 		var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 		ConfirmEmailInfo values = new() { UserId = user.Id, Code = code };
-		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmail", values);
+		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "confirm-email", values, returnUrl);
 		// send the email
 		await _emailSender.SendEmailAsync(register.Email, subject: "Potwierdź swój adres e-mail. Przetrwaj.pl",
 			$"<h2>{register.Name} witaj w serwisie Przetrwaj.pl</h2><br>" +
@@ -161,36 +160,42 @@ public class AuthService : IAuthService
 		return user;
 	}
 
-	private string GenerateEmailConfirmationUrl(string action, ConfirmEmailInfo values)
+	// Helper to prevent Open Redirect attacks
+	private bool IsUrlSafe(string url)
 	{
-		if (!string.IsNullOrEmpty(_frontEndSettings.Url))
+		// Check if it starts with front-end domain or is a local path
+		return url.StartsWith(_frontEndSettings.Url) || url.StartsWith("https://localhost:");
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="action">the action path in AccountController (not the method name!)</param>
+	/// <param name="values"></param>
+	/// <param name="returnUrl">if present and safe it will link to it</param>
+	/// <returns>URL with encoded query params</returns>
+	/// <exception cref="InvalidConfirmationException"></exception>
+	private string GenerateEmailConfirmationUrl(string action, ConfirmEmailInfo values, string? returnUrl)
+	{
+		if (string.IsNullOrEmpty(returnUrl) || !IsUrlSafe(returnUrl))
+			returnUrl = _frontEndSettings.Url; // Fallback to frontEnd Url
+
+		if (string.IsNullOrEmpty(returnUrl))
 		{
-			var baseUrl = $"{_frontEndSettings.Url}/{action}";
-			var urlFront = values.ToQueryString(baseUrl);
-			return urlFront;
+			// we could not fetch any frontend Url. hadle it with backend only
+			var request = _httpContextAccessor.HttpContext?.Request;
+			var scheme = request?.Scheme;
+			var host = request?.Host.Value;
+			// the absolute URL string
+			// e.g., "https://" +("localhost:5001" or "api.example.com")
+			returnUrl = $"{scheme}://{host}";
+			if (!returnUrl.EndsWith('/')) returnUrl += "/";
+			returnUrl += "Account"; //the path to AccountController
 		}
-		// 2. Generate the relative URL path using IUrlHelper.Action()
-		// This is equivalent to your old 'Url.Action' call
-		var relativeUrl = _urlHelper.Action(
-			action: action,
-			controller: "Account",
-			values: values);
-		// Check if relativeUrl is null (route not found)
-		if (string.IsNullOrEmpty(relativeUrl))
-		{   //Email confirmation related errors
-			throw new InvalidConfirmationException("Could not generate confirmation URL.");
-		}
-		// 3. Get the request scheme and host from HttpContext
-		var request = _httpContextAccessor.HttpContext?.Request;
-		if (request == null)
-		{   //Email confirmation related errors
-			throw new InvalidConfirmationException("Cannot access HTTP context to build URL.");
-		}
-		var scheme = request.Scheme;
-		var host = request.Host.Value;
-		// 4. Construct the absolute URL string
-		// e.g., "localhost:5001" or "api.example.com"
-		var absoluteUrlString = $"{scheme}://{host}{relativeUrl}";
-		return absoluteUrlString;
+
+		if (!returnUrl.EndsWith('/')) returnUrl += "/";
+		var baseUrl = returnUrl + action;
+
+		return values.ToQueryString(baseUrl);
 	}
 }

@@ -137,6 +137,16 @@ public class AccountController : Controller
 	public async Task<IActionResult> UpdateUserAccountEmail(UpdateAccountEmailCommand updateAccountEmail, CancellationToken cancellationToken)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		if (string.IsNullOrEmpty(updateAccountEmail.ReturnUrl))  //auto fill in from requester site
+		{
+			// Check Origin first, fallback to Referer if available
+			var requesterUrl = Request.Headers.Origin.ToString();
+			if (string.IsNullOrEmpty(requesterUrl))
+				requesterUrl = Request.Headers.Referer.ToString();
+
+			updateAccountEmail.ReturnUrl = requesterUrl;
+		}
+
 		var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 		if (currentUserId is null)
 			return BadRequest((ExceptionCasting)new InvalidCookieException("Invalid Cookie/Token")); // Returns a 400 User for some reason does not exist

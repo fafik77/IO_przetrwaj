@@ -30,6 +30,16 @@ public partial class RegisterController : Controller
 	public async Task<IActionResult> RegisterWithEmail([FromBody] RegisterEmailCommand model)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		if (string.IsNullOrEmpty(model.ReturnUrl))  //auto fill in from requester site
+		{
+			// Check Origin first, fallback to Referer if available
+			var requesterUrl = Request.Headers.Origin.ToString();
+			if (string.IsNullOrEmpty(requesterUrl))
+				requesterUrl = Request.Headers.Referer.ToString();
+
+			model.ReturnUrl = requesterUrl;
+		}
+
 		try
 		{
 			var result = await _mediator.Send(model);

@@ -103,7 +103,7 @@ public class UpdateAccountCommandHandler : ICommandHandler<UpdateAccountInternal
 		if (await _userManager.FindByNameAsync(normName) != null)
 			throw new UserAlreadyExistsException(updateEmail.Email ?? user.Id);
 		//now generate a token and send an email
-		await _authService.GenerateChangeEmailTokenAsync(user, updateEmail.Email);
+		await _authService.GenerateChangeEmailTokenAsync(user, updateEmail.Email, updateEmail.ReturnUrl);
 	}
 
 	private async Task UpdateGeneralInfo(AppUser user, UpdateAccountCommand update, CancellationToken ct)

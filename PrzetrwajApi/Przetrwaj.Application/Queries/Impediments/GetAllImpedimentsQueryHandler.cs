@@ -1,10 +1,10 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
 using Przetrwaj.Domain.Abstractions;
-using Przetrwaj.Domain.Entities;
 
-namespace Przetrwaj.Application.Quaries.Impediments;
+namespace Przetrwaj.Application.Queries.Impediments;
 
-public class GetAllImpedimentsQueryHandler : IQueryHandler<GetAllImpedimentsQuery,IEnumerable<Impediment>> {
+public class GetAllImpedimentsQueryHandler : IQueryHandler<GetAllImpedimentsQuery, IDictionary<short, string>>
+{
 	private readonly IImpedimentsRepository _repo;
 
 	public GetAllImpedimentsQueryHandler(IImpedimentsRepository repo)
@@ -12,7 +12,7 @@ public class GetAllImpedimentsQueryHandler : IQueryHandler<GetAllImpedimentsQuer
 		_repo = repo;
 	}
 
-	public async Task<IEnumerable<Impediment>> Handle(GetAllImpedimentsQuery request, CancellationToken cancellationToken)
+	public async Task<IDictionary<short, string>> Handle(GetAllImpedimentsQuery request, CancellationToken cancellationToken)
 	{
 		return await _repo.GetAllAsync(cancellationToken);
 	}

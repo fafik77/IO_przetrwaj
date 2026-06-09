@@ -2,7 +2,7 @@
 using Przetrwaj.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace Przetrwaj.Application.Quaries.Impediments;
+namespace Przetrwaj.Application.Queries.Impediments;
 public class GetImpedimentQuery : IQuery<Impediment>
 {
 	[Required]

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Impediments;
-using Przetrwaj.Application.Quaries.Impediments;
+using Przetrwaj.Application.Queries.Impediments;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
@@ -47,12 +47,12 @@ public class ImpedimentController : Controller
 	}
 
 	[HttpGet]
-	[SwaggerOperation("List all Impediments")]
-	[ProducesResponseType(typeof(IEnumerable<Impediment>), StatusCodes.Status200OK)]
+	[SwaggerOperation("Map all Impediments <id, name>")]
+	[ProducesResponseType(typeof(Dictionary<int, string>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetAll(CancellationToken ct)
 	{
-		var list = await _mediator.Send(new GetAllImpedimentsQuery(), ct);
-		return Ok(list);
+		var dict = await _mediator.Send(new GetAllImpedimentsQuery(), ct);
+		return Ok(dict);
 	}
 
 	[HttpGet("{id}")]

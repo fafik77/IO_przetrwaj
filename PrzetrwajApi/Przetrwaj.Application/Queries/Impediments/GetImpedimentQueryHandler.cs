@@ -3,7 +3,7 @@ using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Impediments;
 
-namespace Przetrwaj.Application.Quaries.Impediments;
+namespace Przetrwaj.Application.Queries.Impediments;
 
 public class GetImpedimentQueryHandler : IQueryHandler<GetImpedimentQuery, Impediment>
 {

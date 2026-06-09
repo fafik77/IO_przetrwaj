@@ -1,6 +1,5 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
-using Przetrwaj.Domain.Entities;
 
-namespace Przetrwaj.Application.Quaries.Impediments;
+namespace Przetrwaj.Application.Queries.Impediments;
 
-public class GetAllImpedimentsQuery : IQuery<IEnumerable<Impediment>> { }
+public class GetAllImpedimentsQuery : IQuery<IDictionary<short, string>> { }

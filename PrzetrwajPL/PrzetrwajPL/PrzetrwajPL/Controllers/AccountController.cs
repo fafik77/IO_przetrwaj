@@ -31,58 +31,27 @@ public class AccountController : Controller
 		if (!handler.CanReadToken(token)) return Results.BadRequest("Invalid Token");
 
 		var jwtToken = handler.ReadJwtToken(token);
-		var claims = new List<Claim>();
 
-		// Case-insensitive matching logic on token payloads
-		var sub = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "sub", StringComparison.OrdinalIgnoreCase))?.Value;
-		var email = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "email", StringComparison.OrdinalIgnoreCase))?.Value;
-		var region = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "Region", StringComparison.OrdinalIgnoreCase))?.Value;
-		var name = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "Name", StringComparison.OrdinalIgnoreCase))?.Value;
-		var surname = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "Surname", StringComparison.OrdinalIgnoreCase))?.Value;
-		var roles = jwtToken.Claims.Where(c => string.Equals(c.Type, "role", StringComparison.OrdinalIgnoreCase));
+		// extract only sub for minimal claim
+		var sub = jwtToken.Claims.FirstOrDefault(c => string.Equals(c.Type, "sub", StringComparison.OrdinalIgnoreCase))?.Value
+				  ?? Guid.NewGuid().ToString();
 
-		if (!string.IsNullOrEmpty(sub))
-			claims.Add(new Claim(ClaimTypes.NameIdentifier, sub));
-		if (!string.IsNullOrEmpty(email))
-		{
-			claims.Add(new Claim(ClaimTypes.Name, email));
-			claims.Add(new Claim(ClaimTypes.Email, email));
-		}
-		if (!string.IsNullOrEmpty(region))
-			claims.Add(new Claim("Region", region));
-		if (!string.IsNullOrEmpty(name))
-			claims.Add(new Claim("Name", name));
-		if (!string.IsNullOrEmpty(surname))
-			claims.Add(new Claim("Surname", surname));
-
-		if (roles.Any())
-		{
-			foreach (var r in roles)
-			{
-				claims.Add(new Claim(ClaimTypes.Role, r.Value));
-			}
-		}
-		else
-		{
-			claims.Add(new Claim(ClaimTypes.Role, "User"));
-		}
-
+		var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, sub) };
 		var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 		var principal = new ClaimsPrincipal(identity);
 
-		// Authentication kept for 31 days
+		//make the store
 		var authProperties = new AuthenticationProperties
 		{
 			IsPersistent = true,
 			ExpiresUtc = DateTimeOffset.UtcNow.AddDays(31)
 		};
 
-		// Bundle both tokens securely into the Cookie container
+		//save poth the JWT and refresh token in it
 		var tokensToStore = new List<AuthenticationToken>
 		{
 			new AuthenticationToken { Name = "access_token", Value = token }
 		};
-
 		if (!string.IsNullOrEmpty(refreshToken))
 		{
 			tokensToStore.Add(new AuthenticationToken { Name = "refresh_token", Value = refreshToken });
@@ -90,16 +59,19 @@ public class AccountController : Controller
 
 		authProperties.StoreTokens(tokensToStore);
 
+		//save it to be able to connect to user "/Account/"
 		await _ContextAccessor.HttpContext.SignInAsync(
 			CookieAuthenticationDefaults.AuthenticationScheme,
 			principal,
 			authProperties);
 
-		return Results.LocalRedirect("/");
+		//let the `RefreshCookie` method pull all data about the user
+		return Results.LocalRedirect($"/account/refresh-cookie?redirectTo=/&succesMsg=false");
 	}
 
+
 	[HttpGet("refresh-cookie")]
-	public async Task<IResult> RefreshCookie(string redirectTo = "", CancellationToken ct = default)
+	public async Task<IResult> RefreshCookie(string redirectTo = "", bool succesMsg = true, CancellationToken ct = default)
 	{
 		redirectTo = redirectTo.Trim();
 		if (!redirectTo.StartsWith('/')) redirectTo = "/" + redirectTo;
@@ -117,19 +89,34 @@ public class AccountController : Controller
 			ExpiresUtc = DateTimeOffset.UtcNow.AddDays(31) // 31-day lifespan
 		};
 
+		string succStr = "Zmiany zapisane pomyślnie";
 		// Fetch up-to-date user information from the API
-		var client = _ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-		var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("/Account", ct);
+		try
+		{
+			var client = _ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+			var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("/Account", ct);
+			await SaveUserAuthenticationCookie(httpContext, authProperties, user);
+		}
+		catch (Exception)
+		{
+			succStr = "Nie udało się pobrać danych z serwera";
+		}
 
-		// Rebuild the claims array with fresh data
+		return Results.LocalRedirect(redirectTo + (succesMsg == true ? $"?success={WebUtility.UrlEncode(succStr)}" : ""));
+	}
+
+	private static async Task SaveUserAuthenticationCookie(HttpContext httpContext, AuthenticationProperties authProperties, UserWithPersonalDataDto user)
+	{
+		// build the claims array with fresh data
 		var claims = new List<Claim>
 		{
-			new Claim(ClaimTypes.NameIdentifier, user.Id),
-			new Claim(ClaimTypes.Name, user.Name ?? user.Email!),
-			new Claim(ClaimTypes.Email, user.Email!),
-			new Claim("Region", user.Region?.Id.ToString() ?? "0"),
-			new Claim("Surname", user.Surname ?? ""),
-			new Claim("Name", user.Name ?? ""),
+			new(ClaimTypes.NameIdentifier, user.Id),
+			new(ClaimTypes.Name, user.Name ?? user.Email!),
+			new(ClaimTypes.Email, user.Email!),
+			new(ClaimNames.Region, user.Region?.Id.ToString() ?? "0"),
+			new(ClaimNames.Surname, user.Surname ?? ""),
+			new(ClaimNames.Name, user.Name ?? ""),
+			new(ClaimNames.Impediments, user.Impediments.ToString() ?? "0"),
 		};
 
 		foreach (var role in user.Roles)
@@ -145,8 +132,5 @@ public class AccountController : Controller
 			CookieAuthenticationDefaults.AuthenticationScheme,
 			principal,
 			authProperties);
-
-		var succStr = "Zmiany zapisane pomyślnie";
-		return Results.LocalRedirect(redirectTo + $"?success={WebUtility.UrlEncode(succStr)}");
 	}
 }

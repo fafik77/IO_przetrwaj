@@ -149,7 +149,7 @@ else
 			if (userPrincipal.Identity is not { IsAuthenticated: true })
 				return;
 
-			var regionStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
+			var regionStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimNames.Region)?.Value;
 			int region = 0;
 			if (int.TryParse(regionStr, out region))
 			{

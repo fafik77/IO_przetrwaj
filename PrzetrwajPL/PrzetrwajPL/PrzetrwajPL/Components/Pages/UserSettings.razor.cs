@@ -48,10 +48,10 @@ public partial class UserSettings
 			// in the meantime populate something from the token
 			try
 			{
-				var regionStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
+				var regionStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimNames.Region)?.Value;
 				UserUpdateRequest.Email = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-				UserUpdateRequest.Name = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Name")?.Value;
-				UserUpdateRequest.Surname = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Surname")?.Value;
+				UserUpdateRequest.Name = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimNames.Name)?.Value;
+				UserUpdateRequest.Surname = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimNames.Surname)?.Value;
 				if (!string.IsNullOrEmpty(regionStr)) UserUpdateRequest.GminaId = userRegionId = int.Parse(regionStr);
 			}
 			catch (Exception)
@@ -107,6 +107,7 @@ public partial class UserSettings
 
 	private async Task HandleInvalid()
 	{
+		errorMessage = "W formularzu znajduj¹ siê niepoprawne danê!";
 		return;
 	}
 

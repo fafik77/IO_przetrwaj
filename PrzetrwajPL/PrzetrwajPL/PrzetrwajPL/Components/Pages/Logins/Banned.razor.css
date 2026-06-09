@@ -1,0 +1,78 @@
+﻿.ban-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 60vh;
+	padding: 20px;
+}
+
+.ban-card {
+	background-color: #fff;
+	border: 1px solid #dee2e6;
+	border-top: 4px solid #dc3545; /* red accent */
+	border-radius: 8px;
+	padding: 30px;
+	max-width: 500px;
+	width: 100%;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	text-align: center;
+}
+
+.ban-icon {
+	font-size: 48px;
+	color: #dc3545;
+	margin-bottom: 15px;
+}
+
+h2 {
+	color: #343a40;
+	margin-bottom: 15px;
+	font-weight: 700;
+}
+
+.ban-main-msg {
+	color: #6c757d;
+	font-size: 15px;
+	margin-bottom: 20px;
+}
+
+.ban-details {
+	background-color: #f8f9fa;
+	border-radius: 6px;
+	padding: 15px;
+	text-align: left;
+	margin-bottom: 25px;
+	border-left: 3px solid #6c757d;
+}
+
+	.ban-details p {
+		margin-bottom: 10px;
+		font-size: 14px;
+		color: #495057;
+	}
+
+		.ban-details p:last-child {
+			margin-bottom: 0;
+		}
+
+.ban-reason {
+	color: #d63301;
+	font-weight: 500;
+}
+
+.btn-back {
+	display: inline-block;
+	background-color: #007bff;
+	color: white;
+	text-decoration: none;
+	padding: 10px 20px;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 500;
+	transition: background-color 0.15s ease-in-out;
+}
+
+	.btn-back:hover {
+		background-color: #0056b3;
+		color: white;
+	}

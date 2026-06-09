@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PrzetrwajPL.Models;
+namespace Przetrwaj.CommonLibrary.Models;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CategoryType

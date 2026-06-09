@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.CommonLibrary.Consts;
-using PrzetrwajPL.Models;
+using Przetrwaj.CommonLibrary.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;

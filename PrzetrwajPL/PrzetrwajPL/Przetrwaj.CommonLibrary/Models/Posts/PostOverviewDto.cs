@@ -1,4 +1,4 @@
-﻿namespace PrzetrwajPL.Models.Posts;
+﻿namespace Przetrwaj.CommonLibrary.Models.Posts;
 
 
 /// <summary>

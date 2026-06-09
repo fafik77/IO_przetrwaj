@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace PrzetrwajPL.Models;
+namespace Przetrwaj.CommonLibrary.Models;
 
 
 public class ExceptionCasting

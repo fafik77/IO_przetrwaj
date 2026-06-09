@@ -1,8 +1,59 @@
 ﻿@page "/login-error/Banned"
 @using System.Text.Json
+@using Przetrwaj.CommonLibrary.Models
 @using PrzetrwajPL.Models
 
-<h3>Banned</h3>
+<div class="ban-container">
+	<div class="ban-card">
+		<div class="ban-icon">
+			<i class="fa fa-gavel"></i>
+		</div>
+
+		<h2>Konto Zablokowane</h2>
+		<hr />
+
+		@if (banInfo != null)
+		{
+			<p class="ban-main-msg">
+				Twoje konto zostało trwale zawieszone w systemie.
+			</p>
+
+			<div class="ban-details">
+				@if (banInfo.BanDate.HasValue)
+				{
+					<p>
+						<strong>Data nałożenia blokady:</strong>
+						<span title="dd.MM.yyyy">@banInfo.BanDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+					</p>
+				}
+
+				<p>
+					<strong>Powód blokady:</strong>
+					<span class="ban-reason">@banInfo.BanReason</span>
+				</p>
+
+				@if (banInfo.BannedBy != null)
+				{
+					<p>
+						<strong>Zablokowany przez:</strong>
+						<span>@banInfo.BannedBy.Name @banInfo.BannedBy.Surname</span>
+					</p>
+				}
+
+			</div>
+		}
+		else
+		{
+			<p class="text-danger">
+				Wystąpił błąd podczas ładowania szczegółów blokady. Skontaktuj się ze wsparciem technicznym.
+			</p>
+		}
+
+		<div class="ban-footer">
+			<a href="/" class="btn-back">Powrót do strony głównej</a>
+		</div>
+	</div>
+</div>
 
 @code {
 	[Parameter, SupplyParameterFromQuery]
@@ -13,7 +64,14 @@
 	{
 		if (!string.IsNullOrEmpty(Info))
 		{
-			banInfo = JsonSerializer.Deserialize<BanInfo>(Info);
+			try
+			{
+				banInfo = JsonSerializer.Deserialize<BanInfo>(Info);
+			}
+			catch (JsonException ex)
+			{
+				Console.WriteLine($"Błąd deserializacji danych banInfo: {ex.Message}");
+			}
 		}
 	}
 }

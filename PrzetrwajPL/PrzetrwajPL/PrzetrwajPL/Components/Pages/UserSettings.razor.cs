@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Przetrwaj.CommonLibrary.Consts;
+using Przetrwaj.CommonLibrary.Models;
+using Przetrwaj.CommonLibrary.Requests;
 using PrzetrwajPL.Components.Pages.Components;
-using PrzetrwajPL.Models;
-using PrzetrwajPL.Requests;
 using System.Security.Claims;
 
 namespace PrzetrwajPL.Components.Pages
@@ -52,7 +52,7 @@ namespace PrzetrwajPL.Components.Pages
 					userUpdateRequest.Email = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 					userUpdateRequest.Name = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Name")?.Value;
 					userUpdateRequest.Surname = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Surname")?.Value;
-					if (!string.IsNullOrEmpty(region)) userUpdateRequest.IdRegion = userRegionId = int.Parse(region);
+					if (!string.IsNullOrEmpty(region)) userUpdateRequest.GminaId = userRegionId = int.Parse(region);
 				}
 				catch (Exception) { }
 				if (!string.IsNullOrEmpty(Success))
@@ -79,7 +79,7 @@ namespace PrzetrwajPL.Components.Pages
 						// Store region ID to set the picker later
 						if (userInfo.Region != null)
 						{
-							userUpdateRequest.IdRegion = userRegionId = userInfo.Region.Id;
+							userUpdateRequest.GminaId = userRegionId = userInfo.Region.Id;
 						}
 					}
 				}

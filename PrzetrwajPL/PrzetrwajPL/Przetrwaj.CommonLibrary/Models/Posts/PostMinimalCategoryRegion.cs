@@ -1,4 +1,4 @@
-﻿namespace PrzetrwajPL.Models.Posts;
+﻿namespace Przetrwaj.CommonLibrary.Models.Posts;
 
 /// <summary>
 /// Truly minimal amount of data, usefull for sending a list of thousands of posts to place on map.

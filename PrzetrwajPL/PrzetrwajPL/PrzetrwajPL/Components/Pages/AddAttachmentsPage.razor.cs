@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Logic;
-using PrzetrwajPL.Requests;
+using Przetrwaj.CommonLibrary.Requests;
 
 namespace PrzetrwajPL.Components.Pages
 {

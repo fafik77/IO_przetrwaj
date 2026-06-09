@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models;
-using PrzetrwajPL.Models;
 
 namespace PrzetrwajPL.Components.Pages.Components;
 
@@ -35,7 +34,7 @@ public partial class RegionPicker
 		if (firstRender)
 		{
 			// If an initial ID was provided, fetch the full multi-layer path up to the root
-			if (SelectedRegionId != -1)
+			if (SelectedRegionId > 0)
 			{
 				await LoadRegionFromId(SelectedRegionId);
 			}

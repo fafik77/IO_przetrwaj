@@ -1,4 +1,4 @@
-﻿namespace PrzetrwajPL.Models;
+﻿namespace Przetrwaj.CommonLibrary.Models;
 
 public class CategoryDto
 {

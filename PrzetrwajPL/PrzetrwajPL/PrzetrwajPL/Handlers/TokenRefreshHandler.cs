@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Przetrwaj.CommonLibrary.Consts;
-using PrzetrwajPL.Models;
+using Przetrwaj.CommonLibrary.Models;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;

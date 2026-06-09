@@ -1,6 +1,4 @@
-﻿using Przetrwaj.CommonLibrary.Models;
-
-namespace PrzetrwajPL.Models;
+﻿namespace Przetrwaj.CommonLibrary.Models;
 
 public record RegionOnlyDto
 {

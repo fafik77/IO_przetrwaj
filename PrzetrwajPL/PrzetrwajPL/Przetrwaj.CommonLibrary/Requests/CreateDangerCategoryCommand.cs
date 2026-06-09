@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PrzetrwajPL.Requests;
+namespace Przetrwaj.CommonLibrary.Requests;
 
 public class CreateDangerCategoryCommand
 {

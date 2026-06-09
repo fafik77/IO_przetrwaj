@@ -23,6 +23,7 @@ public partial class RegisterForm
 		errorMessage = string.Empty;
 		try
 		{
+			registerRequest.ReturnUrl = NavigationManager.BaseUri;
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var response = await client.PostAsJsonAsync("/Register/email", registerRequest);
 			if (response.IsSuccessStatusCode)
@@ -36,7 +37,7 @@ public partial class RegisterForm
 						["Name"] = registerRequest.Name,
 						["Email"] = registerRequest.Email
 					};
-					// Build the URL: /registration-success?Name=Jan&Email=jan@example.com
+					// Build the URL:
 					var successUrl = QueryHelpers.AddQueryString("/registration-success", queryParams);
 					// Redirect the user
 					NavigationManager.NavigateTo(successUrl);
@@ -50,8 +51,7 @@ public partial class RegisterForm
 			else
 			{
 				var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-				// errorMessage = "Nieprawid³owy email lub has³o.";
-				errorMessage = errorText?.Error.Message;
+				errorMessage = errorText?.Error.Message ?? "";
 			}
 		}
 		catch (Exception ex)

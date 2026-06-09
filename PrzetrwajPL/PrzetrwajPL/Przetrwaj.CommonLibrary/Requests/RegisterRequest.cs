@@ -23,4 +23,6 @@ public class RegisterRequest
 	[Range(0, int.MaxValue, ErrorMessage = "Region jest wymagany")]
 	public int IdRegion { get; set; } = -1;
 	public bool ModeratorRole { get; set; } = false;
+
+	public string? ReturnUrl { get; set; }
 }

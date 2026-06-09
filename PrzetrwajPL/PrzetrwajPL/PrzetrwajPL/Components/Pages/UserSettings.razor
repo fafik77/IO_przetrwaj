@@ -14,61 +14,67 @@
 <div class="container">
 	<div class="inContainer">
 		<h2 style="text-align:center; font-weight:bold;">Ustawienia użytkownika</h2>
-	<p>Tu możesz zmienić swoje ustawienia użytkownika.</p>
-	<EditForm Model="@userUpdateRequest" OnValidSubmit="HandleUpdate" FormName="updateForm">
-		<DataAnnotationsValidator />
-		@if (!string.IsNullOrEmpty(successMessage))
-		{
-			<div class="alert alert-info pre-wrap" role="alert" style="text-align:center;">
-				@successMessage
-			</div>
-		}
-		@if (!string.IsNullOrEmpty(errorMessage))
-		{
-			<div class="alert alert-danger pre-wrap" role="alert" style="color: black; text-align:center;">@errorMessage</div>
-		}
-		<label for="name">Imie:</label><br />
-			<InputText @bind-Value="userUpdateRequest.Name" id="name" placeholder="Podaj imie" class="form-control" />
-			<ValidationMessage For="@(() => userUpdateRequest.Name)" style="color:red; font-size: 12px;" /><br />
+		<p>Tu możesz zmienić swoje ustawienia użytkownika.</p>
+		<EditForm Model="@UserUpdateRequest" OnValidSubmit="HandleUpdate" FormName="updateForm" OnInvalidSubmit="HandleInvalid">
+			<DataAnnotationsValidator />
+			@if (!string.IsNullOrEmpty(successMessage))
+			{
+				<div class="alert alert-info pre-wrap" role="alert" style="text-align:center;">
+					@successMessage
+				</div>
+			}
+			@if (!string.IsNullOrEmpty(errorMessage))
+			{
+				<div class="alert alert-danger pre-wrap" role="alert" style="color: black; text-align:center;">@errorMessage</div>
+			}
 
-		<label for="surname">Nazwisko:</label><br />
-			<InputText @bind-Value="userUpdateRequest.Surname" id="surname" placeholder="Podaj nazwisko" class="form-control" />
-			<ValidationMessage For="@(() => userUpdateRequest.Surname)" style="color:red; font-size: 12px;" /><br />
+			@* Imię *@
+			<label for="name">Imie:</label><br />
+			<InputText @bind-Value="UserUpdateRequest.Name" id="name" placeholder="Podaj imie" class="form-control" autocomplete="given-name" />
+			<ValidationMessage For="@(() => UserUpdateRequest.Name)" style="color:red; font-size: 12px;" /><br />
 
-		<label for="email">Email:</label><br />
-			<InputText @bind-Value="userUpdateRequest.Email" id="email" placeholder="Podaj email" class="form-control" />
-			<ValidationMessage For="@(() => userUpdateRequest.Email)" style="color:red; font-size: 12px;" /><br />
+			@* Nazwisko *@
+			<label for="surname">Nazwisko:</label><br />
+			<InputText @bind-Value="UserUpdateRequest.Surname" id="surname" placeholder="Podaj nazwisko" class="form-control" autocomplete="family-name" />
+			<ValidationMessage For="@(() => UserUpdateRequest.Surname)" style="color:red; font-size: 12px;" /><br />
 
-		<label for="region">Twoja lokalizacja:</label><br />
+			@* Email *@
+			<label for="email">Email:</label><br />
+			<InputText @bind-Value="UserUpdateRequest.Email" id="email" placeholder="Podaj email" class="form-control" autocomplete="username" />
+			<ValidationMessage For="@(() => UserUpdateRequest.Email)" style="color:red; font-size: 12px;" /><br />
+
+			<label for="region">Twoja lokalizacja:</label><br />
 			<div class="picker-conteiner">
 				<div class="picker">
-					<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(id => userUpdateRequest.GminaId = id)" />
+					<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(id => UserUpdateRequest.GminaId = id)" />
 				</div>
 			</div><br />
 
-		<label for="newPassword">Nowe hasło</label>
-			<InputText type="password" @bind-Value="userUpdateRequest.NewPassword" id="newPassword" placeholder="Podaj nowe hasło" class="form-control" />
-			<ValidationMessage For="@(() => userUpdateRequest.NewPassword)" style="color:red; font-size: 12px;" /><br />
+			@* Stare hasło autocomplete="current-password" *@
+			<label for="oldPassword">Stare hasło</label>
+			<InputText type="password" @bind-Value="UserUpdateRequest.OldPassword" id="oldPassword" placeholder="Podaj stare hasło" class="form-control" autocomplete="current-password" />
+			<ValidationMessage For="@(() => UserUpdateRequest.OldPassword)" style="color:red; font-size: 12px;" /><br />
 
-		<label for="newPassword">Powtórz nowe hasło</label>
-			<InputText type="password" @bind-Value="userUpdateRequest.ConfirmPassword" id="newPasswordConfirm" placeholder="Powtórz nowe hasło" class="form-control" />
-			<ValidationMessage For="@(() => userUpdateRequest.ConfirmPassword)" style="color:red; font-size: 12px;" /><br />
+			@* Nowe hasło *@
+			<label for="newPassword">Nowe hasło</label>
+			<InputText type="password" @bind-Value="UserUpdateRequest.NewPassword" id="newPassword" placeholder="Podaj nowe hasło" class="form-control" autocomplete="new-password" />
+			<ValidationMessage For="@(() => UserUpdateRequest.NewPassword)" style="color:red; font-size: 12px;" /><br />
 
-		<label for="oldPassword">Stare hasło</label>
-			<InputText type="password" @bind-Value="userUpdateRequest.OldPassword" id="oldPassword" placeholder="Podaj stare hasło" class="form-control" />
-			<ValidationMessage For="@(() => userUpdateRequest.OldPassword)" style="color:red; font-size: 12px;" /><br />
+			@* Powtórz nowe hasło *@
+			<label for="newPassword">Powtórz nowe hasło</label>
+			<InputText type="password" @bind-Value="UserUpdateRequest.ConfirmPassword" id="newPasswordConfirm" placeholder="Powtórz nowe hasło" class="form-control" autocomplete="new-password" />
+			<ValidationMessage For="@(() => UserUpdateRequest.ConfirmPassword)" style="color:red; font-size: 12px;" /><br />
 
-		<button type="submit" disabled="@isLoading">
-			@if (isLoading)
-			{
-				<span>Zapisuje zmiany...</span>
-			}
-			else
-			{
-				<span>Zapisz zmiany</span>
-			}
-		</button><br /><br />
-	</EditForm>
+			<button type="submit" disabled="@isLoading">
+				@if (isLoading)
+				{
+					<span>Zapisuje zmiany...</span>
+				}
+				else
+				{
+					<span>Zapisz zmiany</span>
+				}
+			</button><br /><br />
+		</EditForm>
 	</div>
 </div>
-

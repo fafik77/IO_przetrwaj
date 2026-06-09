@@ -6,129 +6,169 @@ using Przetrwaj.CommonLibrary.Requests;
 using PrzetrwajPL.Components.Pages.Components;
 using System.Security.Claims;
 
-namespace PrzetrwajPL.Components.Pages
+namespace PrzetrwajPL.Components.Pages;
+
+public partial class UserSettings
 {
-	public partial class UserSettings
+	// Access basic user info from the cookie claims
+	[CascadingParameter]
+	private Task<AuthenticationState> AuthStateTask { get; set; }
+	[SupplyParameterFromQuery]
+	public string? Success { get; set; }
+
+	private UpdateAccountCommand UserUpdateRequest { get; set; } = new UpdateAccountCommand();
+	private bool isLoading = false;
+	private string errorMessage = string.Empty;
+	private string successMessage = string.Empty;
+	private RegionPicker myRegionPicker;
+	private int userRegionId = -1;
+	private string? oldEmail;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		// Access basic user info from the cookie claims
-		[CascadingParameter]
-		private Task<AuthenticationState> AuthStateTask { get; set; }
-		[SupplyParameterFromQuery]
-		public string? Success { get; set; }
-
-		private UpdateAccountCommand userUpdateRequest { get; set; } = new UpdateAccountCommand();
-		private bool isLoading = false;
-		private string errorMessage = string.Empty;
-		private string successMessage = string.Empty;
-		private RegionPicker myRegionPicker;
-		private int userRegionId = -1;
-
-		protected override async Task OnAfterRenderAsync(bool firstRender)
+		if (firstRender)
 		{
-			if (firstRender)
-			{
-				await GetUserInfo();
-				StateHasChanged();
-			}
+			await GetUserInfo();
+			StateHasChanged();
 		}
+	}
 
-		private async Task GetUserInfo()
+	private async Task GetUserInfo()
+	{
+		isLoading = true;
+		try
 		{
-			isLoading = true;
+			var authState = await AuthStateTask;
+			var userPrincipal = authState.User;
+
+			// start fetching full user data from API
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+			var responseTask = client.GetAsync("/Account");
+
+			// in the meantime populate something from the token
 			try
 			{
-				var authState = await AuthStateTask;
-				var userPrincipal = authState.User;
+				var regionStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
+				UserUpdateRequest.Email = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+				UserUpdateRequest.Name = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Name")?.Value;
+				UserUpdateRequest.Surname = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Surname")?.Value;
+				if (!string.IsNullOrEmpty(regionStr)) UserUpdateRequest.GminaId = userRegionId = int.Parse(regionStr);
+			}
+			catch (Exception)
+			{
+				// fail silently as this was only the local cookie which might have been corrupted or missing!
+			}
 
-				if (userPrincipal.Identity is not { IsAuthenticated: true })
-				{
-					NavigationManager.NavigateTo("/login");
-					return;
-				}
+			//show the succesfully applied message when redirected from this:"/account/refresh-cookie?"...
+			if (!string.IsNullOrEmpty(Success))
+			{
+				successMessage = Success;
+				await myRegionPicker.LoadRegionFromId(userRegionId);
+				return;
+			}
 
-				try
+			// populate everything from the user info
+			var response = await responseTask;
+			if (response.IsSuccessStatusCode)
+			{
+				var userInfo = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
+				if (userInfo != null)
 				{
-					var region = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
-					userUpdateRequest.Email = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-					userUpdateRequest.Name = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Name")?.Value;
-					userUpdateRequest.Surname = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Surname")?.Value;
-					if (!string.IsNullOrEmpty(region)) userUpdateRequest.GminaId = userRegionId = int.Parse(region);
-				}
-				catch (Exception) { }
-				if (!string.IsNullOrEmpty(Success))
-				{
-					successMessage = Success;
-					await myRegionPicker.LoadRegionFromId(userRegionId);
-					return;
-				}
-				// 1. Fetch full user data from API
-				var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-				var responseTask = client.GetAsync("/Account");
+					// Map data to the update command
+					UserUpdateRequest.Name = userInfo.Name;
+					UserUpdateRequest.Surname = userInfo.Surname;
+					UserUpdateRequest.Email = userInfo.Email;
+					UserUpdateRequest.Impediments = userInfo.Impediments;
 
-				var response = await responseTask;
-				if (response.IsSuccessStatusCode)
-				{
-					var userInfo = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
-					if (userInfo != null)
+					// Store region ID to set the picker later
+					if (userInfo.Region != null)
 					{
-						// 2. Map data to the update command
-						userUpdateRequest.Name = userInfo.Name;
-						userUpdateRequest.Surname = userInfo.Surname;
-						userUpdateRequest.Email = userInfo.Email;
-
-						// Store region ID to set the picker later
-						if (userInfo.Region != null)
-						{
-							userUpdateRequest.GminaId = userRegionId = userInfo.Region.Id;
-						}
+						UserUpdateRequest.GminaId = userRegionId = userInfo.Region.Id;
 					}
 				}
-				else
+			}
+			else
+			{
+				errorMessage = "Nie uda³o siê pobraæ danych u¿ytkownika.";
+			}
+
+			oldEmail = UserUpdateRequest.Email;
+			await myRegionPicker.LoadRegionFromId(userRegionId);
+		}
+		catch (Exception ex)
+		{
+			errorMessage = $"B³¹d podczas pobierania danych: {ex.Message}";
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task HandleInvalid()
+	{
+		return;
+	}
+
+	private async Task HandleUpdate()
+	{
+		isLoading = true;
+		errorMessage = string.Empty;
+		successMessage = string.Empty;
+		const string settingsPage = "settings";
+
+		try
+		{
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+			var response = await client.PutAsJsonAsync("/Account", UserUpdateRequest);
+			bool IsSuccessStatusCode = response.IsSuccessStatusCode;
+			List<HttpContent> errorsContent = [];
+			if (!response.IsSuccessStatusCode) errorsContent.Add(response.Content);
+
+			//change password
+			if (!string.IsNullOrWhiteSpace(UserUpdateRequest.NewPassword))
+			{
+				//we can send the entire object, it will be stripped by the API
+				response = await client.PutAsJsonAsync("/Account/password", UserUpdateRequest);
+				//both requests have to sucseed
+				IsSuccessStatusCode &= response.IsSuccessStatusCode;
+				if (!response.IsSuccessStatusCode) errorsContent.Add(response.Content);
+			}
+
+			//new email
+			if (!UserUpdateRequest.Email.Equals(oldEmail, comparisonType: StringComparison.OrdinalIgnoreCase))
+			{
+				//we can send the entire object, it will be stripped by the API
+				response = await client.PutAsJsonAsync("/Account/email", UserUpdateRequest);
+				//both requests have to sucseed
+				IsSuccessStatusCode &= response.IsSuccessStatusCode;
+				if (!response.IsSuccessStatusCode) errorsContent.Add(response.Content);
+			}
+
+
+			if (IsSuccessStatusCode)
+			{
+				// Trigger the cookie update handshake (Force page reload to refresh cookie)
+				// We redirect to a server-side endpoint to issue a new cookie with updated claims
+				NavigationManager.NavigateTo($"/account/refresh-cookie?redirectTo={settingsPage}", forceLoad: true);
+			}
+			else
+			{
+				string errorText = string.Empty;
+				foreach (var error in errorsContent)
 				{
-					errorMessage = "Nie uda³o siê pobraæ danych u¿ytkownika.";
+					errorText += await error.ReadFromJsonAsync<ExceptionCasting>() + "\n";
 				}
-				await myRegionPicker.LoadRegionFromId(userRegionId);
-			}
-			catch (Exception ex)
-			{
-				errorMessage = $"B³¹d podczas pobierania danych: {ex.Message}";
-			}
-			finally
-			{
-				isLoading = false;
+				errorMessage = errorText;
 			}
 		}
-
-		private async Task HandleUpdate()
+		catch (Exception ex)
 		{
-			isLoading = true;
-			errorMessage = string.Empty;
-			successMessage = string.Empty;
-
-			try
-			{
-				var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-				var response = await client.PutAsJsonAsync("/Account", userUpdateRequest);
-				if (response.IsSuccessStatusCode)
-				{
-					// Trigger the cookie update handshake (Force page reload to refresh cookie)
-					// We redirect to a server-side endpoint to issue a new cookie with updated claims
-					NavigationManager.NavigateTo($"/account/refresh-cookie?redirectTo=settings", forceLoad: true);
-				}
-				else
-				{
-					var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-					errorMessage = errorText?.Error.Message;
-				}
-			}
-			catch (Exception ex)
-			{
-				errorMessage = $"B³¹d po³¹czenia: {ex.Message}";
-			}
-			finally
-			{
-				isLoading = false;
-			}
+			errorMessage = $"B³¹d po³¹czenia: {ex.Message}";
+		}
+		finally
+		{
+			isLoading = false;
 		}
 	}
 }

@@ -104,9 +104,24 @@ public class AccountController : Controller
 		redirectTo = redirectTo.Trim();
 		if (!redirectTo.StartsWith('/')) redirectTo = "/" + redirectTo;
 
+		var httpContext = _ContextAccessor.HttpContext;
+		if (httpContext == null) return Results.BadRequest("Missing HTTP Context");
+
+		// Important: fetch the existing authentication properties/tokens BEFORE rewriting the session !
+		var authResult = await httpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+		// If authResult is successful, it contains the old tokens. If it fails, fallback to a safe default.
+		var authProperties = authResult.Properties ?? new AuthenticationProperties
+		{
+			IsPersistent = true,
+			ExpiresUtc = DateTimeOffset.UtcNow.AddDays(31) // 31-day lifespan
+		};
+
+		// Fetch up-to-date user information from the API
 		var client = _ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 		var user = await client.GetFromJsonAsync<UserWithPersonalDataDto>("/Account", ct);
 
+		// Rebuild the claims array with fresh data
 		var claims = new List<Claim>
 		{
 			new Claim(ClaimTypes.NameIdentifier, user.Id),
@@ -116,16 +131,21 @@ public class AccountController : Controller
 			new Claim("Surname", user.Surname ?? ""),
 			new Claim("Name", user.Name ?? ""),
 		};
+
 		foreach (var role in user.Roles)
 		{
 			claims.Add(new Claim(ClaimTypes.Role, role));
 		}
+
 		var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 		var principal = new ClaimsPrincipal(identity);
-		await _ContextAccessor.HttpContext.SignInAsync(
+
+		// store the extracted authProperties (with the old tokens intact!) back
+		await httpContext.SignInAsync(
 			CookieAuthenticationDefaults.AuthenticationScheme,
 			principal,
-			new AuthenticationProperties { IsPersistent = true });
+			authProperties);
+
 		var succStr = "Zmiany zapisane pomyślnie";
 		return Results.LocalRedirect(redirectTo + $"?success={WebUtility.UrlEncode(succStr)}");
 	}

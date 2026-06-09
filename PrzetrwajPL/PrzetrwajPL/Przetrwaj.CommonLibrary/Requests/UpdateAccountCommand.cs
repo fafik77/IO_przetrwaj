@@ -9,7 +9,6 @@ public class UpdateAccountCommand
 	public string? Name { get; set; }
 	[MaxLength(64)]
 	public string? Surname { get; set; }
-	[EmailAddress(ErrorMessage = "Niepoprawny format email")]
 	public int? GminaId { get; set; }
 	public int? Impediments { get; set; }
 
@@ -17,7 +16,8 @@ public class UpdateAccountCommand
 
 
 	// email
-	public string? Email { get; set; }
+	[EmailAddress(ErrorMessage = "Niepoprawny format email")]
+	public string Email { get; set; } = string.Empty;
 
 	[PasswordPropertyText]
 	public string? OldPassword { get; set; }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using PrzetrwajPL.Models;
 
 namespace PrzetrwajPL.Components.Pages.Components
 {

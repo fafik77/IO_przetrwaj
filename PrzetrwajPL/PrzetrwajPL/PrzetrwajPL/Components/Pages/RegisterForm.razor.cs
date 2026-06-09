@@ -8,11 +8,9 @@ namespace PrzetrwajPL.Components.Pages;
 
 public partial class RegisterForm
 {
-	//private UserWithPersonalDataDto user = new();
-	private RegisterRequest registerRequest = new();
+	private readonly RegisterRequest registerRequest = new();
 	private string errorMessage = string.Empty;
 	private bool isLoading = false;
-	//private string selectedRegionDisplay = "Wybierz swój region";
 
 	private async Task HandleRegister()
 	{

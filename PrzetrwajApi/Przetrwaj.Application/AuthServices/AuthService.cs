@@ -111,7 +111,7 @@ public class AuthService : IAuthService
 	{
 		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(register.IdRegion);
 		//var PowExists = _regionRepository.GetByIdAsync(Pow);
-		var GmiExists = _regionRepository.GetByIdAsync(Gmi);
+		var GmiExists = await _regionRepository.GetByIdAsync(Gmi);
 		var user = new AppUser
 		{
 			Email = register.Email,

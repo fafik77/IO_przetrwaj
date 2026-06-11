@@ -1,0 +1,57 @@
+﻿button {
+	cursor: pointer;
+}
+	button:hover {
+		opacity: 0.8;
+		border: double;
+	}
+
+	.white-button-blue-text {
+		background-color: ghostwhite;
+		color: #0094ff;
+		padding: 14px 20px;
+		border: 3px solid #0094ff;
+		border-radius: 10px;
+		text-shadow: #808080;
+		font-weight: bold;
+	}
+
+	.blue-button-white-text {
+		background-color: #0094ff;
+		color: ghostwhite;
+		padding: 14px 20px;
+		border: 3px solid #0094ff;
+		border-radius: 10px;
+		text-shadow: #808080;
+		font-weight: bold;
+	}
+
+
+/* smooth slide from top to bottom and reversed */
+.picker-slider {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+	overflow: hidden;
+}
+
+	.picker-slider.expanded {
+		grid-template-rows: 1fr;
+		margin-bottom: 0.5em;
+	}
+
+/* inner container required for min-height: 0 */
+.picker-inner-content {
+	min-height: 0;
+	transform: translateY(-15px);
+	opacity: 0;
+	transition: transform 0.35s ease-out, opacity 0.25s ease-out;
+	padding-top: 4px;
+}
+
+/* show the expanded content */
+.picker-slider.expanded .picker-inner-content {
+	transform: translateY(0);
+	opacity: 1;
+}
+

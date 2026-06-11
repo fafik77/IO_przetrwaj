@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Requests;
@@ -18,10 +19,14 @@ public partial class UserSettings
 	public string? Success { get; set; }
 
 	private UpdateAccountCommand UserUpdateRequest { get; set; } = new UpdateAccountCommand();
+	private string RegionName { get; set; } = "";
 	private bool isLoading = false;
 	private string errorMessage = string.Empty;
 	private string successMessage = string.Empty;
-	private RegionPicker myRegionPicker;
+	private RegionPicker? myRegionPicker;
+	private bool isRegionPickerOpen = false;
+	private CheckboxGrid? preferencesCheckboxGrid;
+	private bool isPreferencesCheckboxGridOpen = false;
 	private int userRegionId = -1;
 	private string? oldEmail;
 
@@ -34,6 +39,12 @@ public partial class UserSettings
 		}
 	}
 
+	private void HandleRegionChanged(int id) => UserUpdateRequest.GminaId = id;
+	private bool ShouldShowRegionPicker() => UserUpdateRequest.GminaId <= 0 || isRegionPickerOpen;
+	private void ToggleRegionPicker() => isRegionPickerOpen = !isRegionPickerOpen;
+	private void TogglePreferencesPicker() => isPreferencesCheckboxGridOpen = !isPreferencesCheckboxGridOpen;
+
+
 	private async Task GetUserInfo()
 	{
 		isLoading = true;
@@ -44,7 +55,8 @@ public partial class UserSettings
 
 			// start fetching full user data from API
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-			var responseTask = client.GetAsync("/Account");
+			var getUserDetailsTask = client.GetAsync("/Account");
+			var getImpedimentsTask = client.GetAsync("/Impediments");
 
 			// in the meantime populate something from the token
 			try
@@ -69,10 +81,11 @@ public partial class UserSettings
 			}
 
 			// populate everything from the user info
-			var response = await responseTask;
-			if (response.IsSuccessStatusCode)
+			var userDetails = await getUserDetailsTask;
+			var impedimentsResponse = await getImpedimentsTask;
+			if (userDetails.IsSuccessStatusCode)
 			{
-				var userInfo = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
+				var userInfo = await userDetails.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
 				if (userInfo != null)
 				{
 					// Map data to the update command
@@ -80,6 +93,8 @@ public partial class UserSettings
 					UserUpdateRequest.Surname = userInfo.Surname;
 					UserUpdateRequest.Email = userInfo.Email;
 					UserUpdateRequest.Impediments = userInfo.Impediments;
+					var impediments = await impedimentsResponse.Content.ReadFromJsonAsync<Dictionary<int, string>>() ?? new();
+					preferencesCheckboxGrid.LoadFromIntBitField(userInfo.Impediments, impediments);
 
 					// Store region ID to set the picker later
 					if (userInfo.Region != null)
@@ -95,6 +110,7 @@ public partial class UserSettings
 
 			oldEmail = UserUpdateRequest.Email;
 			await myRegionPicker.LoadRegionFromId(userRegionId);
+			var selected = preferencesCheckboxGrid.GetSelectedAsIntBitField();
 		}
 		catch (Exception ex)
 		{
@@ -122,6 +138,7 @@ public partial class UserSettings
 		try
 		{
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+			UserUpdateRequest.ReturnUrl = NavigationManager.BaseUri;
 			var response = await client.PutAsJsonAsync("/Account", UserUpdateRequest);
 			bool IsSuccessStatusCode = response.IsSuccessStatusCode;
 			List<HttpContent> errorsContent = [];
@@ -172,6 +189,17 @@ public partial class UserSettings
 		finally
 		{
 			isLoading = false;
+		}
+	}
+
+	private async Task ConfirmAndLogoutAll()
+	{
+		// localized Yes/No = Tak/Nie
+		bool isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz wylogowaæ wszystkie aktywne sesje na innych urz¹dzeniach?");
+
+		if (isConfirmed)
+		{
+			NavigationManager.NavigateTo("/logout-all-sessions");
 		}
 	}
 }

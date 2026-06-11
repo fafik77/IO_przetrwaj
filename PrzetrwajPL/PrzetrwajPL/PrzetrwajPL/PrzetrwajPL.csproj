@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\css\MainStyles.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Przetrwaj.CommonLibrary\Przetrwaj.CommonLibrary.csproj" />
     <ProjectReference Include="..\PrzetrwajPL.Client\PrzetrwajPL.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.12" />

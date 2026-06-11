@@ -1,0 +1,19 @@
+﻿<div class="checkbox-grid-container">
+	@for (int currentSlot = 0; currentSlot <= 31; currentSlot++)
+	{
+		@if (_slots.TryGetValue(currentSlot, out var item))
+		{
+			<div class="grid-cell active-cell">
+				<label class="checkbox-label">
+					<input type="checkbox" @bind="item.IsChecked" class="checkbox-input" />
+					<span class="label-text">@item.Label</span>
+				</label>
+			</div>
+		}
+		else
+		{
+			// empty cell that preserves the 4x8 grid
+			<div class="grid-cell empty-cell"></div>
+		}
+	}
+</div>

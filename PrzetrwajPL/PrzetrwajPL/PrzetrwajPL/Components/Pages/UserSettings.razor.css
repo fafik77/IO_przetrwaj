@@ -1,17 +1,11 @@
-﻿button {
-    background-color: #0094ff;
-    color: white;
-    padding: 14px 20px;
-    margin: auto;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
+﻿label {
+	margin-top: 0.5em;
 }
 
-    button:hover {
-        opacity: 0.8;
-    }
+div p {
+	text-align: center;
+}
+
 
 .form-control {
     width: 100%;
@@ -36,9 +30,6 @@
     border-radius: 8px 8px 8px 8px;
 }
 
-div p {
-    text-align: center;
-}
 
 .pre-wrap {
     white-space: pre-wrap;
@@ -49,3 +40,31 @@ div p {
     display: flex;
     justify-content: center;
 }
+
+
+
+
+
+
+
+/* Region button showing the picked region */
+.btn-toggle-picker {
+	background-color: #e6f4ff;
+	color: #0094ff;
+	border: 1px solid #bae7ff;
+	padding: 2px 4px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 14px;
+	display: inline-flex;
+	align-items: center;
+	transition: all 0.2s ease-in-out;
+	margin-bottom: 8px;
+	width: auto;
+}
+
+	.btn-toggle-picker:hover {
+		background-color: #bae7ff;
+		color: #007adb;
+	}

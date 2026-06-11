@@ -21,6 +21,7 @@ public class UpdateAccountCommand
 
 	[PasswordPropertyText]
 	public string? OldPassword { get; set; }
+	public string? ReturnUrl { get; set; }
 
 	// password (with OldPassword)
 	[PasswordPropertyText]

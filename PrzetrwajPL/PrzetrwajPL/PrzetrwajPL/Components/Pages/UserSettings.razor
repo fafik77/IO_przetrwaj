@@ -3,6 +3,7 @@
 
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
 @using Przetrwaj.CommonLibrary.Consts
 @using PrzetrwajPL;
 @using PrzetrwajPL.Components.Pages.Components
@@ -14,7 +15,6 @@
 <div class="container">
 	<div class="inContainer">
 		<h2 style="text-align:center; font-weight:bold;">Ustawienia użytkownika</h2>
-		<p>Tu możesz zmienić swoje ustawienia użytkownika.</p>
 		<EditForm Model="@UserUpdateRequest" OnValidSubmit="HandleUpdate" FormName="updateForm" OnInvalidSubmit="HandleInvalid">
 			<DataAnnotationsValidator />
 			@if (!string.IsNullOrEmpty(successMessage))
@@ -31,50 +31,82 @@
 			@* Imię *@
 			<label for="name">Imie:</label><br />
 			<InputText @bind-Value="UserUpdateRequest.Name" id="name" placeholder="Podaj imie" class="form-control" autocomplete="given-name" />
-			<ValidationMessage For="@(() => UserUpdateRequest.Name)" style="color:red; font-size: 12px;" /><br />
+			<ValidationMessage For="@(() => UserUpdateRequest.Name)" style="color:red; font-size: 12px;" />
 
 			@* Nazwisko *@
 			<label for="surname">Nazwisko:</label><br />
 			<InputText @bind-Value="UserUpdateRequest.Surname" id="surname" placeholder="Podaj nazwisko" class="form-control" autocomplete="family-name" />
-			<ValidationMessage For="@(() => UserUpdateRequest.Surname)" style="color:red; font-size: 12px;" /><br />
+			<ValidationMessage For="@(() => UserUpdateRequest.Surname)" style="color:red; font-size: 12px;" />
 
 			@* Email *@
 			<label for="email">Email:</label><br />
 			<InputText @bind-Value="UserUpdateRequest.Email" id="email" placeholder="Podaj email" class="form-control" autocomplete="username" />
-			<ValidationMessage For="@(() => UserUpdateRequest.Email)" style="color:red; font-size: 12px;" /><br />
+			<ValidationMessage For="@(() => UserUpdateRequest.Email)" style="color:red; font-size: 12px;" />
 
-			<label for="region">Twoja lokalizacja:</label><br />
-			<div class="picker-conteiner">
-				<div class="picker">
-					<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(id => UserUpdateRequest.GminaId = id)" />
+			@* Region (Gmina) *@
+			<label for="region">Twoja lokalizacja:
+				@* Nazwa gminy (button) *@
+				<button type="button" class="btn-toggle-picker" @onclick="ToggleRegionPicker">
+					<i class="fa fa-map-marker me-2"></i>
+					@(myRegionPicker?.SelectedRegionName ?? "Wczytywanie lokalizacji...")
+					<i class="fa @(isRegionPickerOpen ? "fa-chevron-up" : "fa-chevron-down") ms-2" style="font-size: 11px;"></i>
+				</button>
+			</label>
+			<div class="picker-container">
+				@* Picker wraz z animacją *@
+				<div class="picker-slider @(ShouldShowRegionPicker() ? "expanded" : "collapsed")">
+					<div class="picker-inner-content">
+						<div class="picker">
+							<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="HandleRegionChanged" />
+						</div>
+					</div>
 				</div>
-			</div><br />
+			</div>
 
-			@* Stare hasło autocomplete="current-password" *@
+			@* Preferencje *@
+			<label for="impediments">Wybierz kategorie które ciebie bardziej interesują:
+				<button type="button" class="btn-toggle-picker" @onclick="TogglePreferencesPicker">
+					Kategorie
+					<i class="fa @(isPreferencesCheckboxGridOpen ? "fa-chevron-up" : "fa-chevron-down") ms-2" style="font-size: 11px;"></i>
+				</button>
+			</label>
+			<div>
+				<CheckboxGrid/>
+			</div>
+
+			@* Stare hasło *@
 			<label for="oldPassword">Stare hasło</label>
-			<InputText type="password" @bind-Value="UserUpdateRequest.OldPassword" id="oldPassword" placeholder="Podaj stare hasło" class="form-control" autocomplete="current-password" />
-			<ValidationMessage For="@(() => UserUpdateRequest.OldPassword)" style="color:red; font-size: 12px;" /><br />
+			<InputText type="password" @bind-Value="UserUpdateRequest.OldPassword" id="oldPassword" placeholder="Podaj stare hasło" class="isform-control" autocomplete="current-password" />
+			<ValidationMessage For="@(() => UserUpdateRequest.OldPassword)" style="color:red; font-size: 12px;" />
 
 			@* Nowe hasło *@
-			<label for="newPassword">Nowe hasło</label>
+			<label for="newPisassword">Nowe hasło</label>
 			<InputText type="password" @bind-Value="UserUpdateRequest.NewPassword" id="newPassword" placeholder="Podaj nowe hasło" class="form-control" autocomplete="new-password" />
-			<ValidationMessage For="@(() => UserUpdateRequest.NewPassword)" style="color:red; font-size: 12px;" /><br />
+			<ValidationMessage For="@(() => UserUpdateRequest.NewPassword)" style="color:red; font-size: 12px;" />
 
 			@* Powtórz nowe hasło *@
 			<label for="newPassword">Powtórz nowe hasło</label>
 			<InputText type="password" @bind-Value="UserUpdateRequest.ConfirmPassword" id="newPasswordConfirm" placeholder="Powtórz nowe hasło" class="form-control" autocomplete="new-password" />
-			<ValidationMessage For="@(() => UserUpdateRequest.ConfirmPassword)" style="color:red; font-size: 12px;" /><br />
+			<ValidationMessage For="@(() => UserUpdateRequest.ConfirmPassword)" style="color:red; font-size: 12px;" />
 
-			<button type="submit" disabled="@isLoading">
-				@if (isLoading)
-				{
-					<span>Zapisuje zmiany...</span>
-				}
-				else
-				{
-					<span>Zapisz zmiany</span>
-				}
-			</button><br /><br />
+			@* Grupa przycisków akcji obok siebie *@
+			<div class="action-buttons-group" style="display: flex; gap: 12px; justify-content: center; align-items: center;">
+				<button type="submit" class="white-button-blue-text" disabled="@isLoading">
+					@if (isLoading)
+					{
+						<span>Zapisuje zmiany...</span>
+					}
+					else
+					{
+						<span>Zapisz zmiany</span>
+					}
+				</button>
+
+				<button type="button" class="blue-button-white-text" @onclick="ConfirmAndLogoutAll">
+					Wyloguj wszystkie sesje
+				</button>
+			</div>
+			<br /><br />
 		</EditForm>
 	</div>
 </div>

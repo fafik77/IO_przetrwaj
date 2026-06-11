@@ -5,6 +5,7 @@ using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Requests;
 using PrzetrwajPL.Components.Pages.Components;
 using System.Security.Claims;
+using System.Text;
 
 namespace PrzetrwajPL.Components.Pages;
 
@@ -130,7 +131,7 @@ public partial class UserSettings
 			if (!string.IsNullOrWhiteSpace(UserUpdateRequest.NewPassword))
 			{
 				//we can send the entire object, it will be stripped by the API
-				response = await client.PutAsJsonAsync("/Account/password", UserUpdateRequest);
+				response = await client.PatchAsJsonAsync("/Account/password", UserUpdateRequest);
 				//both requests have to sucseed
 				IsSuccessStatusCode &= response.IsSuccessStatusCode;
 				if (!response.IsSuccessStatusCode) errorsContent.Add(response.Content);
@@ -140,7 +141,7 @@ public partial class UserSettings
 			if (!UserUpdateRequest.Email.Equals(oldEmail, comparisonType: StringComparison.OrdinalIgnoreCase))
 			{
 				//we can send the entire object, it will be stripped by the API
-				response = await client.PutAsJsonAsync("/Account/email", UserUpdateRequest);
+				response = await client.PatchAsJsonAsync("/Account/email", UserUpdateRequest);
 				//both requests have to sucseed
 				IsSuccessStatusCode &= response.IsSuccessStatusCode;
 				if (!response.IsSuccessStatusCode) errorsContent.Add(response.Content);
@@ -155,12 +156,13 @@ public partial class UserSettings
 			}
 			else
 			{
-				string errorText = string.Empty;
+				StringBuilder sb = new();
 				foreach (var error in errorsContent)
 				{
-					errorText += await error.ReadFromJsonAsync<ExceptionCasting>() + "\n";
+					var errorContent = await error.ReadFromJsonAsync<ExceptionCasting>();
+					sb.AppendLine(errorContent?.Error?.Message);
 				}
-				errorMessage = errorText;
+				errorMessage = sb.ToString();
 			}
 		}
 		catch (Exception ex)

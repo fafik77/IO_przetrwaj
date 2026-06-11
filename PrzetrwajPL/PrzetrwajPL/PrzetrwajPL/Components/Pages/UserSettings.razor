@@ -71,8 +71,15 @@
 					<i class="fa @(isPreferencesCheckboxGridOpen ? "fa-chevron-up" : "fa-chevron-down") ms-2" style="font-size: 11px;"></i>
 				</button>
 			</label>
-			<div>
-				<CheckboxGrid @ref="preferencesCheckboxGrid"/>
+			<div class="picker-container">
+				@* Picker wraz z animacją *@
+				<div class="picker-slider @(isPreferencesCheckboxGridOpen ? "expanded" : "collapsed")">
+					<div class="picker-inner-content">
+						<div class="picker">
+							<CheckboxGrid @ref="preferencesCheckboxGrid" />
+						</div>
+					</div>
+				</div>
 			</div>
 
 			@* Stare hasło *@

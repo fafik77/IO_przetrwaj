@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Przetrwaj.Domain.Exceptions._base;
 using System.Net;
+using System.Text.Json.Serialization;
 
 namespace Przetrwaj.Domain.Exceptions;
 
@@ -14,13 +15,15 @@ public class ExceptionCasting
 	protected ExceptionCasting(ExceptionCasting other)
 	{
 		this.Status = other.Status;
-		this.StatusCode = other.StatusCode;
+		this.StatusCodeEnum = other.StatusCodeEnum;
 		this.Error = other.Error;
 		this.Timestamp = other.Timestamp;
 	}
 
 	public string Status { get; set; }
-	public HttpStatusCode StatusCode { get; set; }
+	[JsonIgnore]
+	public HttpStatusCode StatusCodeEnum { get; set; }
+	public int StatusCode { get => (int)StatusCodeEnum; }
 	public ErrorDetails? Error { get; set; }
 	public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.UtcNow;
 
@@ -28,7 +31,7 @@ public class ExceptionCasting
 	{
 		return new ExceptionCasting
 		{
-			StatusCode = exception.HttpStatusCode,
+			StatusCodeEnum = exception.HttpStatusCode,
 			Status = "error",
 			Error = new ErrorDetails
 			{
@@ -43,7 +46,7 @@ public class ExceptionCasting
 	{
 		return new ExceptionCasting
 		{
-			StatusCode = HttpStatusCode.BadRequest,
+			StatusCodeEnum = HttpStatusCode.BadRequest,
 			Status = "error",
 			Error = new ErrorDetails
 			{

@@ -36,7 +36,7 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 		{
 			Status = "success",
 			Error = new ErrorDetails { },
-			StatusCode = System.Net.HttpStatusCode.OK,
+			StatusCodeEnum = System.Net.HttpStatusCode.OK,
 			Timestamp = DateTimeOffset.UtcNow,
 		};
 		var post = await _postRepository.GetPostWithAttachmentsByIdAsync(request.IdPost, cancellationToken);
@@ -129,7 +129,7 @@ public class AddAttachmentsHandler : ICommandHandler<AddAttachmentsInternal, Add
 				var attAdded = new AddAttachmentResult
 				{
 					Status = "success",
-					StatusCode = System.Net.HttpStatusCode.Created,
+					StatusCodeEnum = System.Net.HttpStatusCode.Created,
 					Timestamp = DateTimeOffset.UtcNow,
 					AttachmentDto = AttachmentDto.Map(attInDB, HttpPath)
 				};

@@ -247,7 +247,6 @@ public partial class PostController : Controller
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddDanger(AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
@@ -275,7 +274,6 @@ public partial class PostController : Controller
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddResource(AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
@@ -303,7 +301,6 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
 	[RequestSizeLimit(50 << 20)] //up to 50 MB
 	public async Task<IActionResult> AddAttachment(string id, [FromForm] AddAttachments attachments, CancellationToken CT)
@@ -318,7 +315,7 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(req, CT);
-			return StatusCode((int)res.StatusCode, res);
+			return StatusCode((int)res.StatusCodeEnum, res);
 		}
 		catch (BaseException ex)
 		{
@@ -335,7 +332,6 @@ public partial class PostController : Controller
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> MarkAsInactive(string id, CancellationToken CT)
 	{
 		var requ = new MarkPostAsInactiveCommand { PostId = id };

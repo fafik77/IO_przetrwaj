@@ -31,7 +31,6 @@ public class ImpedimentController : Controller
 	[SwaggerOperation("Update/Create a Impediment Id:[0; 31] (Moderator)")]
 	[ProducesResponseType(typeof(Impediment), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> Update([FromBody] UpdateImpedimentCommand cmd, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
@@ -47,8 +46,8 @@ public class ImpedimentController : Controller
 	}
 
 	[HttpGet]
-	[SwaggerOperation("Map all Impediments <id, name>")]
-	[ProducesResponseType(typeof(Dictionary<int, string>), StatusCodes.Status200OK)]
+	[SwaggerOperation("Map of all Impediments <id, name>")]
+	[ProducesResponseType(typeof(Dictionary<short, string>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetAll(CancellationToken ct)
 	{
 		var dict = await _mediator.Send(new GetAllImpedimentsQuery(), ct);

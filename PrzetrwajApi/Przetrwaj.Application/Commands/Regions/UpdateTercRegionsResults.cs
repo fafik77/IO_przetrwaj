@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using System.Net;
+using System.Text.Json.Serialization;
 
 namespace Przetrwaj.Application.Commands.Regions;
 
@@ -14,7 +15,9 @@ public record UpdateTercRegionResult
 public class UpdateTercRegionsResults
 {
 	public bool Success { get; set; } = true;
-	public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
+	[JsonIgnore]
+	public HttpStatusCode StatusCodeEnum { get; set; } = HttpStatusCode.OK;
+	public int StatusCode { get => (int)StatusCodeEnum; }
 	public ErrorDetails? Error { get; set; }
 	public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.UtcNow;
 	public short WojCount { get; set; }

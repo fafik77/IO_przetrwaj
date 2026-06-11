@@ -169,7 +169,6 @@ public class UserController : Controller
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> Ban(BanUserCommand banUserCommand, CancellationToken cancellationToken)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);

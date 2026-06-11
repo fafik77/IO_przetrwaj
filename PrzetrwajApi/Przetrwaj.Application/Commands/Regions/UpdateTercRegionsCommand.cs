@@ -31,7 +31,7 @@ public class UpdateTercRegionsCommandHandler : ICommandHandler<UpdateTercRegions
 		var results = new UpdateTercRegionsResults();
 		if (!request.File.ContentType.Equals("text/csv", StringComparison.OrdinalIgnoreCase))
 		{
-			results.StatusCode = System.Net.HttpStatusCode.BadRequest;
+			results.StatusCodeEnum = System.Net.HttpStatusCode.BadRequest;
 			results.Success = false;
 			results.Timestamp = DateTimeOffset.UtcNow;
 			results.Error = new ErrorDetails

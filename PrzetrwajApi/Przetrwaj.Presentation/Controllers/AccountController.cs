@@ -306,7 +306,7 @@ public class AccountController : Controller
 		{
 			return BadRequest(new ExceptionCasting
 			{
-				StatusCode = System.Net.HttpStatusCode.BadRequest,
+				StatusCodeEnum = System.Net.HttpStatusCode.BadRequest,
 				Status = "error",
 				Error = new ErrorDetails { Code = ex.GetType().Name, Message = ex.Message }
 			});

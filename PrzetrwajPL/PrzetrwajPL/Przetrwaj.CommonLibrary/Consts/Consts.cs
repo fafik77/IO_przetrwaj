@@ -1,5 +1,12 @@
 ﻿namespace Przetrwaj.CommonLibrary.Consts;
 
+public static class UserRoles
+{
+	public const string User = "User";
+	public const string Moderator = "Moderator";
+	public const string Admin = "Admin";
+}
+
 public static class ClaimNames
 {
 	/// <summary>
@@ -19,5 +26,5 @@ public static class Consts
 	public const string PrzetrwajApiClientName = "ServerAPI";
 	public static readonly StringComparer PolishAlphabetComparer =
 		StringComparer.Create(new System.Globalization.CultureInfo("pl-PL"), ignoreCase: true);
-
+	public const string PrzetrwajAuthCookie = "PrzetrwajAuthCookie";
 }

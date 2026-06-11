@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Przetrwaj.CommonLibrary.Consts;
-using PrzetrwajPL;
 using PrzetrwajPL.Components;
 using PrzetrwajPL.Handlers;
 using PrzetrwajPL.Handlers.Security;
@@ -17,9 +16,13 @@ builder.Services.AddRazorComponents()
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 	.AddCookie(options =>
 	{
-		options.Cookie.Name = "cookie";
-		options.Cookie.MaxAge = TimeSpan.FromHours(6);
+		options.Cookie.Name = Consts.PrzetrwajAuthCookie;
 		options.LoginPath = "/login";
+
+		options.Events = new CookieAuthenticationEvents
+		{
+			OnValidatePrincipal = RefreshJwtTokenOnValidatePrincipal.OnValidatePrincipal
+		};
 	});
 builder.Services.AddAuthorization(opt =>
 {
@@ -43,14 +46,15 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<JwtAuthorizationHandler>();
 builder.Services.AddTransient<TokenRefreshHandler>();
 
+//those settings are to this client alone
 builder.Services.AddHttpClient(Consts.PrzetrwajApiClientName, client =>
 {
 	client.BaseAddress =
 	//new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/");
 	new Uri("https://localhost:7072/");
 })
-.AddHttpMessageHandler<JwtAuthorizationHandler>()	// include JWT in AuthHeader
-.AddHttpMessageHandler<TokenRefreshHandler>();		// retry login with RefreshToken
+.AddHttpMessageHandler<JwtAuthorizationHandler>()   // include JWT in AuthHeader
+.AddHttpMessageHandler<TokenRefreshHandler>();      // retry login with RefreshToken
 
 
 var app = builder.Build();

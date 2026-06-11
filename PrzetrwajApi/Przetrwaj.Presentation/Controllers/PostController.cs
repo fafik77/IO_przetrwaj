@@ -247,6 +247,7 @@ public partial class PostController : Controller
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> AddDanger(AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);

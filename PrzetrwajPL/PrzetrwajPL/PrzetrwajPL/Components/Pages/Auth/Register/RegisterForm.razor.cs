@@ -4,7 +4,7 @@ using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Requests;
 
-namespace PrzetrwajPL.Components.Pages;
+namespace PrzetrwajPL.Components.Pages.Auth.Register;
 
 public partial class RegisterForm
 {

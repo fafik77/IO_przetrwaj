@@ -8,7 +8,7 @@ using PrzetrwajPL.Components.Pages.Components;
 using System.Security.Claims;
 using System.Text;
 
-namespace PrzetrwajPL.Components.Pages;
+namespace PrzetrwajPL.Components.Pages.Auth;
 
 public partial class UserSettings
 {

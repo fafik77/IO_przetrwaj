@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
 
-namespace PrzetrwajPL.Components.Pages;
+namespace PrzetrwajPL.Components.Pages.Auth.Logout;
 
 public partial class Logout
 {

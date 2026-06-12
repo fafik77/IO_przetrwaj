@@ -5,7 +5,7 @@ using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Requests;
 
 
-namespace PrzetrwajPL.Components.Pages
+namespace PrzetrwajPL.Components.Pages.Auth.Login
 {
 	public partial class LoginForm
 	{

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
 using System.Net;
 
-namespace PrzetrwajPL.Components.Pages;
+namespace PrzetrwajPL.Components.Pages.Auth.Callbacks;
 public partial class ConfirmEmail
 {
 	private bool _isProcessing = true;

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 
 namespace PrzetrwajPL.Handlers;
 
@@ -33,6 +34,7 @@ public static class RefreshJwtTokenOnValidatePrincipal
 		var clientFactory = context.HttpContext.RequestServices.GetRequiredService<IHttpClientFactory>();
 		var refreshClient = clientFactory.CreateClient();
 		refreshClient.BaseAddress = clientFactory.CreateClient(Consts.PrzetrwajApiClientName).BaseAddress;
+		refreshClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 		try
 		{
 			var refreshPayload = new { refreshToken };

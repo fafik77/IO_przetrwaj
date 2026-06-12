@@ -27,4 +27,5 @@ public static class Consts
 	public static readonly StringComparer PolishAlphabetComparer =
 		StringComparer.Create(new System.Globalization.CultureInfo("pl-PL"), ignoreCase: true);
 	public const string PrzetrwajAuthCookie = "PrzetrwajAuthCookie";
+	public const string RedirectLoggedInUserTo = "/list";
 }

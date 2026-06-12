@@ -66,7 +66,7 @@ public class AccountController : Controller
 			authProperties);
 
 		//let the `RefreshCookie` method pull all data about the user
-		return Results.LocalRedirect($"/account/refresh-cookie?redirectTo=/&succesMsg=false");
+		return Results.LocalRedirect($"/account/refresh-cookie?redirectTo={Consts.RedirectLoggedInUserTo}&succesMsg=false");
 	}
 
 

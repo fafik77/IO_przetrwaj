@@ -110,7 +110,6 @@ public partial class UserSettings
 
 			oldEmail = UserUpdateRequest.Email;
 			await myRegionPicker.LoadRegionFromId(userRegionId);
-			var selected = preferencesCheckboxGrid.GetSelectedAsIntBitField();
 		}
 		catch (Exception ex)
 		{
@@ -137,6 +136,9 @@ public partial class UserSettings
 
 		try
 		{
+			var selectedPreferences = preferencesCheckboxGrid?.GetSelectedAsIntBitField();
+			UserUpdateRequest.Impediments = selectedPreferences;
+
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			UserUpdateRequest.ReturnUrl = NavigationManager.BaseUri;
 			var response = await client.PutAsJsonAsync("/Account", UserUpdateRequest);

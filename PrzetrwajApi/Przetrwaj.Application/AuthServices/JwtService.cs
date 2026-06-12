@@ -57,6 +57,7 @@ public class JwtService : IJwtService
 		//make claims
 		var (tokens, userJwt) = GenerateTokens(userDto, res.Jwi);
 		res.RefreshToken = userJwt.RefreshToken;
+		res.ValidTill = userJwt.ValidTill;
 		//invalidate old JWT Jti
 		_logoutCache.Logout(userId, tokenId);
 		_userJwtRefreshRepository.Update(res);

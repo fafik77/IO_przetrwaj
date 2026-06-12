@@ -19,7 +19,7 @@ public class AuthorizationHelper
 	public ClaimsPrincipal GetPrincipalClaimsFromTokens(List<string> authorizationTokens, bool ValidateLifetime = true)
 	{
 		if (authorizationTokens.Count != 1) throw new InvalidAuthorizationException("Invalid authorization token");
-		return GetPrincipalClaimsFromToken(authorizationTokens[0]);
+		return GetPrincipalClaimsFromToken(authorizationTokens[0], ValidateLifetime);
 	}
 
 	public ClaimsPrincipal GetPrincipalClaimsFromToken(string authorizationToken, bool ValidateLifetime = true)

@@ -84,7 +84,7 @@
 
 			@* Stare hasło *@
 			<label for="oldPassword">Stare hasło</label>
-			<InputText type="password" @bind-Value="UserUpdateRequest.OldPassword" id="oldPassword" placeholder="Podaj stare hasło" class="isform-control" autocomplete="current-password" />
+			<InputText type="password" @bind-Value="UserUpdateRequest.OldPassword" id="oldPassword" placeholder="Podaj stare hasło" class="form-control" autocomplete="current-password" />
 			<ValidationMessage For="@(() => UserUpdateRequest.OldPassword)" style="color:red; font-size: 12px;" />
 
 			@* Nowe hasło *@
@@ -98,7 +98,7 @@
 			<ValidationMessage For="@(() => UserUpdateRequest.ConfirmPassword)" style="color:red; font-size: 12px;" />
 
 			@* Grupa przycisków akcji obok siebie *@
-			<div class="action-buttons-group" style="display: flex; gap: 12px; justify-content: center; align-items: center;">
+			<div class="action-buttons-group" style="display: flex; gap: 12px; justify-content: center; align-items: center; margin: 1em">
 				<button type="submit" class="white-button-blue-text" disabled="@isLoading">
 					@if (isLoading)
 					{

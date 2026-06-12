@@ -14,13 +14,14 @@ namespace Przetrwaj.Application.AuthServices;
 public class JwtService : IJwtService
 {
 	private readonly ILogoutCache _logoutCache;
+	private readonly IBanCache _banCache;
 	private readonly IUserJwtRefreshRepository _userJwtRefreshRepository;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IUserRepository _userRepository;
 	private readonly UserManager<AppUser> _userManager;
 	private readonly JwtSettings _jwtSettings;
 
-	public JwtService(IOptions<JwtSettings> options, ILogoutCache logoutCache, IUserJwtRefreshRepository userJwtRefreshRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, UserManager<AppUser> userManager)
+	public JwtService(IOptions<JwtSettings> options, ILogoutCache logoutCache, IUserJwtRefreshRepository userJwtRefreshRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, UserManager<AppUser> userManager, IBanCache banCache)
 	{
 		_jwtSettings = options.Value;
 		_logoutCache = logoutCache;
@@ -28,6 +29,7 @@ public class JwtService : IJwtService
 		_unitOfWork = unitOfWork;
 		_userRepository = userRepository;
 		_userManager = userManager;
+		_banCache = banCache;
 	}
 
 	public async Task<JwtTokenDto> GenerateTokenAsync(UserWithPersonalDataDto user, CancellationToken ct)
@@ -41,6 +43,9 @@ public class JwtService : IJwtService
 	}
 	public async Task<JwtTokenDto?> RefreshTokenAsync(string userId, string tokenId, string refreshToken, CancellationToken ct)
 	{
+		if (_logoutCache.IsLogedOut(userId, tokenId) ||
+			_banCache.IsUserBanned(userId))
+			return null;
 		var res = await _userJwtRefreshRepository.GetByIdAsync(userId, tokenId, ct);
 		if (res is null) return null;
 		if (res.RefreshToken != refreshToken) return null;

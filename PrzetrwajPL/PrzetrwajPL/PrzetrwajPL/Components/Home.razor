@@ -2,6 +2,7 @@
 
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Przetrwaj PL</PageTitle>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -14,13 +15,16 @@
 
 <div>
 	<p>
-		Aktualnie w Polsce śledzimy 3'150 zagrożeń, oraz 30 pomocnych punktów z zasobami.
+		Aktualnie w Polsce śledzimy @($"{statistics?.ActiveDangers ?? 0:n0}") zagrożeń, oraz  @($"{statistics?.ActiveResources ?? 0:n0}") pomocnych punktów z zasobami.
 	</p>
 	<p>
-		Strona posiada 100 użytkowników, oraz 3 moderatorów.
+		Strona posiada  @($"{statistics?.Users ?? 0:n0}") użytkowników, oraz  @($"{statistics?.Moderators ?? 0:n0}") moderatorów.
 	</p>
 </div>
 
-@code {
 
-}
+<div style="text-align: center">
+	<h2>Mapa aktualnych zagrożeń i zasobów</h2>
+</div>
+@* map container with size *@
+<div id="@(PolandMapId)" style="height: 800px; width: 100%; margin-top: 20px; border-radius: 8px; border: 1px solid #ccc; z-index: 1;"></div>

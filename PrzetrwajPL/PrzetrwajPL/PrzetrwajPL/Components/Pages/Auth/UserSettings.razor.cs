@@ -19,7 +19,6 @@ public partial class UserSettings
 	public string? Success { get; set; }
 
 	private UpdateAccountCommand UserUpdateRequest { get; set; } = new UpdateAccountCommand();
-	private string RegionName { get; set; } = "";
 	private bool isLoading = false;
 	private string errorMessage = string.Empty;
 	private string successMessage = string.Empty;
@@ -57,6 +56,8 @@ public partial class UserSettings
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var getUserDetailsTask = client.GetAsync("/Account");
 			var getImpedimentsTask = client.GetAsync("/Impediments");
+			getImpedimentsTask.Start();
+			getUserDetailsTask.Start();
 
 			// in the meantime populate something from the token
 			try

@@ -6,7 +6,7 @@
 @using Przetrwaj.CommonLibrary.Models.Posts
 @using PrzetrwajPL.Components.Pages.Components
 
-<PageTitle>Przetrwaj PL</PageTitle>
+<PageTitle>Lokalnie - Przetrwaj PL</PageTitle>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div style="text-align: center">
@@ -70,16 +70,11 @@ else
 	private TypePicker myTypePicker;
 	private List<PostOverviewDto>? posts;
 
-	protected override async Task OnInitializedAsync()
-	{
-		//moved to OnAfterRenderAsync as we need `myRegionPicker` to exist
-	}
-
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		await base.OnAfterRenderAsync(firstRender);
 		if (firstRender)
 		{
-			// await myRegionPicker.LoadRegionFromId(0);
 			await GetUserInfo();
 		}
 	}

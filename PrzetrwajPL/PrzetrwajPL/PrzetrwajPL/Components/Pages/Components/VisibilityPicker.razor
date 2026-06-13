@@ -1,0 +1,36 @@
+﻿@namespace PrzetrwajPL.Components.Pages.Components
+@using Przetrwaj.CommonLibrary.Models
+
+<div class="picker-box">
+	<div class="cascade-selectors">
+		<label>Widoczność na skalę</label>
+		@* min *@
+		<div class="selector-group">
+			<label>Od</label>
+            <select class="form-control-region" value="@min">
+				<option value="@RegionPrecision.PL">Polska</option>
+				<option value="@RegionPrecision.WOJ">Województwo</option>
+				<option value="@RegionPrecision.POW">Powiat</option>
+				<option value="@RegionPrecision.GMI" selected>Gmina</option>
+			</select>
+		</div>
+
+		@* max *@
+		<div class="selector-group">
+			<label>Do</label>
+			<select class="form-control-region" value="@max">
+				<option value="@RegionPrecision.PL" selected>Polska</option>
+				<option value="@RegionPrecision.WOJ">Województwo</option>
+				<option value="@RegionPrecision.POW">Powiat</option>
+				<option value="@RegionPrecision.GMI">Gmina</option>
+			</select>
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public RegionPrecision min { get; set; }
+	[Parameter]
+	public RegionPrecision max{ get; set; }
+}

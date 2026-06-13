@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Przetrwaj.Application.ValidationPipeline;
+using System.Text.Json.Serialization;
 
 namespace Przetrwaj.Presentation;
 
@@ -39,7 +40,12 @@ public static class Extensions
 			});
 		});
 
-		services.AddControllers();
+		services.AddControllers()
+		.AddJsonOptions(options =>
+		{
+			// This converts enums to strings globally
+			options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+		});
 
 		return services;
 	}
@@ -59,7 +65,7 @@ public static class Extensions
 
 		//the order matters
 		app.UseAuthentication();
-		app.UseMiddleware<BanMiddleware>();
+		app.UseMiddleware<UserBlackListMiddleware>();
 		app.UseAuthorization();
 
 		app.MapControllers();

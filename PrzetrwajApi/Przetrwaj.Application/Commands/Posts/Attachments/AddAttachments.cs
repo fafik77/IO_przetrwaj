@@ -3,7 +3,7 @@ using Przetrwaj.Application.Configuration.Commands;
 
 namespace Przetrwaj.Application.Commands.Posts.Attachments;
 
-public class AddAttachmentsInternal : AddAttachments, ICommand<AddAttachmentsResult>
+public record AddAttachmentsInternal : AddAttachments, ICommand<AddAttachmentsResult>
 {
 	public required string IdPost { get; set; }
 	public required string IdUser { get; set; }
@@ -14,7 +14,7 @@ public class AttachmentItem
 	public string? AltDescription { get; set; }
 }
 
-public class AddAttachments
+public record AddAttachments
 {
 	// A list of pairs ensures the data stays together
 	public required List<AttachmentItem> Items { get; set; }

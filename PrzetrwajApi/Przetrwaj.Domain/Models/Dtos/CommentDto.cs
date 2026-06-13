@@ -2,7 +2,7 @@
 
 namespace Przetrwaj.Domain.Models.Dtos;
 
-public class CommentDto
+public record CommentDto
 {
 	//there is no point in including Id, or Post info (as we already know the post)
 	public required string Comment { get; set; }

@@ -1,10 +1,6 @@
 ﻿using Przetrwaj.Domain.Exceptions._base;
 
-namespace Przetrwaj.Domain.Exceptions.RegionException;
+namespace Przetrwaj.Domain.Exceptions.Regions;
 
-public class RegionNotFoundException : NotFoundException<Entities.Region>
-{
-	public RegionNotFoundException(int id) : base(id)
-	{
-	}
-}
+public class RegionNotFoundException(int id) : NotFoundException<Entities.IRegionInfo>(id)
+{ }

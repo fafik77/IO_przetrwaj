@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Commands.Regions;
-using Przetrwaj.Application.Quaries.RegionQauries;
+using Przetrwaj.Application.Quaries.Regions;
+using Przetrwaj.Application.Queries.Regions;
 using Przetrwaj.Domain;
+using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Models.Dtos;
@@ -13,7 +15,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Przetrwaj.Presentation.Controllers;
 
 
-[Route("[controller]")]
+[Route("[controller]s")]
 [ApiController]
 [Produces("application/json")]
 public class RegionController : Controller
@@ -25,19 +27,22 @@ public class RegionController : Controller
 		_mediator = mediator;
 	}
 
-
 	[HttpGet]
 	[SwaggerOperation("Get Regions")]
 	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+	public async Task<IActionResult> GetAll(
+		[FromQuery] string? nameLike,
+		[FromQuery] RegionPrecision? precision,
+		[FromQuery] int? ParentId,
+		CancellationToken ct)
 	{
-		var res = await _mediator.Send(new GetRegionsQuarry(), cancellationToken);
+		var res = await _mediator.Send(new GetRegionsQuarry() { NameLike = nameLike, Precision = precision, ParentId = ParentId }, ct);
 		return Ok(res);
 	}
 
 	[HttpGet("{id}")]
-	[SwaggerOperation("Get Region")]
-	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
+	[SwaggerOperation("Get Region with TERC id")]
+	[ProducesResponseType(typeof(RegionOnlyWithinDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
 	{
@@ -52,46 +57,31 @@ public class RegionController : Controller
 		}
 	}
 
-	[HttpPost]
-	[SwaggerOperation("Add Region (Moderator)")]
-	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status201Created)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	public async Task<IActionResult> AddRegion([FromBody] AddRegionCommand region, CancellationToken cancellationToken)
+	[HttpPost("[action]")]
+	[SwaggerOperation("Add or Update TERC Regions (.csv) (Admin)")]
+	[Authorize(UserRoles.Admin)]
+	[ProducesResponseType(typeof(UpdateTercRegionsResults), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(UpdateTercRegionsResults), StatusCodes.Status400BadRequest)]
+	[RequestFormLimits(MultipartBodyLengthLimit = 5 << 20)] //up to 5 MB
+	[RequestSizeLimit(5 << 20)] //up to 5 MB
+	public async Task<IActionResult> UpdateTercRegions([FromForm] UpdateTercRegionsCommand region, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-		var res = await _mediator.Send(region, cancellationToken);
-		return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
+		var res = await _mediator.Send(region, ct);
+		return StatusCode(res.StatusCode, res);
 	}
 
-	[HttpPost("many")]
-	[SwaggerOperation("Add many Regions (Moderator)")]
-	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(typeof(IEnumerable<RegionOnlyDto>), StatusCodes.Status201Created)]
+	[HttpPost("from-location")]
+	[SwaggerOperation("Get region from location")]
+	[ProducesResponseType(typeof(RegionOnlyDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	public async Task<IActionResult> AddRegions([FromBody] AddRegionsCommand regions, CancellationToken cancellationToken)
-	{
-		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-		var res = await _mediator.Send(regions, cancellationToken);
-		return CreatedAtAction(nameof(GetById), res);
-	}
-
-	[HttpPut]
-	[SwaggerOperation("Update Region (Moderator)")]
-	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(StatusCodes.Status204NoContent)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> UpdateRegion([FromBody] UpdateRegionCommand region, CancellationToken cancellationToken)
+	public async Task<IActionResult> FromLocation([FromBody] LatLong region, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		try
 		{
-			await _mediator.Send(region, cancellationToken);
-			return NoContent();
+			var res = await _mediator.Send(new RegionFromLocationQuery() { location = region }, ct);
+			return Ok(res);
 		}
 		catch (BaseException ex)
 		{
@@ -99,23 +89,5 @@ public class RegionController : Controller
 		}
 	}
 
-	[HttpDelete("{id}")]
-	[SwaggerOperation("Delete Region (Moderator)")]
-	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(StatusCodes.Status204NoContent)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> DeleteRegion(int id, CancellationToken cancellationToken)
-	{
-		try
-		{
-			await _mediator.Send(new DeleteRegionCommand() { RegionId = id }, cancellationToken);
-			return NoContent();
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
 }
 

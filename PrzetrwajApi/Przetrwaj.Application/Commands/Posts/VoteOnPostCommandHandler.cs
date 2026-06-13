@@ -20,7 +20,7 @@ public class VoteOnPostCommandHandler : ICommandHandler<VoteOnPostCommand>
 	public async Task Handle(VoteOnPostCommand request, CancellationToken cancellationToken)
 	{
 		// 404 jeśli post nie istnieje
-		if (!await _postRepository.ExistsPostIdAsync(request.IdPost, cancellationToken))
+		if (!await _postRepository.ExistsActivePostIdAsync(request.IdPost, cancellationToken))
 			throw new PostNotFoundException(request.IdPost);
 
 		// 409 jeśli user już głosował

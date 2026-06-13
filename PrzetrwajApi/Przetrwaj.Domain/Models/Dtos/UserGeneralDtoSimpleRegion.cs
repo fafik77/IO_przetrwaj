@@ -18,9 +18,8 @@ public class UserGeneralDtoSimpleRegion
 		{
 			Id = registeredUser.Id,
 			Name = registeredUser.Name ?? "",
-			//Role = string.Join(", ", registeredUser.clai.ToList()),
 			Surname = registeredUser.Surname ?? "",
-			IdRegion = registeredUser.IdRegion,
+			IdRegion = registeredUser.GminaId ?? 0,
 			RegistrationDate = registeredUser.RegistrationDate,
 			BanDate = registeredUser.BanDate,
 		};

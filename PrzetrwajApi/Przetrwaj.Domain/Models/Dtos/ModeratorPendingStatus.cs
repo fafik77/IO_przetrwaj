@@ -1,6 +1,6 @@
 ﻿namespace Przetrwaj.Domain.Models.Dtos;
 
-public class ModeratorPendingStatus
+public record ModeratorPendingStatus
 {
 	public required string Id { get; set; }
 	public required string Email { get; set; }

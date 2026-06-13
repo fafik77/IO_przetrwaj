@@ -12,4 +12,5 @@ public class UpdateResourceCategoryCommand : ICommand
 	[MaxLength(100)]
 	public required string Name { get; set; }
 	public string? CategoryIcon { get; set; }
+	public int? Impediments { get; set; }
 }

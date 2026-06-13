@@ -1,6 +1,4 @@
-﻿using Przetrwaj.Domain.Entities;
-
-namespace Przetrwaj.Domain.Models.Dtos.Posts;
+﻿namespace Przetrwaj.Domain.Models.Dtos.Posts;
 
 
 /// <summary>
@@ -15,23 +13,6 @@ public class PostOverviewDto
 	public DateTimeOffset DateCreated { get; set; }
 
 
-	///To add all this bellow
 	public long VotePositive { get; set; }
 	public long VoteNegative { get; set; }
-	//public long VoteBalance { get; set; }
-	//public long VoteSum { get; set; }
-	//public float VoteRatio { get; set; }
-
-
-	public static explicit operator PostOverviewDto?(Post? post)
-	{
-		return post is null ? null : new PostOverviewDto
-		{
-			Id = post.IdPost,
-			Title = post.Title,
-			Category = (CategoryDto?)post.IdCategoryNavigation,
-			Region = (RegionOnlyDto?)post.IdRegionNavigation,
-			DateCreated = post.DateCreated,
-		};
-	}
 }

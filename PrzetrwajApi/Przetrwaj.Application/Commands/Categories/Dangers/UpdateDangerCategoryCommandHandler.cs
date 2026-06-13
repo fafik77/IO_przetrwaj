@@ -22,6 +22,7 @@ public class UpdateDangerCategoryCommandHandler : ICommandHandler<UpdateDangerCa
 		if (cat is null) throw new CategoryNotFoundException(request.Id);
 		cat.CategoryIcon = request.CategoryIcon;
 		cat.Name = request.Name;
+		if (request.Impediments != null) cat.Impediments = (int)request.Impediments;
 		_categoryRepository.Update(cat);
 		try
 		{

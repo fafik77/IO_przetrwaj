@@ -1,74 +1,140 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+using System.Security.Cryptography;
 
 namespace Przetrwaj.Application.AuthServices;
 
 public class JwtService : IJwtService
 {
-	private readonly IConfiguration _config;
-	public JwtService(IConfiguration config)
+	private readonly ILogoutCache _logoutCache;
+	private readonly IBanCache _banCache;
+	private readonly IUserJwtRefreshRepository _userJwtRefreshRepository;
+	private readonly IUnitOfWork _unitOfWork;
+	private readonly IUserRepository _userRepository;
+	private readonly UserManager<AppUser> _userManager;
+	private readonly JwtSettings _jwtSettings;
+
+	public JwtService(IOptions<JwtSettings> options, ILogoutCache logoutCache, IUserJwtRefreshRepository userJwtRefreshRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, UserManager<AppUser> userManager, IBanCache banCache)
 	{
-		_config = config;
+		_jwtSettings = options.Value;
+		_logoutCache = logoutCache;
+		_userJwtRefreshRepository = userJwtRefreshRepository;
+		_unitOfWork = unitOfWork;
+		_userRepository = userRepository;
+		_userManager = userManager;
+		_banCache = banCache;
 	}
 
-	public string GenerateToken(UserWithPersonalDataDto user)
+	public async Task<JwtTokenDto> GenerateTokenAsync(UserWithPersonalDataDto user, CancellationToken ct)
+	{
+		//make claims
+		var (tokens, userJwt) = GenerateTokens(user, Guid.NewGuid().ToString());
+		userJwt.UsesLeft = 5;
+		await _userJwtRefreshRepository.AddAsync(userJwt, ct);
+		await _unitOfWork.SaveChangesAsync(ct);
+		return tokens;
+	}
+	public async Task<JwtTokenDto?> RefreshTokenAsync(string userId, string tokenId, string refreshToken, CancellationToken ct)
+	{
+		if (_logoutCache.IsLogedOut(userId, tokenId) ||
+			_banCache.IsUserBanned(userId))
+			return null;
+		var res = await _userJwtRefreshRepository.GetByIdAsync(userId, tokenId, ct);
+		if (res is null) return null;
+		if (res.RefreshToken != refreshToken) return null;
+		if (res.ValidTill <= DateTimeOffset.Now)
+			return null;
+		var user = await _userRepository.GetByIdAsync(userId, ct);
+		if (user is null) return null;
+		var userDto = (UserWithPersonalDataDto)user;
+		var roles = await _userManager.GetRolesAsync(user);
+		userDto.Roles = roles;
+		//make claims
+		var (tokens, userJwt) = GenerateTokens(userDto, res.Jwi);
+		res.RefreshToken = userJwt.RefreshToken;
+		res.ValidTill = userJwt.ValidTill;
+		_userJwtRefreshRepository.Update(res);
+		await _unitOfWork.SaveChangesAsync(ct);
+		return tokens;
+	}
+
+	public async Task BlockTokenAsync(string userId, string tokenId, CancellationToken ct)
+	{
+		_logoutCache.Logout(userId, tokenId);
+		await _userJwtRefreshRepository.DeleteAsync(userId, tokenId, ct);
+		await _unitOfWork.SaveChangesAsync(ct);
+	}
+	public async Task BlockAllTokenAsync(string userId, CancellationToken ct)
+	{
+		var tokens = await _userJwtRefreshRepository.GetByIdAsync(userId, ct);
+		foreach (var token in tokens)
+		{
+			_logoutCache.Logout(userId, token.Jwi);
+		}
+		await _userJwtRefreshRepository.DeleteAllAsync(userId, ct);
+		await _unitOfWork.SaveChangesAsync(ct);
+	}
+
+
+
+
+
+	private (JwtTokenDto tokens, UserJwtRefresh userJwt) GenerateTokens(UserWithPersonalDataDto user, string Jti)
 	{
 		//make claims
 		var claims = new List<Claim>
 		{
-			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+			new Claim(JwtRegisteredClaimNames.Jti, Jti),
 
 			new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-			new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+			new Claim("Region", user.Region?.Id.ToString() ?? "0"),
 			new Claim("Name", user.Name ?? string.Empty),
 			new Claim("Surname", user.Surname ?? string.Empty),
-			new Claim("Region", user.Region?.Id.ToString() ?? string.Empty),
-			new Claim("BanInfo", user.BanInfo?.ToString() ?? string.Empty),
 		};
 		foreach (var role in user.Roles) claims.Add(new Claim(ClaimTypes.Role, role));
 		//make token
-		return MakeTokenWithClaims(claims);
-	}
-	public string GenerateToken(AppUser user, IList<string> roles)
-	{
-		//make claims
-		var claims = new List<Claim>
+		var res = new JwtTokenDto { Token = MakeTokenWithClaims(claims), RefreshToken = GenerateRefreshToken() };
+		UserJwtRefresh userJwt = new UserJwtRefresh
 		{
-			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-
-			new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-			new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-			new Claim("Name", user.Name ?? string.Empty),
-			new Claim("Surname", user.Surname ?? string.Empty),
-			new Claim("Region", user.IdRegion.ToString()),
+			UserId = user.Id,
+			Jwi = Jti,
+			RefreshToken = res.RefreshToken,
+			ValidTill = DateTimeOffset.UtcNow.AddHours(_jwtSettings.RefreshTokenValidHours),
 		};
-		foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));
-		//make token
-		return MakeTokenWithClaims(claims);
+		return (res, userJwt);
+	}
+	private static string GenerateRefreshToken()
+	{
+		var randomNumber = new byte[32];
+		using var rng = RandomNumberGenerator.Create();
+		rng.GetBytes(randomNumber);
+		return Convert.ToBase64String(randomNumber);
 	}
 
 	private string MakeTokenWithClaims(List<Claim> claims)
 	{
-		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+		var key = new SymmetricSecurityKey(_jwtSettings.KeyBytes);
 		var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
 		var tokenHandler = new JwtSecurityTokenHandler();
 		var tokenDesc = new SecurityTokenDescriptor
 		{
-			Issuer = _config["Jwt:Issuer"],
-			Audience = _config["Jwt:Audience"],
+			Issuer = _jwtSettings.Issuer,
+			Audience = _jwtSettings.Audience,
 			Subject = new ClaimsIdentity(claims),
-			Expires = DateTime.Now.AddHours(24),
+			Expires = DateTime.UtcNow.AddHours(_jwtSettings.ValidHours),
 			SigningCredentials = creds
 		};
 
 		var token = tokenHandler.CreateToken(tokenDesc);
 		return tokenHandler.WriteToken(token);
 	}
+
 }

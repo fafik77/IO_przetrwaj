@@ -13,29 +13,28 @@ using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture;
 using Przetrwaj.Infrastucture.Context;
 using Przetrwaj.Presentation;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-const string AuthenticationCookie = "cookie";
 
 // Bind the "Email" section to the EmailSettings class
 builder.Services.Configure<EmailSettings>(
 	builder.Configuration.GetSection("Email"));
 // Bind the "Attachments" section to the AttachmentSettings class
 builder.Services.Configure<AttachmentSettings>(
-	builder.Configuration.GetSection("Attachments")
-);
+	builder.Configuration.GetSection("Attachments"));
 // Bind the "FrontEnd" section to the FrontEndSettings class
 builder.Services.Configure<FrontEndSettings>(
-	builder.Configuration.GetSection("FrontEnd")
-);
+	builder.Configuration.GetSection("FrontEnd"));
 // Bind the "OAuth" section to the OAuth class
 builder.Services.Configure<OAuth>(
-	builder.Configuration.GetSection("OAuth")
-);
-/// the bound "OAuth" section
+	builder.Configuration.GetSection("OAuth"));
+// Bind the "Jwt" section to the JwtSettings class
+builder.Services.Configure<JwtSettings>(
+	builder.Configuration.GetSection("Jwt"));
+// the bound sections
 var oauthSettings = builder.Configuration.GetSection("OAuth").Get<OAuth>();
+var frontEndSettings = builder.Configuration.GetSection("FrontEnd").Get<FrontEndSettings>();
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 
 // 1. Add the handler to the container
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -54,7 +53,7 @@ builder.Services.AddCors(options =>
 			WithOrigins(
 				"https://localhost:7173",
 				"https://localhost",
-				"https://przetrwaj-front.grayflower-7f624026.polandcentral.azurecontainerapps.io"
+				frontEndSettings.Url
 			)
 			.AllowAnyHeader()
 			.AllowAnyMethod()
@@ -72,42 +71,37 @@ builder.Services.AddCors(options =>
 #endregion
 
 #region Auth
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
+if (jwtSettings is null || jwtSettings.KeyBytes.Length <= 20) throw new ArgumentException("Invalid JWT.Key (Not set)");
 builder.Services.AddAuthentication(
-	options =>
+options =>
+{
+	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+	options.IncludeErrorDetails = true;
+	options.TokenValidationParameters = new TokenValidationParameters
 	{
-		options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-		options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-		options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-	})
-	.AddCookie(AuthenticationCookie, options =>
-	{
-		options.Cookie.Name = AuthenticationCookie;
-	})
-	.AddJwtBearer(options =>
-	{
-		options.IncludeErrorDetails = true;
-		options.TokenValidationParameters = new TokenValidationParameters
-		{
-			IssuerSigningKey = new SymmetricSecurityKey(key),
-			ValidIssuer = jwtSettings["Issuer"],
-			ValidAudience = jwtSettings["Audience"],
-			ClockSkew = TimeSpan.FromSeconds(5),
-			ValidateIssuerSigningKey = true,
-			ValidateIssuer = true,
-			ValidateLifetime = true,
-			ValidateAudience = true,
-		};
-	})
-	.AddGoogle(options =>
-	{
-		options.ClientId = oauthSettings?.Google?.ClientId ?? string.Empty;
-		options.ClientSecret = oauthSettings?.Google?.ClientSecret ?? string.Empty;
-		// This maps the Google claim to the standard .NET NameIdentifier
-		options.SignInScheme = IdentityConstants.ExternalScheme;
-	});
-//.AddIdentityCookies();
+		IssuerSigningKey = new SymmetricSecurityKey(jwtSettings.KeyBytes),
+		ValidIssuer = jwtSettings.Issuer,
+		ValidAudience = jwtSettings.Audience,
+		ClockSkew = TimeSpan.FromSeconds(5),
+		ValidateIssuerSigningKey = true,
+		ValidateIssuer = true,
+		ValidateLifetime = true,
+		ValidateAudience = true,
+		//ValidAlgorithms = [SecurityAlgorithms.HmacSha256Signature],
+	};
+})
+.AddGoogle(options =>
+{
+	options.ClientId = oauthSettings?.Google?.ClientId ?? string.Empty;
+	options.ClientSecret = oauthSettings?.Google?.ClientSecret ?? string.Empty;
+	// This maps the Google claim to the standard .NET NameIdentifier
+	options.SignInScheme = IdentityConstants.ExternalScheme;
+});
 // cookie for multiple .Net apps https://learn.microsoft.com/en-us/aspnet/core/security/cookie-sharing?view=aspnetcore-9.0
 builder.Services.AddAuthorization(opt =>
 {
@@ -115,7 +109,6 @@ builder.Services.AddAuthorization(opt =>
 	opt.AddPolicy(UserRoles.User, policy =>
 	{   // this is an or gate
 		policy.RequireAuthenticatedUser(); //any registered user with any role that is able to log in
-										   //policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin);
 	});
 
 	// Policy 2: Moderator+ access
@@ -156,31 +149,9 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 	options.User.RequireUniqueEmail = true;
 	options.SignIn.RequireConfirmedAccount = true;
 })
-.AddEntityFrameworkStores<ApplicationDbContext>() // Specifies that Identity should use EF Core and your DbContext
+.AddEntityFrameworkStores<ApplicationDbContext>() // Specifies that Identity should use EF Core and this DbContext
 .AddDefaultTokenProviders(); // Required for generating tokens (e.g., password reset)
-builder.Services.ConfigureApplicationCookie(options =>
-{
-	// Cookie settings
-	options.Cookie.HttpOnly = true;
-	options.ExpireTimeSpan = TimeSpan.FromHours(8);
 
-	//options.LoginPath = "/Identity/Account/Login";
-	//options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-	options.SlidingExpiration = true;
-
-	options.Events.OnRedirectToLogin = context =>
-	{
-		// Instead of redirecting to /Account/Login, return 401
-		context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-		return Task.CompletedTask;
-	};
-	options.Events.OnRedirectToAccessDenied = context =>
-	{
-		// Instead of redirecting to AccessDenied, return 403
-		context.Response.StatusCode = StatusCodes.Status403Forbidden;
-		return Task.CompletedTask;
-	};
-});
 builder.Services.AddAuthentication(options =>   //re-apply JWT as default
 {
 	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -228,10 +199,10 @@ app.UseRouting(); // Added this explicitly beffore UseCors (New .Net thing)
 app.UseCors(AllowPrzetrwajOrigins);
 app.UsePresentation();
 
+
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
 	ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
-
-
 app.Run();

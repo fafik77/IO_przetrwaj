@@ -2,10 +2,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
+using Przetrwaj.Application.Helpers;
 using Przetrwaj.Application.Quaries.Posts;
+using Przetrwaj.Application.Queries.Posts;
+using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
+using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Exceptions.Posts;
@@ -16,28 +21,40 @@ using System.Security.Claims;
 
 namespace Przetrwaj.Presentation.Controllers;
 
-[Route("[controller]")]
+[Route("[controller]s")]
 [ApiController]
 [Produces("application/json")]
 public partial class PostController : Controller
 {
 	private readonly IMediator _mediator;
+	private readonly IOptions<JwtSettings> _jwtOptions;
 
-	public PostController(IMediator mediator)
+	public PostController(IMediator mediator, IOptions<JwtSettings> jwtOptions)
 	{
 		_mediator = mediator;
+		_jwtOptions = jwtOptions;
 	}
 
 
 	[HttpGet("{id}")]
-	[SwaggerOperation("Get post with all content. Vote status in NOT included(use Get: /Post/{id}/Vote)")]
+	[SwaggerOperation("Get post with all content. (contains MyVote)")]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetById(string id, CancellationToken CT)
+	public async Task<IActionResult> GetById(
+		[FromAuthorizationHeader] List<string> Authorizations,
+		[FromRoute] string id,
+		CancellationToken CT)
 	{
+		string? userId = null;
 		try
 		{
-			var post = await _mediator.Send(new GetPostByIdQuery { Id = id }, CT);
+			if (Authorizations.Count == 1)
+			{
+				var helper = new AuthorizationHelper(_jwtOptions);
+				var claims = helper.GetPrincipalClaimsFromTokens(Authorizations);
+				userId = AuthorizationHelper.GetUserId(claims);
+			}
+			var post = await _mediator.Send(new GetPostByIdQuery { Id = id, UserId = userId }, CT);
 			return Ok(post);
 		}
 		catch (BaseException ex)
@@ -46,7 +63,7 @@ public partial class PostController : Controller
 		}
 	}
 
-	[HttpGet]
+	[HttpGet("map")]
 	[SwaggerOperation("Get all posts for map display.")]
 	[ProducesResponseType(typeof(IEnumerable<PostMinimalCategoryRegion>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetAllPosts(CancellationToken CT)
@@ -55,16 +72,30 @@ public partial class PostController : Controller
 		return Ok(posts);
 	}
 
-	//KL Done
-	[HttpGet("Region/{id}/Danger")]
-	[SwaggerOperation("Get all Danger posts in region")]
+	[HttpGet]
+	[SwaggerOperation("Get all matching posts, sort in order of relevance")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetDangerInRegion(int id, CancellationToken CT)
+	public async Task<IActionResult> GetMatchingPosts(
+		[FromQuery] int RegionId,
+		[FromQuery] int? Impediment,
+		[FromQuery] RegionPrecision? MaxLevel,
+		[FromQuery] CategoryTypeFilter? Category,
+		CancellationToken CT)
 	{
+		var request = new GetAllMatchingPostsQuery
+		{
+			MatchingPostsFilter = new()
+			{
+				RegionId = RegionId,
+				Impediment = Impediment ?? 0,
+				MaxLevel = MaxLevel,
+				CategoryFilter = Category
+			}
+		};
 		try
 		{
-			var posts = await _mediator.Send(new GetDangerPostsInRegionQuery { IdRegion = id }, CT);
+			var posts = await _mediator.Send(request, CT);
 			return Ok(posts);
 		}
 		catch (BaseException ex)
@@ -73,26 +104,9 @@ public partial class PostController : Controller
 		}
 	}
 
-	//KL Done
-	[HttpGet("Region/{id}/Resource")]
-	[SwaggerOperation("Get all Resource posts in region")]
-	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetResourceInRegion(int id, CancellationToken CT)
-	{
-		try
-		{
-			var posts = await _mediator.Send(new GetResourcePostsInRegionQuery { IdRegion = id }, CT);
-			return Ok(posts);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
 
 
-	[HttpGet("Authored/{id}")]
+	[HttpGet("authored/{id}")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -110,7 +124,7 @@ public partial class PostController : Controller
 		}
 	}
 
-	[HttpPost("{id}/Comment")]
+	[HttpPost("{id}/comment")]
 	[SwaggerOperation("Add a comment to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(CommentDto), StatusCodes.Status201Created)]
@@ -137,7 +151,7 @@ public partial class PostController : Controller
 	}
 
 	//KL Done
-	[HttpPost("{id}/VotePositive")]
+	[HttpPost("{id}/vote-positive")]
 	[SwaggerOperation("Add a Positive vote to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -170,7 +184,7 @@ public partial class PostController : Controller
 	}
 
 	//KL Done
-	[HttpPost("{id}/VoteNegative")]
+	[HttpPost("{id}/vote-negative")]
 	[SwaggerOperation("Add a Negative vote to the post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -203,7 +217,7 @@ public partial class PostController : Controller
 	}
 
 	//KL Done, PN exposed
-	[HttpGet("{id}/Vote")]
+	[HttpGet("{id}/vote")]
 	[SwaggerOperation("Get user Vote status on Post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(VoteDto), StatusCodes.Status200OK)]
@@ -228,24 +242,21 @@ public partial class PostController : Controller
 
 
 	//ToDo: implement CustomCategory checking (allow it only if Category.id/Name == inne)
-	[HttpPost("Danger")]
+	[HttpPost("danger")]
 	[SwaggerOperation("Add a Danger post (User)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> AddDanger(AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var postI = new AddDangerInternallCommand
 		{
-			Title = newPost.Title,
-			Description = newPost.Description,
-			IdCategory = newPost.IdCategory,
-			CustomCategory = newPost.CustomCategory,
-			IdRegion = newPost.IdRegion,
+			AddPostCommand = newPost,
 			// Set user from cookie
 			IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+			ClaimsPrincipal = User,
 		};
 		try
 		{
@@ -259,24 +270,20 @@ public partial class PostController : Controller
 	}
 
 	//ToDo: implement CustomCategory checking (allow it only if Category.id/Name == inne)
-	[HttpPost("Resource")]
+	[HttpPost("resource")]
 	[SwaggerOperation("Add a Resource post (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> AddResource(AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var postI = new AddResourceInternallCommand
 		{
-			Title = newPost.Title,
-			Description = newPost.Description,
-			IdCategory = newPost.IdCategory,
-			CustomCategory = newPost.CustomCategory,
-			IdRegion = newPost.IdRegion,
+			AddPostCommand = newPost,
 			// Set user from cookie
 			IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+			ClaimsPrincipal = User,
 		};
 		try
 		{
@@ -289,15 +296,14 @@ public partial class PostController : Controller
 		}
 	}
 
-	[HttpPost("{id}/Attachment")]
+	[HttpPost("{id}/attachment")]
 	[SwaggerOperation("Add Attachments to post (Owner of the post)(max 50 MiB request)")]
 	[Authorize(UserRoles.User)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(AddAttachmentsResult), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-	[RequestFormLimits(MultipartBodyLengthLimit = 52428800)] //up to 50 MB
-	[RequestSizeLimit(52428800)] //up to 50 MB
+	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
+	[RequestSizeLimit(50 << 20)] //up to 50 MB
 	public async Task<IActionResult> AddAttachment(string id, [FromForm] AddAttachments attachments, CancellationToken CT)
 	{
 		var req = new AddAttachmentsInternal
@@ -310,7 +316,7 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(req, CT);
-			return StatusCode((int)res.StatusCode, res);
+			return StatusCode((int)res.StatusCodeEnum, res);
 		}
 		catch (BaseException ex)
 		{
@@ -322,12 +328,11 @@ public partial class PostController : Controller
 	//the only thing is to mark it not Active (Mod only)
 
 
-	[HttpPut("{id}")]
+	[HttpPut("{id}/mark-inactive")]
 	[SwaggerOperation("Mark a post as Not Active (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> MarkAsInactive(string id, CancellationToken CT)
 	{
 		var requ = new MarkPostAsInactiveCommand { PostId = id };

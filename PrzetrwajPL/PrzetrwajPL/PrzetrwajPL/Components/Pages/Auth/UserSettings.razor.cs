@@ -56,8 +56,6 @@ public partial class UserSettings
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var getUserDetailsTask = client.GetAsync("/Account");
 			var getImpedimentsTask = client.GetAsync("/Impediments");
-			getImpedimentsTask.Start();
-			getUserDetailsTask.Start();
 
 			// in the meantime populate something from the token
 			try

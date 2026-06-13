@@ -22,7 +22,7 @@ namespace Przetrwaj.Presentation.Controllers;
 /// Do not confuse this one with 'AccountController',
 /// as this one does not return any sensitive data period.
 /// </summary>
-[Route("[controller]")]
+[Route("[controller]s")]
 [ApiController]
 [Produces("application/json")]
 public class UserController : Controller
@@ -55,7 +55,7 @@ public class UserController : Controller
 	}
 
 
-	[HttpGet("{id}/Posts")]
+	[HttpGet("{id}/posts")]
 	[SwaggerOperation("Get all posts made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -73,7 +73,7 @@ public class UserController : Controller
 		}
 	}
 
-	[HttpGet("WIP/{id}/Comments")]
+	[HttpGet("WIP/{id}/comments")]
 	[SwaggerOperation("Get all comments made by user id")]
 	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
@@ -83,7 +83,7 @@ public class UserController : Controller
 	}
 
 
-	[HttpPost("MakeModerator")]
+	[HttpPost("make-moderator")]
 	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
@@ -102,9 +102,53 @@ public class UserController : Controller
 		}
 	}
 
-	[HttpGet("ModeratorPending")]
-	[SwaggerOperation("Gets users with Moderator Pending status (Admin)")]
+	[HttpPost("deny-moderator")]
+	[SwaggerOperation("Deny Moderator role to user by Id or Email (Admin)")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> DenyModeratorRole(DenyModeratorCommand userInfo, CancellationToken cancellationToken)
+	{
+		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+		try
+		{
+			var res = await _mediator.Send(userInfo, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
+	}
+
+	[HttpPost("make-admin")]
+	[SwaggerOperation("Grant Admin role to user by Id or Email (Admin)")]
 	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> AssignAdminRole(MakeAdminCommand request, CancellationToken cancellationToken)
+	{
+		if (!ModelState.IsValid) return BadRequest(IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" }));
+		try
+		{
+			var internallReq = new MakeAdminInternallCommand
+			{
+				Id = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+				Password = request.Password,
+				UserIdOrEmail = request.UserIdOrEmail,
+			};
+			var res = await _mediator.Send(internallReq, cancellationToken);
+			return Ok(res);
+		}
+		catch (BaseException ex)
+		{
+			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+		}
+	}
+
+	[HttpGet("pending-moderators")]
+	[SwaggerOperation("Gets users with Moderator Pending status (Admin)")]
+	[ProducesResponseType(typeof(IEnumerable<ModeratorPendingStatus>), StatusCodes.Status200OK)]
 	public async Task<IActionResult> GetModeratorPending(CancellationToken cancellationToken)
 	{
 		try
@@ -119,13 +163,13 @@ public class UserController : Controller
 	}
 
 
-	[HttpPost("Ban")]
+	[HttpPost("ban")]
 	[Authorize(UserRoles.Moderator)]
 	[SwaggerOperation("Ban a User by Id or Email (Moderator, Admin)")]
 	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
 	public async Task<IActionResult> Ban(BanUserCommand banUserCommand, CancellationToken cancellationToken)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);

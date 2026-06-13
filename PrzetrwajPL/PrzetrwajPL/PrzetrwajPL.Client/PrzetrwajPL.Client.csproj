@@ -17,4 +17,8 @@
     <ProjectReference Include="..\Przetrwaj.CommonLibrary\Przetrwaj.CommonLibrary.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\" />
+  </ItemGroup>
+
 </Project>

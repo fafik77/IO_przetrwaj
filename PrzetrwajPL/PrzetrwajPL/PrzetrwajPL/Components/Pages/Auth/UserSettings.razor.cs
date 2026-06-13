@@ -19,7 +19,6 @@ public partial class UserSettings
 	public string? Success { get; set; }
 
 	private UpdateAccountCommand UserUpdateRequest { get; set; } = new UpdateAccountCommand();
-	private string RegionName { get; set; } = "";
 	private bool isLoading = false;
 	private string errorMessage = string.Empty;
 	private string successMessage = string.Empty;
@@ -105,7 +104,7 @@ public partial class UserSettings
 			}
 			else
 			{
-				errorMessage = "Nie uda³o siê pobraæ danych u¿ytkownika.";
+				errorMessage = "Nie udaÂ³o siÃª pobraÃ¦ danych uÂ¿ytkownika.";
 			}
 
 			oldEmail = UserUpdateRequest.Email;
@@ -113,7 +112,7 @@ public partial class UserSettings
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B³¹d podczas pobierania danych: {ex.Message}";
+			errorMessage = $"BÂ³Â¹d podczas pobierania danych: {ex.Message}";
 		}
 		finally
 		{
@@ -123,7 +122,7 @@ public partial class UserSettings
 
 	private async Task HandleInvalid()
 	{
-		errorMessage = "W formularzu znajduj¹ siê niepoprawne danê!";
+		errorMessage = "W formularzu znajdujÂ¹ siÃª niepoprawne danÃª!";
 		return;
 	}
 
@@ -186,7 +185,7 @@ public partial class UserSettings
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B³¹d po³¹czenia: {ex.Message}";
+			errorMessage = $"BÂ³Â¹d poÂ³Â¹czenia: {ex.Message}";
 		}
 		finally
 		{
@@ -197,7 +196,7 @@ public partial class UserSettings
 	private async Task ConfirmAndLogoutAll()
 	{
 		// localized Yes/No = Tak/Nie
-		bool isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz wylogowaæ wszystkie aktywne sesje na innych urz¹dzeniach?");
+		bool isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz wylogowaÃ¦ wszystkie aktywne sesje na urzÂ¹dzeniach?");
 
 		if (isConfirmed)
 		{

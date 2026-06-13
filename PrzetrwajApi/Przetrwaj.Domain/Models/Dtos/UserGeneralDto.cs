@@ -12,15 +12,14 @@ public class UserGeneralDto
 	public DateTimeOffset? BanDate { get; set; }
 
 
-	public static explicit operator UserGeneralDto?(AppUser? registeredUser)
+	public static UserGeneralDto? Map(AppUser? registeredUser)
 	{
 		return registeredUser is null ? null : new UserGeneralDto
 		{
 			Id = registeredUser.Id,
 			Name = registeredUser.Name ?? "",
-			//Role = string.Join(", ", registeredUser.clai.ToList()),
 			Surname = registeredUser.Surname ?? "",
-			Region = (RegionOnlyDto?)registeredUser.IdRegionNavigation,
+			Region = RegionOnlyDto.Map(registeredUser.RegionNavigation),
 			RegistrationDate = registeredUser.RegistrationDate,
 			BanDate = registeredUser.BanDate,
 		};

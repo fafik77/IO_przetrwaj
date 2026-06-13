@@ -27,11 +27,11 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
 			_validators.Select(v => v.ValidateAsync(context, cancellationToken)));
 
 		var failures = validationResults
-			.Where(r => r.Errors.Any())
+			.Where(r => r.Errors.Count != 0)
 			.SelectMany(r => r.Errors)
 			.ToList();
 
-		if (failures.Any())
+		if (failures.Count != 0)
 		{
 			// You should implement a custom exception here (e.g., ValidationException)
 			// that your API layer can catch and map to a 400 Bad Request response.

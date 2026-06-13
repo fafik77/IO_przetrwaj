@@ -2,22 +2,36 @@
 
 namespace Przetrwaj.Domain.Models.Dtos;
 
-public class RegionOnlyDto
+public record RegionOnlyDto
 {
-	public int IdRegion { get; set; }
+	public int Id { get; set; }
 	public required string Name { get; set; }
-	public double Lat { get; set; }
-	public double Long { get; set; }
+	public int ParentId { get; set; }
 
-
-	public static explicit operator RegionOnlyDto?(Region region)
+	public static RegionOnlyDto? Map(IRegionInfo? region)
 	{
 		return region is null ? null : new RegionOnlyDto
 		{
-			IdRegion = region.IdRegion,
+			Id = region.Id,
 			Name = region.Name,
-			Lat = region.Lat,
-			Long = region.Long,
+			ParentId = region.ParentId ?? 0
+		};
+	}
+}
+
+public record RegionOnlyWithinDto : RegionOnlyDto
+{
+	public string? In { get; set; }
+	public RegionPrecision Type { get; set; }
+
+	public static RegionOnlyWithinDto? Map(IRegionInfo? region)
+	{
+		return region is null ? null : new RegionOnlyWithinDto
+		{
+			Id = region.Id,
+			Name = region.Name,
+			Type = region.Type,
+			ParentId = region.ParentId ?? 0
 		};
 	}
 }

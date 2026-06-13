@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos.Posts;
@@ -14,16 +15,19 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	public DbSet<Region> Regions { get; set; }
 	public DbSet<UserComment> Comments { get; set; }
 	public DbSet<Vote> Votes { get; set; }
+	public DbSet<Impediment> Impediments { get; set; }
+	public DbSet<UserJwtRefresh> UserJwtRefresh { get; set; }
+	public static readonly string przetrwajSchema = "przetrwaj";
 
 	#region Views and TPH mappings
 	/// <summary>
 	/// Returns only Active Danger Posts
 	/// </summary>
-	public IQueryable<Post> PostsDangerRO => Posts.AsNoTracking().Where(p => p.Active == true && p.Category == CategoryType.Danger);
+	public IQueryable<Post> PostsDangerRO => Posts.AsNoTracking().Where(p => p.Active == true && p.CategoryType == CategoryType.Danger);
 	/// <summary>
 	/// Returns only Active Resource Posts
 	/// </summary>
-	public IQueryable<Post> PostsResourcesRO => Posts.AsNoTracking().Where(p => p.Active == true && p.Category == CategoryType.Resource);
+	public IQueryable<Post> PostsResourcesRO => Posts.AsNoTracking().Where(p => p.Active == true && p.CategoryType == CategoryType.Resource);
 	public DbSet<PostMinimalCategoryRegion> PostMinimalViews { get; set; }
 	#endregion
 
@@ -36,20 +40,29 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 	{
 		// MUST call the base method first to configure Identity tables
 		base.OnModelCreating(builder);
-		builder.HasDefaultSchema("przetrwaj");
+		builder.HasDefaultSchema(przetrwajSchema);
+		builder.Entity<UserJwtRefresh>().ToTable(nameof(UserJwtRefresh), "auth");
 
 		// --- 1. Category Inheritance (TPH) Configuration ---
 		builder.Entity<Category>()
-			.HasDiscriminator<CategoryType>("Type")
+			.HasDiscriminator<CategoryType>(Category.Type_)
 			.HasValue<CategoryResource>(CategoryType.Resource)
 			.HasValue<CategoryDanger>(CategoryType.Danger);
+
+
+		// --- 1. Region___ Entity Configuration ---
+		builder.Entity<Region>()
+			.HasDiscriminator<RegionPrecision>(Region.Type_)
+			.HasValue<RegionWoj>(RegionPrecision.WOJ)
+			.HasValue<RegionPow>(RegionPrecision.POW)
+			.HasValue<RegionGmi>(RegionPrecision.GMI);
 
 		builder.Entity<PostMinimalCategoryRegion>(entity =>
 		{
 			entity.HasNoKey(); // Views usually don't have a PK in EF context
-			entity.ToView("View_PostMinimal", "przetrwaj");
-			// Match the property names if they differ from SQL columns
-			entity.Property(v => v.IdPost).HasColumnName("IdPost");
+			entity.ToView("View_PostMinimal", przetrwajSchema);
+			// Match the property names if they differ from SQL columns. Like:
+			//entity.Property(v => v.IdPost).HasColumnName("IdPost");
 		});
 
 		// --- 2. Vote Entity Configuration ---
@@ -76,7 +89,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.OnDelete(DeleteBehavior.Restrict);
 
 
-		// --- 3. UserComment Entity Configuration ---
+		// --- 2. UserComment Entity Configuration ---
 
 		// Relationship: Post (Principal) -> UserComment (Dependent)
 		builder.Entity<UserComment>()
@@ -93,8 +106,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 													// Prevent deleting a User from automatically deleting their Comments
 			.OnDelete(DeleteBehavior.Restrict);
 
-
-		// --- 4. Post Entity Configuration ---
+		// --- 2. Post Entity Configuration ---
 
 		// Relationship: AppUser (Principal) -> Post (Dependent)
 		builder.Entity<Post>()
@@ -110,40 +122,84 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 			.HasForeignKey(p => p.IdCategory)       // Foreign Key is IdCategory (int) in Post
 			.OnDelete(DeleteBehavior.Restrict);
 
-		// Relationship: Region (Principal) -> Post (Dependent)
+		// Relationship: Region___ (Principal) -> Post (Dependent)
 		builder.Entity<Post>()
-			.HasOne(p => p.IdRegionNavigation)      // Post has one Region
+			.HasOne(p => p.RegionNavigation)     // Post has one Region
 			.WithMany(r => r.Posts)                 // Region has many Posts
-			.HasForeignKey(p => p.IdRegion)         // Foreign Key is IdRegion (int) in Post
+			.HasForeignKey(p => p.IdRegion)        // Foreign Key is IdWojOnly (short?) in Post
 			.OnDelete(DeleteBehavior.Restrict);
 
 		builder.Entity<Post>()
-			.Property(p => p.Category)
+			.Property(p => p.CategoryType)
 			.IsRequired();
 
 		// Add a composite index for Category and Active status (used for: PostsDangerROm, PostsResourcesRO, Statistics)
 		builder.Entity<Post>()
-			.HasIndex(p => new { p.Category, p.Active })    // 2 * 2 = only 4 branching paths (Da, Dn, Ra, Rn)
+			.HasIndex(p => new { p.CategoryType, p.Active })    // 2 * 2 = only 4 branching paths (Da, Dn, Ra, Rn)
 			.HasDatabaseName("IX_Post_Category_Active");
 
 
-		// --- 5. Attachment Entity Configuration ---
+		// --- 2. Attachment Entity Configuration ---
 
 		// Relationship: Post (Principal) -> Attachment (Dependent)
 		builder.Entity<Attachment>()
 			.HasOne(a => a.IdPostNavigation)        // Attachment has one Post
 			.WithMany(p => p.Attachments)           // Post has many Attachments
 			.HasForeignKey(a => a.IdPost)           // Foreign Key is IdPost in Attachment
-			.OnDelete(DeleteBehavior.Cascade);      // If a Post is deleted, its Attachments are deleted
+			.OnDelete(DeleteBehavior.SetNull);      // If a Post is deleted, its Attachments are invalidated (to clean up)
 
 
-		// --- 6. AppUser Entity Configuration ---
+		// --- 2. AppUser Entity Configuration ---
 
-		// Relationship: Region (Principal) -> AppUser (Dependent)
+		// Relationship: Region___ (Principal) -> AppUser (Dependent)
 		builder.Entity<AppUser>()
-			.HasOne(u => u.IdRegionNavigation)      // AppUser has one Region
-			.WithMany(r => r.Users)                 // Region has many Users
-			.HasForeignKey(u => u.IdRegion)         // Foreign Key is IdRegion in AppUser
-			.OnDelete(DeleteBehavior.Restrict);     // Prevent deleting a Region if users are linked
+			.HasOne(u => u.RegionNavigation)     // AppUser has one Region
+			.WithMany()
+			.HasForeignKey(u => u.GminaId)          // Foreign Key is PowiatId in AppUser
+			.OnDelete(DeleteBehavior.SetNull);      // Prevent deleting a Region if users are linked
+
+
+		// --- 2. UserJwtRefresh Entity Configuration ---
+
+		builder.Entity<UserJwtRefresh>()
+			.HasKey(k => new { k.UserId, k.Jwi });
+
+		// one AppUser has many UserJwtRefresh
+		builder.Entity<UserJwtRefresh>().HasOne<AppUser>()  // UserJwtRefresh has one AppUser
+			.WithMany()                                     // AppUser has many UserJwtRefresh
+			.HasForeignKey(e => e.UserId)                   // FK is UserId in UserJwtRefresh
+			.OnDelete(DeleteBehavior.Cascade);              // Delete all users tokens when the user is deleted
+
+		// --- default data ---
+		builder.Entity<AppUser>()
+			.Property(user => user.Impediments)
+			.HasDefaultValue(0);
+
+		// --- 3. Seed data ---
+		builder.Entity<IdentityRole>().HasData(
+			new IdentityRole
+			{
+				Id = "c395bc61-a75a-44ea-a8b6-d136bb4e032e",
+				Name = "User",
+				NormalizedName = "USER"
+			},
+			new IdentityRole
+			{
+				Id = "aabf5428-e94c-418a-939a-8004bd1fe63c",
+				Name = "Moderator",
+				NormalizedName = "MODERATOR"
+			},
+			new IdentityRole
+			{
+				Id = "8411b424-3e32-4ea3-8dbc-b5d786b62e40",
+				Name = "Admin",
+				NormalizedName = "ADMIN"
+			}
+		);
+
+		builder.Entity<RegionWoj>().HasData(
+			new RegionWoj { Id = 0, Name = "Polska" }
+		);
+
 	}
 }

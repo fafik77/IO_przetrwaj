@@ -1,12 +1,15 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos.Posts;
+using System.Security.Claims;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class AddDangerInternallCommand : AddPostCommand, ICommand<PostCompleteDataDto>
+public record AddDangerInternallCommand : ICommand<PostCompleteDataDto>
 {
+	public required AddPostCommand AddPostCommand { get; set; }
 	public CategoryType Category { get; set; } = CategoryType.Danger;
 	public required string IdAutor { get; set; }
+	public required ClaimsPrincipal ClaimsPrincipal { get; set; }
 }
 

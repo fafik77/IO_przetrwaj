@@ -8,6 +8,7 @@ using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Exceptions.Users;
+using Przetrwaj.Domain.Helpers;
 using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 
@@ -22,8 +23,9 @@ public class AuthService : IAuthService
 	private readonly IUrlHelper _urlHelper;
 	private readonly IHttpContextAccessor _httpContextAccessor;
 	private readonly FrontEndSettings _frontEndSettings;
+	private readonly IRegionRepository _regionRepository;
 
-	public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IOptions<FrontEndSettings> frontEndSettings)
+	public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IOptions<FrontEndSettings> frontEndSettings, IRegionRepository regionRepository)
 	{
 		_userManager = userManager;
 		_signInManager = signInManager;
@@ -32,6 +34,7 @@ public class AuthService : IAuthService
 		_httpContextAccessor = httpContextAccessor;
 		_userRepository = userRepository;
 		_frontEndSettings = frontEndSettings.Value;
+		_regionRepository = regionRepository;
 	}
 
 
@@ -48,23 +51,23 @@ public class AuthService : IAuthService
 		throw new InvalidConfirmationException("Email confirmation failed.");
 	}
 
-	public async Task GenerateChangeEmailTokenAsync(AppUser user, string newEmail)
+	public async Task GenerateChangeEmailTokenAsync(AppUser user, string newEmail, string? returnUrl)
 	{
 		// 1. Generate the Code
 		var ChangeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
 		ConfirmEmailChangeInfo values = new() { UserId = user.Id, Code = ChangeEmailToken, NewEmail = newEmail };
-		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmailChange", values);
+		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "confirm-email-change", values, returnUrl);
 		// send the email
 		await _emailSender.SendEmailAsync(newEmail, subject: "Potwierdź zmianę adresu e-mail - Przetrwaj.pl",
 		$@"<h2>Witaj {user.Name}!</h2>
-        <p>Otrzymaliśmy prośbę o zmianę adresu e-mail na: <strong>{newEmail}</strong>.</p>
-        <div style='margin: 30px 0;'>
-            <a href='{absoluteUrlString}' 
-               style='background-color: #007bff; color: white; padding: 15px 25px; text-decoration: none; font-size: 18px; border-radius: 5px; display: inline-block;'>
-               Potwierdź zmianę e-maila
-            </a>
-        </div>
-        <p>Dopóki nie klikniesz w przycisk, Twój obecny adres pozostanie aktywny.</p>");
+		<p>Otrzymaliśmy prośbę o zmianę adresu e-mail na: <strong>{newEmail}</strong>.</p>
+		<div style='margin: 30px 0;'>
+			<a href='{absoluteUrlString}' 
+			   style='background-color: #007bff; color: white; padding: 15px 25px; text-decoration: none; font-size: 18px; border-radius: 5px; display: inline-block;'>
+			   Potwierdź zmianę e-maila
+			</a>
+		</div>
+		<p>Dopóki nie klikniesz w przycisk, Twój obecny adres pozostanie aktywny.</p>");
 	}
 
 	public async Task<AppUser> GetUserDetailsAsync(string userIdEmail)
@@ -91,12 +94,12 @@ public class AuthService : IAuthService
 		if (false == await _userManager.CheckPasswordAsync(user, password))
 			throw new InvalidLoginException("Bad login attempt");
 
-		if (user.Banned || user.BanDate != null)    //user is banned
+		if (user.BanDate != null)    //user is banned
 		{
-			var bannedBy = await _userRepository.GetByIdAsync(user.BannedById!);
-			var dto = (UserWithPersonalDataDto)user;
-			dto.BannedBy = (UserGeneralDto?)bannedBy!;
-			throw new UserBannedException("User is banned", dto);
+			var bannedBy = await _userRepository.GetByIdAsync(user.BannedById ?? string.Empty);
+			UserWithPersonalDataDto dto = (UserWithPersonalDataDto)user;
+			if (dto.BanInfo != null) dto.BanInfo.BannedBy = UserGeneralDto.Map(bannedBy);
+			throw new UserBannedException("User is banned", dto.BanInfo!);
 		}
 		var signedIn = await _signInManager.PasswordSignInAsync(user, password, true, true);
 		if (signedIn.Succeeded)
@@ -104,15 +107,17 @@ public class AuthService : IAuthService
 		throw new InvalidLoginException("Bad login attempt");
 	}
 
-	public async Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register)
+	public async Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register, string? returnUrl)
 	{
+		var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(register.IdRegion);
+		var GmiExists = await _regionRepository.GetByIdAsync(Gmi);
 		var user = new AppUser
 		{
 			Email = register.Email,
 			Name = register.Name,
 			Surname = register.Surname,
 			UserName = register.Email, // Typically, UserName is set to the email for login (its enforced unique)
-			IdRegion = register.IdRegion ?? 0,
+			GminaId = GmiExists is null ? null : Gmi,
 			RegistrationDate = DateTimeOffset.UtcNow,
 			ModeratorRolePending = register.ModeratorRole,
 		};
@@ -132,59 +137,65 @@ public class AuthService : IAuthService
 		// 1. Generate the Code
 		var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 		ConfirmEmailInfo values = new() { UserId = user.Id, Code = code };
-		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "ConfirmEmail", values);
+		string absoluteUrlString = GenerateEmailConfirmationUrl(action: "confirm-email", values, returnUrl);
 		// send the email
 		await _emailSender.SendEmailAsync(register.Email, subject: "Potwierdź swój adres e-mail. Przetrwaj.pl",
 			$"<h2>{register.Name} witaj w serwisie Przetrwaj.pl</h2><br>" +
 			$@"<p>Potwierdź swoje konto, klikając w poniższy przycisk:</p>
 <div style='text-align: center; margin: 30px 0;'>
-    <a href='{absoluteUrlString}' 
-       style='background-color: #28a745; 
-              color: white; 
-              padding: 15px 25px; 
-              text-decoration: none; 
-              font-size: 18px; 
-              font-weight: bold; 
-              border-radius: 5px; 
-              display: inline-block;'>
-        Potwierdź konto
-    </a>
+	<a href='{absoluteUrlString}' 
+	   style='background-color: #28a745; 
+			  color: white; 
+			  padding: 15px 25px; 
+			  text-decoration: none; 
+			  font-size: 18px; 
+			  font-weight: bold; 
+			  border-radius: 5px; 
+			  display: inline-block;'>
+		Potwierdź konto
+	</a>
 </div>" +
 			$"<br><br><p style='color: gray; font-size: 12px;'>Ten email został wysłany automatycznie z serwisu <a href='{_frontEndSettings.Url}'>Przetrwaj.pl</a> prosimy na niego nie odpowiadać.</p>");
 
 		return user;
 	}
 
-	private string GenerateEmailConfirmationUrl(string action, ConfirmEmailInfo values)
+	// Helper to prevent Open Redirect attacks
+	private bool IsUrlSafe(string url)
 	{
-		if (!string.IsNullOrEmpty(_frontEndSettings.Url))
+		// Check if it starts with front-end domain or is a local path
+		return url.StartsWith(_frontEndSettings.Url) || url.StartsWith("https://localhost:");
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="action">the action path in AccountController (not the method name!)</param>
+	/// <param name="values"></param>
+	/// <param name="returnUrl">if present and safe it will link to it</param>
+	/// <returns>URL with encoded query params</returns>
+	/// <exception cref="InvalidConfirmationException"></exception>
+	private string GenerateEmailConfirmationUrl(string action, ConfirmEmailInfo values, string? returnUrl)
+	{
+		if (string.IsNullOrEmpty(returnUrl) || !IsUrlSafe(returnUrl))
+			returnUrl = _frontEndSettings.Url; // Fallback to frontEnd Url
+
+		if (string.IsNullOrEmpty(returnUrl))
 		{
-			var baseUrl = $"{_frontEndSettings.Url}/{action}";
-			var urlFront = values.ToQueryString(baseUrl);
-			return urlFront;
+			// we could not fetch any frontend Url. hadle it with backend only
+			var request = _httpContextAccessor.HttpContext?.Request;
+			var scheme = request?.Scheme;
+			var host = request?.Host.Value;
+			// the absolute URL string
+			// e.g., "https://" +("localhost:5001" or "api.example.com")
+			returnUrl = $"{scheme}://{host}";
+			if (!returnUrl.EndsWith('/')) returnUrl += "/";
+			returnUrl += "Account"; //the path to AccountController
 		}
-		// 2. Generate the relative URL path using IUrlHelper.Action()
-		// This is equivalent to your old 'Url.Action' call
-		var relativeUrl = _urlHelper.Action(
-			action: action,
-			controller: "Account",
-			values: values);
-		// Check if relativeUrl is null (route not found)
-		if (string.IsNullOrEmpty(relativeUrl))
-		{   //Email confirmation related errors
-			throw new InvalidConfirmationException("Could not generate confirmation URL.");
-		}
-		// 3. Get the request scheme and host from HttpContext
-		var request = _httpContextAccessor.HttpContext?.Request;
-		if (request == null)
-		{   //Email confirmation related errors
-			throw new InvalidConfirmationException("Cannot access HTTP context to build URL.");
-		}
-		var scheme = request.Scheme;
-		var host = request.Host.Value;
-		// 4. Construct the absolute URL string
-		// e.g., "localhost:5001" or "api.example.com"
-		var absoluteUrlString = $"{scheme}://{host}{relativeUrl}";
-		return absoluteUrlString;
+
+		if (!returnUrl.EndsWith('/')) returnUrl += "/";
+		var baseUrl = returnUrl + action;
+
+		return values.ToQueryString(baseUrl);
 	}
 }

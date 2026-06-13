@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Categories.Resources;
@@ -19,7 +20,14 @@ public class CreateResourceCategoryCommandHandler : ICommandHandler<CreateResour
 	{
 		var category = (CategoryResource)request;
 		await _repo.AddAsync(category, ct);
-		await _uow.SaveChangesAsync(ct);    //this could throw
+		try
+		{
+			await _uow.SaveChangesAsync(ct);    //this could throw
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		return (CategoryDto)category!;
 	}
 }

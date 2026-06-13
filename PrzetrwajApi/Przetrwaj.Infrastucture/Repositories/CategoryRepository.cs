@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture.Context;
+using System.Collections.Frozen;
 
 namespace Przetrwaj.Infrastucture.Repositories;
 
@@ -11,7 +12,7 @@ public class CategoryRepository : ICategoryRepository
 {
 	private readonly ApplicationDbContext _db;
 	private readonly IAppCache _cache;
-	private const string CategoryCacheKey = "Categories";
+	private readonly string CategoryCacheKey = "Categories";
 	private readonly TimeSpan _cacheDuration = TimeSpan.FromHours(24);
 
 	public CategoryRepository(ApplicationDbContext db, IAppCache cache)
@@ -20,40 +21,50 @@ public class CategoryRepository : ICategoryRepository
 		_cache = cache;
 	}
 
+	private class CategoriesMaped
+	{
+		public FrozenDictionary<int, CategoryDanger> Dangers { get; set; } = FrozenDictionary<int, CategoryDanger>.Empty;
+		public FrozenDictionary<int, CategoryResource> Resources { get; set; } = FrozenDictionary<int, CategoryResource>.Empty;
+	}
+
 	// Helper to get the master list
-	private async Task<IEnumerable<Category>> GetAllInternalAsync(CancellationToken ct)
+	private async Task<CategoriesMaped> GetAllInternalAsync(CancellationToken ct)
 	{
 		return await _cache.GetOrAddAsync(CategoryCacheKey, async entry =>
 		{
 			entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
 			// Fetching the base type gets all derived types (TPH)
-			return await _db.Categories.AsNoTracking().ToListAsync(ct);
+			var res = await _db.Categories.AsNoTracking().ToListAsync(ct);
+			return new CategoriesMaped
+			{
+				Dangers = res.OfType<CategoryDanger>().ToFrozenDictionary(e => e.IdCategory),
+				Resources = res.OfType<CategoryResource>().ToFrozenDictionary(e => e.IdCategory),
+			};
 		});
 	}
 
 	public async Task<IEnumerable<CategoryDanger>> GetDangersAsync(CancellationToken ct)
 	{
-		var all = await GetAllInternalAsync(ct);
-		// OfType filters and casts the objects in-memory
-		return all.OfType<CategoryDanger>();
+		var CategoriesMaped = await GetAllInternalAsync(ct);
+		return CategoriesMaped.Dangers.Select(e => e.Value);
 	}
 
 	public async Task<IEnumerable<CategoryResource>> GetResourcesAsync(CancellationToken ct)
 	{
-		var all = await GetAllInternalAsync(ct);
-		return all.OfType<CategoryResource>();
+		var CategoriesMaped = await GetAllInternalAsync(ct);
+		return CategoriesMaped.Resources.Select(e => e.Value);
 	}
 
 	public async Task<CategoryDanger?> GetDangerByIdAsync(int id, CancellationToken ct)
 	{
-		var list = await GetDangersAsync(ct);
-		return list.FirstOrDefault(c => c.IdCategory == id);
+		var CategoriesMaped = await GetAllInternalAsync(ct);
+		return CategoriesMaped.Dangers.GetValueOrDefault(id);
 	}
 
 	public async Task<CategoryResource?> GetResourceByIdAsync(int id, CancellationToken ct)
 	{
-		var list = await GetResourcesAsync(ct);
-		return list.FirstOrDefault(c => c.IdCategory == id);
+		var CategoriesMaped = await GetAllInternalAsync(ct);
+		return CategoriesMaped.Resources.GetValueOrDefault(id);
 	}
 
 

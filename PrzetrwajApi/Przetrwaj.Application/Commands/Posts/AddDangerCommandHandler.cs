@@ -1,4 +1,5 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
+using Przetrwaj.Application.Services;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos.Posts;
@@ -7,30 +8,25 @@ namespace Przetrwaj.Application.Commands.Posts;
 
 public class AddDangerCommandHandler : ICommandHandler<AddDangerInternallCommand, PostCompleteDataDto>
 {
-	private readonly IPostRepository _postRepository;
-	private readonly IUnitOfWork _unitOfWork;
+	private readonly ICategoryRepository _categoryRepository;
+	private readonly IAddPostService _addPostService;
 
-	public AddDangerCommandHandler(IPostRepository postRepository, IUnitOfWork unitOfWork)
+	public AddDangerCommandHandler(ICategoryRepository categoryRepository, IAddPostService addPostService)
 	{
-		_postRepository = postRepository;
-		_unitOfWork = unitOfWork;
+		_categoryRepository = categoryRepository;
+		_addPostService = addPostService;
 	}
-
 
 	public async Task<PostCompleteDataDto> Handle(AddDangerInternallCommand request, CancellationToken cancellationToken)
 	{
+		var categories = await _categoryRepository.GetDangersAsync(cancellationToken);
 		var post = new Post
 		{
-			Description = request.Description ?? string.Empty,
+			Description = request.AddPostCommand.Description ?? string.Empty,
 			IdAutor = request.IdAutor,
-			Title = request.Title,
-			Category = request.Category,
-			IdRegion = request.IdRegion,
-			CustomCategory = request.CustomCategory ?? string.Empty,
-			IdCategory = request.IdCategory,
+			Title = request.AddPostCommand.Title,
+			CategoryType = request.Category
 		};
-		await _postRepository.AddAsync(post, cancellationToken);
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
-		return (PostCompleteDataDto)post!;
+		return await _addPostService.FillPostFromDataAndAddAsync(post, request.AddPostCommand, categories, request.ClaimsPrincipal, cancellationToken);
 	}
 }

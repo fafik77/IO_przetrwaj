@@ -31,22 +31,14 @@ public class PostArchivingService : BackgroundService
 		}
 	}
 
-	private async Task MarkPostsAsInactive(CancellationToken cancellationToken)
+	private async Task MarkPostsAsInactive(CancellationToken ct)
 	{
 		using var scope = _services.CreateScope();
 		var postRepository = scope.ServiceProvider.GetRequiredService<IPostRepository>();
-		var posts = await postRepository.GetAllWithVotesStatusROAsync(cancellationToken);
+		///change this method to return list<post ids> of inactive Posts
+		var postsArchived = await postRepository.ArchiveInactivePostsAsync(ct);
 
-		var idsToDeactivate = posts
-			.Where(p => p.VoteNegative > p.VotePositive)
-			.Select(p => p.Id)
-			.ToList();
-		foreach (var chunk in idsToDeactivate.Chunk(1000))
-		{
-			//Perform ONE atomic database update for a chunk of identified posts
-			await postRepository.SetInactiveBulkAsync(chunk, cancellationToken);
-		}
-		if (idsToDeactivate.Count != 0)
-			_logger.LogInformation("Archived {Count} posts.", idsToDeactivate.Count);
+		if (postsArchived != 0)
+			_logger.LogInformation("Archived {postsArchived} posts.", postsArchived);
 	}
 }

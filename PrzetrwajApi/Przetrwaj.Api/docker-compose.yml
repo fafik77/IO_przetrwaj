@@ -1,0 +1,18 @@
+services:
+  db_postgis:
+    image: postgis/postgis:17-3.6-alpine
+    container_name: przetrwaj_db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT_EXTERNAL}:5432"
+    volumes:
+      - przetrwaj_db_data:/var/lib/postgresql/data
+
+volumes:
+  przetrwaj_db_data:

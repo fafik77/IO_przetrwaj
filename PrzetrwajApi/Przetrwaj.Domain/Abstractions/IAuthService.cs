@@ -5,9 +5,9 @@ namespace Przetrwaj.Domain.Abstractions;
 
 public interface IAuthService
 {
-	Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register);
+	Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register, string? returnUrl);
 	Task<AppUser> LoginUserByEmailAsync(string email, string password);
 	Task<AppUser> ConfirmEmailAsync(string userId, string code);
 	Task<AppUser> GetUserDetailsAsync(string userIdEmail);
-	Task GenerateChangeEmailTokenAsync(AppUser user, string newEmail);
+	Task GenerateChangeEmailTokenAsync(AppUser user, string newEmail, string? returnUrl);
 }

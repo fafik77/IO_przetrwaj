@@ -5,31 +5,28 @@ using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Auth;
 using Przetrwaj.Domain.Models.Dtos;
 
-namespace Przetrwaj.Application.Commands.Login
+namespace Przetrwaj.Application.Commands.Login;
+
+public class LoginEmailCommandHandler : ICommandHandler<LoginEmailCommand, JwtTokenDto>
 {
-	public class LoginEmailCommandHandler : ICommandHandler<LoginEmailCommand, UserWithPersonalDataDto>
+	private readonly IAuthService _authService;
+	private readonly UserManager<AppUser> _userManager;
+	private readonly IJwtService _jwtService;
+
+	public LoginEmailCommandHandler(IAuthService authService, UserManager<AppUser> userManager, IJwtService jwtService)
 	{
-		private readonly IUserRepository _userRepository;
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IAuthService _authService;
-		private readonly UserManager<AppUser> _userManager;
+		_authService = authService;
+		_userManager = userManager;
+		_jwtService = jwtService;
+	}
 
-		public LoginEmailCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IAuthService authService, UserManager<AppUser> userManager)
-		{
-			_userRepository = userRepository;
-			_unitOfWork = unitOfWork;
-			_authService = authService;
-			_userManager = userManager;
-		}
-
-		public async Task<UserWithPersonalDataDto> Handle(LoginEmailCommand request, CancellationToken cancellationToken)
-		{
-			var registeredUser = await _authService.LoginUserByEmailAsync(request.Email, request.Password);
-			if (registeredUser == null) throw new InvalidLoginException("Could not Login");
-			var dto = (UserWithPersonalDataDto)registeredUser;
-			var roles = await _userManager.GetRolesAsync(registeredUser);
-			dto.Role = string.Join(", ", roles);
-			return dto;
-		}
+	public async Task<JwtTokenDto> Handle(LoginEmailCommand request, CancellationToken cancellationToken)
+	{
+		var registeredUser = await _authService.LoginUserByEmailAsync(request.Email, request.Password);
+		if (registeredUser == null) throw new InvalidLoginException("Could not Login");
+		var dto = (UserWithPersonalDataDto)registeredUser;
+		var roles = await _userManager.GetRolesAsync(registeredUser);
+		dto.Roles = roles;
+		return await _jwtService.GenerateTokenAsync(dto, cancellationToken);
 	}
 }

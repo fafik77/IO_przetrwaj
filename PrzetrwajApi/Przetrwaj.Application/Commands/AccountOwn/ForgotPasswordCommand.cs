@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.AccountOwn;
 
-public class ForgotPasswordCommand : ICommand<UserGeneralDto> 
+public record ForgotPasswordCommand : ICommand<UserGeneralDto> 
 {
 	[Required]
 	[EmailAddress]

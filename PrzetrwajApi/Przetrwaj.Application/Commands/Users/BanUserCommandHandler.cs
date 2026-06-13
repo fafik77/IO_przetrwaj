@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Caching.Memory;
 using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Users;
-using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Users;
@@ -36,11 +34,12 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		else //id
 			user = await _userRepository.GetByIdAsync(request.UserIdOrEmail, cancellationToken);
 		if (user is null) throw new UserNotFoundException(request.UserIdOrEmail);
-		if (user.Banned || user.BannedById != null) //user was already banned
+		if (user.BannedById != null) //user was already banned
 		{
-			AppUser? moderatorOld = await _userRepository.GetByIdAsync(user.BannedById!, cancellationToken);
+			AppUser? moderatorOld = await _userRepository.GetByIdAsync(user.BannedById ?? string.Empty, cancellationToken);
 			var dtoUserAlreadyBanned = (UserWithPersonalDataDto)user;
-			dtoUserAlreadyBanned.BannedBy = (UserGeneralDto?)moderatorOld; //add Moderator info
+			if (dtoUserAlreadyBanned.BanInfo != null)
+				dtoUserAlreadyBanned.BanInfo.BannedBy = UserGeneralDto.Map(moderatorOld); //add Moderator info
 			return dtoUserAlreadyBanned;
 		}
 		AppUser? moderator = await _userRepository.GetByIdAsync(request.ModeratorId, cancellationToken);
@@ -51,22 +50,28 @@ public class BanUserCommandHandler : ICommandHandler<BanUserInternallCommand, Us
 		if (userRoles.Contains(UserRoles.Admin) || (moderatorIsAdmin && userRoles.Contains(UserRoles.Moderator)))
 		{   //Admin can not be banned. Moderator can only be banned by Admin (authorization levels).
 			var rolesStr = string.Join(", ", userRoles);
-			throw new UnauthorizedException($"User {request.UserIdOrEmail} has roles: {rolesStr}. You {moderator.Name} {moderator.Surname} do not have permissions to ban them.");
+			throw new PermissionDeniedException($"User {request.UserIdOrEmail} has roles: {rolesStr}. You {moderator.Name} {moderator.Surname} do not have permissions to ban them.");
 		}
 
 		user.BanDate = DateTimeOffset.UtcNow;
 		user.BanReason = request.Reason;
 		user.BannedById = request.ModeratorId;
-		user.Banned = true;
 		// This is the key line to invalidate logged in user cookie or other tokens:
 		await _userManager.UpdateSecurityStampAsync(user);
-
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		// cache ban info
 		_banCache.BanUser(user.Id);
 
 		var dto = (UserWithPersonalDataDto)user;
-		dto.BannedBy = (UserGeneralDto?)moderator; //add Moderator info
+		if (dto.BanInfo != null)
+			dto.BanInfo.BannedBy = UserGeneralDto.Map(moderator); //add Moderator info
 		return dto;
 	}
 }

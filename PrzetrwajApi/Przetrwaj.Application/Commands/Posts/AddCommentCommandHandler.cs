@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Posts;
 using Przetrwaj.Domain.Models.Dtos;
 
@@ -21,7 +22,7 @@ public class AddCommentCommandHandler : ICommandHandler<AddCommentInternalComman
 
 	public async Task<CommentDto> Handle(AddCommentInternalCommand request, CancellationToken cancellationToken)
 	{
-		if (!await _postRepository.ExistsPostIdAsync(request.IdPost, cancellationToken))
+		if (!await _postRepository.ExistsActivePostIdAsync(request.IdPost, cancellationToken))
 			throw new PostNotFoundException(request.IdPost);
 		var user = await _userRepository.GetByIdAsync(request.IdAutor, cancellationToken);
 		var comment = new UserComment
@@ -31,9 +32,16 @@ public class AddCommentCommandHandler : ICommandHandler<AddCommentInternalComman
 			Comment = request.Comment,
 		};
 		var res = await _postRepository.AddCommentAsync(comment, cancellationToken);
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		var dto = (CommentDto)res;
-		dto.Autor = (UserGeneralDto?)user!;
+		dto.Autor = (UserGeneralDtoSimpleRegion?)user!;
 		return dto;
 	}
 }

@@ -197,7 +197,7 @@ public partial class UserSettings
 	private async Task ConfirmAndLogoutAll()
 	{
 		// localized Yes/No = Tak/Nie
-		bool isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz wylogowaæ wszystkie aktywne sesje na innych urz¹dzeniach?");
+		bool isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz wylogowaæ wszystkie aktywne sesje na urz¹dzeniach?");
 
 		if (isConfirmed)
 		{

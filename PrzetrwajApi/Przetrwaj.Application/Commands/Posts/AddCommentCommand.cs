@@ -2,7 +2,7 @@
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class AddCommentCommand
+public record AddCommentCommand
 {
 	[Required]
 	[MaxLength(1000)]

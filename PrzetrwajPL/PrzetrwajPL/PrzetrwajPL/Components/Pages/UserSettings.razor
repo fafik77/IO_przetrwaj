@@ -1,0 +1,198 @@
+﻿@page "/settings"
+@rendermode InteractiveServer
+
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager NavigationManager
+@using PrzetrwajPL;
+@using PrzetrwajPL.Models
+@using PrzetrwajPL.Components.Pages.Components
+@using PrzetrwajPL.Requests
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Authentication.Cookies;
+@using Microsoft.AspNetCore.Components;
+@using System.Security.Claims;
+
+<div class="container">
+	<div class="inContainer">
+		<h2 style="text-align:center; font-weight:bold;">Ustawienia użytkownika</h2>
+	<p>Tu możesz zmienić swoje ustawienia użytkownika.</p>
+	<EditForm Model="@userUpdateRequest" OnValidSubmit="HandleUpdate" FormName="updateForm">
+		<DataAnnotationsValidator />
+		@if (!string.IsNullOrEmpty(successMessage))
+		{
+			<div class="alert alert-info pre-wrap" role="alert" style="text-align:center;">
+				@successMessage
+			</div>
+		}
+		@if (!string.IsNullOrEmpty(errorMessage))
+		{
+			<div class="alert alert-danger pre-wrap" role="alert" style="color: black; text-align:center;">@errorMessage</div>
+		}
+		<label for="name">Imie:</label><br />
+			<InputText @bind-Value="userUpdateRequest.Name" id="name" placeholder="Podaj imie" class="form-control" />
+			<ValidationMessage For="@(() => userUpdateRequest.Name)" style="color:red; font-size: 12px;" /><br />
+
+		<label for="surname">Nazwisko:</label><br />
+			<InputText @bind-Value="userUpdateRequest.Surname" id="surname" placeholder="Podaj nazwisko" class="form-control" />
+			<ValidationMessage For="@(() => userUpdateRequest.Surname)" style="color:red; font-size: 12px;" /><br />
+
+		<label for="email">Email:</label><br />
+			<InputText @bind-Value="userUpdateRequest.Email" id="email" placeholder="Podaj email" class="form-control" />
+			<ValidationMessage For="@(() => userUpdateRequest.Email)" style="color:red; font-size: 12px;" /><br />
+
+		<label for="region">Twoja lokalizacja:</label><br />
+			<div class="picker-conteiner">
+				<div class="picker">
+					<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(id => userUpdateRequest.IdRegion = id)" />
+				</div>
+			</div><br />
+
+		<label for="newPassword">Nowe hasło</label>
+			<InputText type="password" @bind-Value="userUpdateRequest.NewPassword" id="newPassword" placeholder="Podaj nowe hasło" class="form-control" />
+			<ValidationMessage For="@(() => userUpdateRequest.NewPassword)" style="color:red; font-size: 12px;" /><br />
+
+		<label for="newPassword">Powtórz nowe hasło</label>
+			<InputText type="password" @bind-Value="userUpdateRequest.ConfirmPassword" id="newPasswordConfirm" placeholder="Powtórz nowe hasło" class="form-control" />
+			<ValidationMessage For="@(() => userUpdateRequest.ConfirmPassword)" style="color:red; font-size: 12px;" /><br />
+
+		<label for="oldPassword">Stare hasło</label>
+			<InputText type="password" @bind-Value="userUpdateRequest.OldPassword" id="oldPassword" placeholder="Podaj stare hasło" class="form-control" />
+			<ValidationMessage For="@(() => userUpdateRequest.OldPassword)" style="color:red; font-size: 12px;" /><br />
+
+		<button type="submit" disabled="@isLoading">
+			@if (isLoading)
+			{
+				<span>Zapisuje zmiany...</span>
+			}
+			else
+			{
+				<span>Zapisz zmiany</span>
+			}
+		</button><br /><br />
+	</EditForm>
+	</div>
+</div>
+
+
+@code {
+	// Access basic user info from the cookie claims
+	[CascadingParameter]
+	private Task<AuthenticationState> AuthStateTask { get; set; }
+	[SupplyParameterFromQuery] 
+	public string? Success { get; set; }
+
+	private UpdateAccountCommand userUpdateRequest { get; set; } = new UpdateAccountCommand();
+	private bool isLoading = false;
+	private string errorMessage = string.Empty;
+	private string successMessage = string.Empty;
+	private RegionPicker myRegionPicker;
+	private int userRegionId = -1;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await GetUserInfo();
+			StateHasChanged();
+		}
+	}
+
+	private async Task GetUserInfo()
+	{
+		isLoading = true;
+		try
+		{
+			var authState = await AuthStateTask;
+			var userPrincipal = authState.User;
+
+			if (userPrincipal.Identity is not { IsAuthenticated: true })
+			{
+				NavigationManager.NavigateTo("/login");
+				return;
+			}
+
+			try
+			{
+				var region = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
+				userUpdateRequest.Email = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+				userUpdateRequest.Name = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Name")?.Value;
+				userUpdateRequest.Surname = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Surname")?.Value;
+				if (!string.IsNullOrEmpty(region)) userUpdateRequest.IdRegion = userRegionId = int.Parse(region);
+			}
+			catch (Exception) { }
+			if (!string.IsNullOrEmpty(Success))
+			{
+				successMessage = Success;
+				await myRegionPicker.PickRegion(userRegionId);
+				return;
+			}
+			// 1. Fetch full data from API
+			var client = ClientFactory.CreateClient("ServerAPI");
+			var responseTask = client.GetAsync("/Account");
+
+			var response = await responseTask;
+			if (response.IsSuccessStatusCode)
+			{
+				var userInfo = await response.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
+				if (userInfo != null)
+				{
+					// 2. Map data to the update command
+					userUpdateRequest.Name = userInfo.Name;
+					userUpdateRequest.Surname = userInfo.Surname;
+					userUpdateRequest.Email = userInfo.Email;
+
+					// Store region ID to set the picker later
+					if (userInfo.Region != null)
+					{
+						userUpdateRequest.IdRegion = userRegionId = userInfo.Region.Id;
+					}
+				}
+			}
+			else
+			{
+				errorMessage = "Nie udało się pobrać danych użytkownika.";
+			}
+			await myRegionPicker.PickRegion(userRegionId);
+		}
+		catch (Exception ex)
+		{
+			errorMessage = $"Błąd podczas pobierania danych: {ex.Message}";
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task HandleUpdate()
+	{
+		isLoading = true;
+		errorMessage = string.Empty;
+		successMessage = string.Empty;
+
+		try
+		{
+			var client = ClientFactory.CreateClient("ServerAPI");
+			var response = await client.PutAsJsonAsync("/Account", userUpdateRequest);
+			if (response.IsSuccessStatusCode)
+			{
+				// Trigger the cookie update handshake (Force page reload to refresh cookie)
+				// We redirect to a server-side endpoint to issue a new cookie with updated claims
+				NavigationManager.NavigateTo($"/account/refresh-cookie?redirectTo=settings", forceLoad: true);
+			}
+			else
+			{
+				var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
+				errorMessage = errorText?.Error.Message;
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = $"Błąd połączenia: {ex.Message}";
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+}

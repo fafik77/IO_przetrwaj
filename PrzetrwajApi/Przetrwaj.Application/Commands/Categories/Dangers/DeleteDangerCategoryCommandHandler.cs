@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Commands.Categories.Dangers;
 using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Exceptions;
 
 internal class DeleteDangerCategoryCommandHandler
 	: ICommandHandler<DeleteDangerCategoryCommand, bool>
@@ -18,7 +19,14 @@ internal class DeleteDangerCategoryCommandHandler
 		var cat = await _repo.GetDangerByIdAsync(cmd.IdCategory, ct);
 		if (cat is null) return false;
 		_repo.Delete(cat);
-		await _uow.SaveChangesAsync(ct);
+		try
+		{
+			await _uow.SaveChangesAsync(ct);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 		return true;
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Posts;
 
 namespace Przetrwaj.Application.Commands.Posts;
@@ -19,7 +20,7 @@ public class VoteOnPostCommandHandler : ICommandHandler<VoteOnPostCommand>
 	public async Task Handle(VoteOnPostCommand request, CancellationToken cancellationToken)
 	{
 		// 404 jeśli post nie istnieje
-		if (!await _postRepository.ExistsPostIdAsync(request.IdPost, cancellationToken))
+		if (!await _postRepository.ExistsActivePostIdAsync(request.IdPost, cancellationToken))
 			throw new PostNotFoundException(request.IdPost);
 
 		// 409 jeśli user już głosował
@@ -33,7 +34,13 @@ public class VoteOnPostCommandHandler : ICommandHandler<VoteOnPostCommand>
 			IdUser = request.IdUser.ToLower(),
 			IsUpvote = request.IsUpvote
 		}, cancellationToken);
-
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 	}
 }

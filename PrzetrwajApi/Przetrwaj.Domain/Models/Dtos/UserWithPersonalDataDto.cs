@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Domain.Models.Dtos;
 
-public class UserWithPersonalDataDto
+public record UserWithPersonalDataDto
 {
 	public required string Id { get; set; }
 	[EmailAddress]
@@ -11,17 +11,15 @@ public class UserWithPersonalDataDto
 	public string? Name { get; set; }
 	public string? Surname { get; set; }
 	public RegionOnlyDto? Region { get; set; }
-	public string? Role { get; set; }
-	public bool TwoFactorEnabled { get; set; }
+	public int? SubRegion { get; set; }
+	public IEnumerable<string> Roles { get; set; } = [];
 	public DateTimeOffset RegistrationDate { get; set; }
+	public int Impediments { get; set; }
 
-	public bool Banned { get; set; }
-	public string? BanReason { get; set; }
-	public DateTimeOffset? BanDate { get; set; }
 	/// <summary>
-	/// You have to include this yourself when making a Dto
+	/// You have to include `BannedBy` yourself when making a Dto
 	/// </summary>
-	public UserGeneralDto? BannedBy { get; set; }
+	public BanInfo? BanInfo { get; set; }
 
 
 	public static explicit operator UserWithPersonalDataDto(AppUser registeredUser)
@@ -31,14 +29,19 @@ public class UserWithPersonalDataDto
 			Id = registeredUser.Id,
 			Email = registeredUser.Email,
 			Name = registeredUser.Name ?? "",
-			//Role = string.Join(", ", registeredUser.clai.ToList()),
 			Surname = registeredUser.Surname ?? "",
-			Region = (RegionOnlyDto?)registeredUser.IdRegionNavigation,
-			Banned = registeredUser.Banned,
-			BanReason = registeredUser.BanReason,
-			BanDate = registeredUser.BanDate,
-			TwoFactorEnabled = registeredUser.TwoFactorEnabled,
+			Region = RegionOnlyDto.Map(registeredUser.RegionNavigation),
+			SubRegion = registeredUser.GminaId,
+			BanInfo = registeredUser.BanDate is null ? null : new BanInfo
+			{
+				Banned = true,
+				BanReason = registeredUser.BanReason ?? string.Empty,
+				BanDate = registeredUser.BanDate,
+				BannedById = registeredUser.BannedById ?? string.Empty,
+				BannedBy = null,
+			},
 			RegistrationDate = registeredUser.RegistrationDate,
+			Impediments = registeredUser.Impediments,
 		};
 	}
 }

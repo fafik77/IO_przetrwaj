@@ -2,9 +2,9 @@
 
 namespace Przetrwaj.Domain.Models.Dtos;
 
-public class CategoryDto
+public record CategoryDto
 {
-	public int IdCategory { get; set; }
+	public int Id { get; set; }
 	public string Name { get; set; } = null!;
 	public CategoryType Type { get; set; }
 
@@ -12,7 +12,7 @@ public class CategoryDto
 	{
 		return category is null ? null : new CategoryDto
 		{
-			IdCategory = category.IdCategory,
+			Id = category.IdCategory,
 			Name = category.Name,
 			Type = category.Type
 		};

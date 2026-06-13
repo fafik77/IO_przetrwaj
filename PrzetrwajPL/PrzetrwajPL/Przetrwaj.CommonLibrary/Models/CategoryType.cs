@@ -3,8 +3,9 @@
 namespace Przetrwaj.CommonLibrary.Models;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum CategoryType
-{
-	Danger,
-	Resource,
+	public enum CategoryType
+	{
+		Danger,
+		Resource,
+	}
 }

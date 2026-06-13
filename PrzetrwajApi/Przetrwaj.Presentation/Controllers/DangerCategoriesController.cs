@@ -14,8 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Przetrwaj.Presentation.Controllers;
 
 [ApiController]
-[Route("Category/Danger")]
-
+[Route("Categories/dangers")]
 [Produces("application/json")]
 public class DangerCategoriesController : Controller
 {
@@ -28,12 +27,11 @@ public class DangerCategoriesController : Controller
 	[SwaggerOperation("Create a Danger category (Moderator)")]
 	[ProducesResponseType(typeof(CategoryDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> Create([FromBody] CreateDangerCategoryCommand cmd, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
-		return CreatedAtAction(nameof(GetById), new { id = created.IdCategory }, created);
+		return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
 	}
 
 	[HttpPut]
@@ -43,7 +41,6 @@ public class DangerCategoriesController : Controller
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> Update([FromBody] UpdateDangerCategoryCommand cmd, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
@@ -62,14 +59,13 @@ public class DangerCategoriesController : Controller
 	[Authorize(UserRoles.Moderator)]
 	[Consumes("application/json")]
 	[SwaggerOperation("Create many Danger categories (Moderator)")]
-	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> Create([FromBody] CreateDangerCategoriesCommand cmd, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
-		return CreatedAtAction(nameof(GetById), created);
+		return Ok(created);
 	}
 
 
@@ -98,7 +94,6 @@ public class DangerCategoriesController : Controller
 	[SwaggerOperation("Delete Danger category by id (Moderator)")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> Delete(int id, CancellationToken ct)
 	{
 		var ok = await _mediator.Send(new DeleteDangerCategoryCommand { IdCategory = id }, ct);

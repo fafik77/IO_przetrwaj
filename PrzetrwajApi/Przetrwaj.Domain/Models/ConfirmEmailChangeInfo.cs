@@ -2,7 +2,7 @@
 
 namespace Przetrwaj.Domain.Models;
 
-public class ConfirmEmailChangeInfo : ConfirmEmailInfo
+public record ConfirmEmailChangeInfo : ConfirmEmailInfo
 {
 	[Required]
 	[EmailAddress]

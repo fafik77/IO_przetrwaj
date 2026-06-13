@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class MarkPostAsInactiveCommand : ICommand
+public record MarkPostAsInactiveCommand : ICommand
 {
 	[Required]
 	public required string PostId { get; set; }

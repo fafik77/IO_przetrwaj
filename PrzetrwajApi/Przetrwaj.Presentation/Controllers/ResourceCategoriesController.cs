@@ -14,8 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Przetrwaj.Presentation.Controllers;
 
 [ApiController]
-[Route("Category/Resource")]
-
+[Route("Categories/resources")]
 [Produces("application/json")]
 public class ResourceCategoriesController : ControllerBase
 {
@@ -33,7 +32,7 @@ public class ResourceCategoriesController : ControllerBase
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
-		return CreatedAtAction(nameof(GetById), new { id = created.IdCategory }, created);
+		return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
 	}
 
 	[HttpPut]
@@ -43,7 +42,6 @@ public class ResourceCategoriesController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	public async Task<IActionResult> Update([FromBody] UpdateResourceCategoryCommand cmd, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
@@ -62,13 +60,13 @@ public class ResourceCategoriesController : ControllerBase
 	[Authorize(UserRoles.Moderator)]
 	[Consumes("application/json")]
 	[SwaggerOperation("Create many Resource categories (Moderator)")]
-	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	public async Task<ActionResult<CategoryDto>> Create([FromBody] CreateResourceCategoriesCommand cmd, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var created = await _mediator.Send(cmd, ct);
-		return CreatedAtAction(nameof(GetById), created);
+		return Ok(created);
 	}
 
 

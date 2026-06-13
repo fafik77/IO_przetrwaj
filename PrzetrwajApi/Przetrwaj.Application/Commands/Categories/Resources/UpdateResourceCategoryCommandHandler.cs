@@ -1,5 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Exceptions.Categories;
 
 namespace Przetrwaj.Application.Commands.Categories.Resources;
@@ -21,7 +22,15 @@ public class UpdateResourceCategoryCommandHandler : ICommandHandler<UpdateResour
 		if (cat is null) throw new CategoryNotFoundException(request.Id);
 		cat.CategoryIcon = request.CategoryIcon;
 		cat.Name = request.Name;
+		if (request.Impediments != null) cat.Impediments = (int)request.Impediments;
 		_categoryRepository.Update(cat);
-		await _unitOfWork.SaveChangesAsync(cancellationToken);
+		try
+		{
+			await _unitOfWork.SaveChangesAsync(cancellationToken);
+		}
+		catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
+		{
+			throw new BadUpdateCommand(ex.InnerException.Message);
+		}
 	}
 }

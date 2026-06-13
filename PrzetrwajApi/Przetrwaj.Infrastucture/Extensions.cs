@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Infrastucture.Cache;
 using Przetrwaj.Infrastucture.Context;
@@ -17,22 +18,49 @@ namespace Przetrwaj.Infrastucture
 			var connectionString = configuration.GetConnectionString("Database");
 			services.AddDbContextFactory<ApplicationDbContext>(ctx => ctx.UseNpgsql(connectionString));
 
+			var postGisSchema = configuration.GetValue<string>("PostGis:schema") ?? "public";
+			var connectionBuilder = new NpgsqlConnectionStringBuilder(connectionString)
+			{
+				SearchPath = $"{postGisSchema},public"
+			};
+			// Register NpgsqlDataSource as a Singleton (Best practice for performance)
+			services.AddSingleton(sp =>
+			{
+				return new NpgsqlDataSourceBuilder(connectionBuilder.ConnectionString).Build();
+			});
+
 			services.AddScoped<IUnitOfWork, UnitOfWork>();  //AddScoped makes this per request, Transient makes a new instance every time its called
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IRegionRepository, RegionRepository>();
 			services.AddScoped<ICategoryRepository, CategoryRepository>();
 			services.AddScoped<IPostRepository, PostRepository>();
 			services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+			services.AddScoped<IImpedimentsRepository, ImpedimentsRepository>();
+			services.AddScoped<IUserJwtRefreshRepository, UserJwtRefreshRepository>();
+
 			services.AddScoped<IStatisticsService, StatisticsService>();
+
+			var CacheSettings = configuration.GetSection("Cache");
+			var BlackListUsersMaxCount = int.Parse(CacheSettings["BlackListUsersMaxCount"]);
 			services.AddSingleton<IBanCache>(sp =>
 			{
 				// A completely separate memory pool just for bans
 				var options = new MemoryCacheOptions
 				{
-					SizeLimit = 10000 // Limit to 10k banned users to protect RAM
+					SizeLimit = BlackListUsersMaxCount // Limit to 10k banned users to protect RAM
 				};
-				return new BanCache(new MemoryCache(options), sp);
+				return new BanCache(new MemoryCache(options), sp, configuration);
 			});
+			services.AddSingleton<ILogoutCache>(sp =>
+			{
+				// A completely separate memory pool just for logged out users
+				var options = new MemoryCacheOptions
+				{
+					SizeLimit = BlackListUsersMaxCount, // Limit to 10k logged out users to protect RAM
+				};
+				return new LogoutCache(new MemoryCache(options), sp, configuration);
+			});
+
 			return services;
 		}
 	}

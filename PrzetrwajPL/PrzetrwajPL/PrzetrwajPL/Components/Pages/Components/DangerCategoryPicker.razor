@@ -1,4 +1,5 @@
-﻿@using PrzetrwajPL.Models
+﻿@using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Models
 @inject IHttpClientFactory ClientFactory
 
 <select class="form-select" @onchange="OnChange">
@@ -25,8 +26,8 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		var client = ClientFactory.CreateClient("ServerAPI");
-		categories = await client.GetFromJsonAsync<List<CategoryDto>>("/Category/Danger");
+		var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+		categories = await client.GetFromJsonAsync<List<CategoryDto>>("/Categories/Dangers");
 	}
 
 	private async Task OnChange(ChangeEventArgs e)

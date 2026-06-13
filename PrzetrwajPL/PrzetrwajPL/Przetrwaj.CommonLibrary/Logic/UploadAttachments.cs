@@ -1,4 +1,4 @@
-﻿using PrzetrwajPL.Requests;
+﻿using Przetrwaj.CommonLibrary.Requests;
 using System.Net.Http.Headers;
 
 namespace Przetrwaj.CommonLibrary.Logic;

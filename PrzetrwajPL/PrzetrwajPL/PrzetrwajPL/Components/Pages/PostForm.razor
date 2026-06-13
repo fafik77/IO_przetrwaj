@@ -2,8 +2,9 @@
 @rendermode InteractiveServer
 
 @namespace PrzetrwajPL.Components.Pages.Components
-@using PrzetrwajPL.Requests
 @using System.Text.RegularExpressions
+@using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Requests
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Nav
 
@@ -126,8 +127,8 @@
 
 		try
 		{
-			var client = ClientFactory.CreateClient("ServerAPI");
-			var response = await client.PostAsJsonAsync("/Post/Danger", model);
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+			var response = await client.PostAsJsonAsync("/Posts/Danger", model);
 
 			if (response.IsSuccessStatusCode)
 			{

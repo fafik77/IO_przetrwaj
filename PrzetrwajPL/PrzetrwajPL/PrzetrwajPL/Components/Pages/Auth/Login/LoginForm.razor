@@ -4,26 +4,27 @@
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavigationManager
 @using PrzetrwajPL;
-@using PrzetrwajPL.Models
 @inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Logowanie</PageTitle>
 
 <div class="container">
 	<div class="inContainer">
 	<h2 style="text-align:center; font-weight:bold;">Zaloguj się</h2>
 	<p style="text-align:center;">Witamy! Podaj swoje dane poniżej żeby się zalogować</p>
-	<EditForm Model="@loginRequest" OnValidSubmit="HandleLogin" FormName="loginForm">
+	<EditForm Model="@LoginRequest" OnValidSubmit="HandleLogin" FormName="loginForm">
 		<DataAnnotationsValidator />
 		@if (!string.IsNullOrEmpty(errorMessage))
 		{
 			<div class="alert alert-danger pre-wrap" role="alert" style="color: black; text-align:center;">@errorMessage</div>
 		}
 		<label for="email">E-mail:</label><br />
-		<InputText @bind-Value="loginRequest.Email" id="email" placeholder="Podaj email" class="form-control"/>
-		<ValidationMessage For="@(() => loginRequest.Email)" style="color:red; font-size: 12px;" /><br />
+		<InputText @bind-Value="LoginRequest.Email" id="email" placeholder="Podaj email" class="form-control"/>
+		<ValidationMessage For="@(() => LoginRequest.Email)" style="color:red; font-size: 12px;" /><br />
 
 			<label for="password">Hasło:</label><br />
-		<InputText @bind-Value="loginRequest.Password" type="password" id="password" placeholder="Podaj hasło" class="form-control"/>
-		<ValidationMessage For="@(() => loginRequest.Password)" style="color:red; font-size: 12px;" /><br />
+		<InputText @bind-Value="LoginRequest.Password" type="password" id="password" placeholder="Podaj hasło" class="form-control"/>
+		<ValidationMessage For="@(() => LoginRequest.Password)" style="color:red; font-size: 12px;" /><br />
 
 		<label>
 			<input type="checkbox" checked="checked" name="remember"> Zapamiętaj mnie
@@ -50,9 +51,9 @@
 		<a href="@GoogleLoginUrl" class="button btn google-btn">
 			<i class="fa fa-google"></i> Google
 		</a><br /><br />
-		<button type="button" class="facebook">Facebook</button><br /><br />
-		<button type="button" class="github">GitHub</button><br /><br />
-		<button type="button" class="microsoft">Microsoft</button><br /><br />
+		<button type="button" class="facebook invisible">Facebook</button><br /><br />
+		<button type="button" class="github invisible">GitHub</button><br /><br />
+		<button type="button" class="microsoft invisible">Microsoft</button><br /><br />
 	</div>
 </div>
 

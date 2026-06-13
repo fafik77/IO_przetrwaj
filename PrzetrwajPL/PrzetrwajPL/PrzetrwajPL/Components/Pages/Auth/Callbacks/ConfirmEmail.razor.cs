@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Components;
+using Przetrwaj.CommonLibrary.Consts;
 using System.Net;
 
-namespace PrzetrwajPL.Components.Pages;
+namespace PrzetrwajPL.Components.Pages.Auth.Callbacks;
 public partial class ConfirmEmail
 {
 	private bool _isProcessing = true;
@@ -23,8 +24,8 @@ public partial class ConfirmEmail
 		{
 			// Note: Since backend is [HttpGet], we append parameters to the URL
 			// We use WebUtility.UrlEncode to ensure characters like '+' in the code don't break the query
-			var requestUrl = $"Account/ConfirmEmail?userId={UserId}&code={WebUtility.UrlEncode(Code)}";
-			var client = ClientFactory.CreateClient("ServerAPI");
+			var requestUrl = $"Account/confirm-email?userId={UserId}&code={WebUtility.UrlEncode(Code)}";
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var response = await client.GetAsync(requestUrl);
 			if (response.IsSuccessStatusCode)
 			{

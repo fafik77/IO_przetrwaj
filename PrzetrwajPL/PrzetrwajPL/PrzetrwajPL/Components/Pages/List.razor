@@ -1,17 +1,16 @@
-﻿@page "/"
+﻿@page "/list"
 
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
-@using PrzetrwajPL;
+@using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Models.Posts
 @using PrzetrwajPL.Components.Pages.Components
-@using PrzetrwajPL.Models;
-@using PrzetrwajPL.Models.Posts;
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Lokalnie - Przetrwaj PL</PageTitle>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div style="text-align: center">
-	<h1>Ogólnopolska strona do zgłaszania zagrożeń w twojej okolicy.</h1>
-	<h2>Widzisz zagrożenie? Zgłoś je!</h2>
+	<h1>Widzisz zagrożenie? Zgłoś je!</h1>
 </div>
 <div class="add-post-box">
    <AuthorizeView Policy="@UserRoles.User">
@@ -37,7 +36,9 @@
     
 </div>
 
-
+<div style="text-align: center">
+	<h2>Lista najnowszych informacji w regionie</h2>
+</div>
 @if (posts == null)
 {
     <p style="text-align: center; margin-top: 20px;">Ładowanie postów...</p>
@@ -69,16 +70,11 @@ else
 	private TypePicker myTypePicker;
 	private List<PostOverviewDto>? posts;
 
-	protected override async Task OnInitializedAsync()
-	{
-		//moved to OnAfterRenderAsync as we need `myRegionPicker` to exist
-	}
-
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		await base.OnAfterRenderAsync(firstRender);
 		if (firstRender)
 		{
-			await myRegionPicker.PickRegion(0);
 			await GetUserInfo();
 		}
 	}
@@ -95,7 +91,7 @@ else
 			{
 				try
 				{
-					var client = ClientFactory.CreateClient("ServerAPI");
+					var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 					var dangers = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Danger");
 					if (dangers != null)
 					{
@@ -111,7 +107,7 @@ else
 			{
 				try
 				{
-					var client = ClientFactory.CreateClient("ServerAPI");
+					var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 					var resources = await client.GetFromJsonAsync<List<PostOverviewDto>>($"/Post/Region/{regionId}/Resource");
 					if (resources != null)
 					{
@@ -148,11 +144,11 @@ else
 			if (userPrincipal.Identity is not { IsAuthenticated: true })
 				return;
 
-			var regionStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == "Region")?.Value;
+			var regionStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimNames.Region)?.Value;
 			int region = 0;
 			if (int.TryParse(regionStr, out region))
 			{
-				await myRegionPicker.PickRegion(region);
+				await myRegionPicker.LoadRegionFromId(region);
 			}
 		}
 		catch (Exception) { }

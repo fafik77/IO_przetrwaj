@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PrzetrwajPL.Models;
+namespace Przetrwaj.CommonLibrary.Models;
 
 public class UserWithPersonalDataDto
 {
@@ -10,10 +10,11 @@ public class UserWithPersonalDataDto
 	public string? Name { get; set; }
 	public string? Surname { get; set; }
 	public RegionOnlyDto? Region { get; set; }
+	public int? SubRegion { get; set; }
 	public IEnumerable<string> Roles { get; set; } = [];
 	public bool TwoFactorEnabled { get; set; }
 	public DateTimeOffset RegistrationDate { get; set; }
+	public int Impediments { get; set; }
 
-	public bool Banned { get; set; }
 	public BanInfo? BanInfo { get; set; }
 }

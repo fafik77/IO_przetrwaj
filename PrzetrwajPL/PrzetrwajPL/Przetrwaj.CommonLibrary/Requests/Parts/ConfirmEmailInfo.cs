@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PrzetrwajPL.Requests.Parts;
+namespace Przetrwaj.CommonLibrary.Requests.Parts;
 
 public class ConfirmEmailInfo
 {

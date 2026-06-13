@@ -1,9 +1,14 @@
-﻿namespace PrzetrwajPL.Models;
+﻿namespace Przetrwaj.CommonLibrary.Models;
 
-public class RegionOnlyDto
+public record RegionOnlyDto
 {
-	public int Id{ get; set; }
+	public int Id { get; set; }
 	public required string Name { get; set; }
-	public double Lat { get; set; }
-	public double Long { get; set; }
+	public int ParentId { get; set; }
+}
+
+public record RegionOnlyWithinDto : RegionOnlyDto
+{
+	public string? In { get; set; }
+	public RegionPrecision Type { get; set; }
 }

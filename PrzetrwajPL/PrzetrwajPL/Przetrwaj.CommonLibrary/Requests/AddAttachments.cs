@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 
-namespace PrzetrwajPL.Requests;
+namespace Przetrwaj.CommonLibrary.Requests;
 
 public class AttachmentItem
 {

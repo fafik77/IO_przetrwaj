@@ -1,7 +1,8 @@
-﻿namespace PrzetrwajPL.Models;
+﻿namespace Przetrwaj.CommonLibrary.Models;
 
 public class JwtTokenDto
 {
 	public string? Token { get; set; }
+	public string? RefreshToken { get; set; }
 	public bool Success { get; set; } = true;
 }

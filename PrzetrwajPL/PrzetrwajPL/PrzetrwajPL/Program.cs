@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using PrzetrwajPL;
+using Przetrwaj.CommonLibrary.Consts;
 using PrzetrwajPL.Components;
-using PrzetrwajPL.Security;
-
+using PrzetrwajPL.Handlers;
+using PrzetrwajPL.Handlers.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,37 +12,23 @@ builder.Services.AddRazorComponents()
 	.AddInteractiveServerComponents()
 	.AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddHttpClient("ServerAPI", client =>
-{
-	client.BaseAddress =
-	new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/");
-	//new Uri("https://localhost:7072/");
-})
-.AddHttpMessageHandler<JwtAuthorizationHandler>(); // This links the handler to "ServerAPI"
-//.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-//{
-//	// This allows the client to send and receive cookies automatically
-//	UseCookies = true,
-//	// Warning: On Blazor Server, sharing one CookieContainer in a Singleton 
-//	// can lead to users seeing each other's sessions. 
-//	// For InteractiveServer, the browser handles cookies naturally.
-//	//CookieContainer = new System.Net.CookieContainer(),
-//	//Credentials = System.Net.CredentialCache.DefaultCredentials
-//});
-
 #region Auth
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 	.AddCookie(options =>
 	{
-		options.Cookie.Name = "cookie";
-		options.Cookie.MaxAge = TimeSpan.FromHours(6);
+		options.Cookie.Name = Consts.PrzetrwajAuthCookie;
 		options.LoginPath = "/login";
+
+		options.Events = new CookieAuthenticationEvents
+		{
+			OnValidatePrincipal = RefreshJwtTokenOnValidatePrincipal.OnValidatePrincipal
+		};
 	});
 builder.Services.AddAuthorization(opt =>
 {
-	// User+ : Requires either User, Moderator, or Admin
+	// User+ : Requires any role
 	opt.AddPolicy(UserRoles.User, policy =>
-		policy.RequireRole(UserRoles.User, UserRoles.Moderator, UserRoles.Admin));
+		policy.RequireAuthenticatedUser()); //any registered user with any role that is able to log in
 
 	// Moderator+ : Requires either Moderator or Admin
 	opt.AddPolicy(UserRoles.Moderator, policy =>
@@ -58,6 +44,24 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<JwtAuthorizationHandler>();
+builder.Services.AddTransient<TokenRefreshHandler>();
+
+string PrzetrwajApiUri = builder.Configuration.GetValue<string>("PrzetrwajApiUri") ?? "https://localhost:7072/";
+//those settings are to this client alone
+builder.Services.AddHttpClient(Consts.PrzetrwajApiClientName, client =>
+{
+	client.BaseAddress = new Uri(PrzetrwajApiUri);
+})
+.AddHttpMessageHandler<JwtAuthorizationHandler>()   // include JWT in AuthHeader
+.AddHttpMessageHandler<TokenRefreshHandler>();      // retry login with RefreshToken
+
+//make the same client injection for RefreshToken (only with the JwtAuthorizationHandler, do not include the TokenRefreshHandler)
+builder.Services.AddHttpClient(Consts.PrzetrwajApiRefreshClientName, client =>
+{
+	client.BaseAddress = new Uri(PrzetrwajApiUri);
+})
+.AddHttpMessageHandler<JwtAuthorizationHandler>();   // include JWT in AuthHeader
+
 
 var app = builder.Build();
 

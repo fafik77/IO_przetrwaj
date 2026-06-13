@@ -3,44 +3,53 @@
 
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavigationManager
-@using PrzetrwajPL;
 @using PrzetrwajPL.Components.Pages.Components
-@using PrzetrwajPL.Models
+
+<PageTitle>Rejestracja</PageTitle>
 
 <div class="container">
 	<div class="inContainer">
-	<h2 style="text-align:center; font-weight:bold;">Zarejestruj się</h2>
-	<p style="text-align:center;">Witamy! Podaj swoje dane poniżej żeby się zarejestrować</p>
-	<EditForm Model="@registerRequest" OnValidSubmit="HandleRegister" FormName="loginForm">
+		<h2 style="text-align:center; font-weight:bold;">Zarejestruj się</h2>
+		<p style="text-align:center;">Witamy! Podaj swoje dane poniżej żeby się zarejestrować</p>
+		<EditForm Model="@registerRequest" OnValidSubmit="HandleRegister" FormName="registerForm">
+		
 		<DataAnnotationsValidator />
 		@if (!string.IsNullOrEmpty(errorMessage))
 		{
 			<div class="alert alert-danger pre-wrap" role="alert" style="color: black; text-align:center;">@errorMessage</div>
 		}
+		
+		@* Imie *@
 		<label for="name">Imie:</label><br />
 		<InputText @bind-Value="registerRequest.Name" id="name" placeholder="Podaj imie" class="form-control"/>
-		<ValidationMessage For="@(() => registerRequest.Email)" style="color:red; font-size: 12px;" /><br />
-		
+		<ValidationMessage For="@(() => registerRequest.Name)" style="color:red; font-size: 12px;" /><br />
+
+		@* Nazwisko *@
 		<label for="surname">Nazwisko:</label><br />
 		<InputText @bind-Value="registerRequest.Surname" id="surname" placeholder="Podaj nazwisko" class="form-control"/>
-		<ValidationMessage For="@(() => registerRequest.Email)" style="color:red; font-size: 12px;" /><br />
+		<ValidationMessage For="@(() => registerRequest.Surname)" style="color:red; font-size: 12px;" /><br />
 
+		@* E-mail *@
 		<label for="email">E-mail:</label><br />
-		<InputText @bind-Value="registerRequest.Email" id="email" placeholder="Podaj email" class="form-control"/>
+		<InputText @bind-Value="registerRequest.Email" id="email" placeholder="Podaj email" class="form-control" autocomplete="off" />
 		<ValidationMessage For="@(() => registerRequest.Email)" style="color:red; font-size: 12px;" /><br />
 
+		@* Hasło *@
 		<label for="password">Hasło:</label><br />
-		<InputText @bind-Value="registerRequest.Password" type="password" id="password" placeholder="Podaj hasło" class="form-control"/>
+		<InputText @bind-Value="registerRequest.Password" type="password" id="password" placeholder="Podaj hasło" class="form-control" autocomplete="new-password" />
 		<ValidationMessage For="@(() => registerRequest.Password)" style="color:red; font-size: 12px;" /><br />
-		
-		<label for="passwordRetake">Powtórz hasło:</label><br />
-		<InputText @bind-Value="registerRequest.ConfirmPassword" type="password" id="password" placeholder="Powtórz hasło" class="form-control"/>
-			<ValidationMessage For="@(() => registerRequest.ConfirmPassword)" style="color:red; font-size: 12px;" /><br />
 
+		@* Powtórz hasło *@
+		<label for="passwordRetake">Powtórz hasło:</label><br />
+		<InputText @bind-Value="registerRequest.ConfirmPassword" type="password" id="passwordRetake" placeholder="Powtórz hasło" class="form-control" autocomplete="new-password" />
+		<ValidationMessage For="@(() => registerRequest.ConfirmPassword)" style="color:red; font-size: 12px;" /><br />
+
+		@* lokalizacja *@
 		<label>Twoja lokalizacja:</label><br />
 		<RegionPicker SelectedRegionIdChanged="@(id => registerRequest.IdRegion = id)" />
 		<ValidationMessage For="@(() => registerRequest.IdRegion)" style="color:red; font-size: 12px;" />
 
+		@* Użytkownik | Moderator *@
 		<label>Zarejestruj się jako:</label><br />
 		<InputRadioGroup @bind-Value="registerRequest.ModeratorRole">
 			<div class="role-selection">
@@ -54,6 +63,7 @@
 		</InputRadioGroup>
 		<br />
 
+		@* (submit) Zarejestruj *@
 		<button type="submit" disabled="@isLoading">
 			@if (isLoading)
 			{

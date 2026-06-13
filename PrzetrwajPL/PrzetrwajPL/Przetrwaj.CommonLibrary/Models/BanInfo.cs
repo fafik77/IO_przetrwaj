@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace PrzetrwajPL.Models;
+namespace Przetrwaj.CommonLibrary.Models;
 
 public class BanInfo
 {

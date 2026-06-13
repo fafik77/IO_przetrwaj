@@ -46,15 +46,21 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<JwtAuthorizationHandler>();
 builder.Services.AddTransient<TokenRefreshHandler>();
 
+string PrzetrwajApiUri = builder.Configuration.GetValue<string>("PrzetrwajApiUri") ?? "https://localhost:7072/";
 //those settings are to this client alone
 builder.Services.AddHttpClient(Consts.PrzetrwajApiClientName, client =>
 {
-	client.BaseAddress =
-	//new Uri("https://przetrwaj-api.grayflower-7f624026.polandcentral.azurecontainerapps.io/");
-	new Uri("https://localhost:7072/");
+	client.BaseAddress = new Uri(PrzetrwajApiUri);
 })
 .AddHttpMessageHandler<JwtAuthorizationHandler>()   // include JWT in AuthHeader
 .AddHttpMessageHandler<TokenRefreshHandler>();      // retry login with RefreshToken
+
+//make the same client injection for RefreshToken (only with the JwtAuthorizationHandler, do not include the TokenRefreshHandler)
+builder.Services.AddHttpClient(Consts.PrzetrwajApiRefreshClientName, client =>
+{
+	client.BaseAddress = new Uri(PrzetrwajApiUri);
+})
+.AddHttpMessageHandler<JwtAuthorizationHandler>();   // include JWT in AuthHeader
 
 
 var app = builder.Build();

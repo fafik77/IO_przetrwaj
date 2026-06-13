@@ -10,8 +10,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div style="text-align: center">
-	<h1>Ogólnopolska strona do zgłaszania zagrożeń w twojej okolicy.</h1>
-	<h2>Widzisz zagrożenie? Zgłoś je!</h2>
+	<h1>Widzisz zagrożenie? Zgłoś je!</h1>
 </div>
 <div class="add-post-box">
    <AuthorizeView Policy="@UserRoles.User">
@@ -37,7 +36,7 @@
     
 </div>
 
-
+<h1>Lista najnowszych informacji w regionie</h1>
 @if (posts == null)
 {
     <p style="text-align: center; margin-top: 20px;">Ładowanie postów...</p>

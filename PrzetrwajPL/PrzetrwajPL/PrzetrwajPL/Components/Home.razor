@@ -1,7 +1,25 @@
 ﻿@page "/"
 
+@rendermode InteractiveServer
+@inject IHttpClientFactory ClientFactory
 
-<h3>Home</h3>
+<PageTitle>Przetrwaj PL</PageTitle>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div style="text-align: center">
+	<h1>
+		Ogólnopolska strona do zgłaszania zagrożeń z twojej okolicy.
+	</h1>
+</div>
+
+<div>
+	<p>
+		Aktualnie w Polsce śledzimy 3'150 zagrożeń, oraz 30 pomocnych punktów z zasobami.
+	</p>
+	<p>
+		Strona posiada 100 użytkowników, oraz 3 moderatorów.
+	</p>
+</div>
 
 @code {
 

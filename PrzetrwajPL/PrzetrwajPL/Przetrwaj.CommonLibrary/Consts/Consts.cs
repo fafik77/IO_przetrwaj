@@ -24,6 +24,7 @@ public static class ClaimNames
 public static class Consts
 {
 	public const string PrzetrwajApiClientName = "ServerAPI";
+	public const string PrzetrwajApiRefreshClientName = "ServerAPIRefreshToken";
 	public static readonly StringComparer PolishAlphabetComparer =
 		StringComparer.Create(new System.Globalization.CultureInfo("pl-PL"), ignoreCase: true);
 	public const string PrzetrwajAuthCookie = "PrzetrwajAuthCookie";

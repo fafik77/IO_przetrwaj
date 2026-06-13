@@ -43,9 +43,8 @@ public class TokenRefreshHandler(
 			return response;
 		try
 		{
-			// Build a clean, isolated client to call the refresh endpoint to prevent recursive execution loops
-			var refreshClient = httpClientFactory.CreateClient();
-			refreshClient.BaseAddress = httpClientFactory.CreateClient(Consts.PrzetrwajApiClientName).BaseAddress;
+			// Build a separate refresh token, isolated client to call the refresh endpoint to prevent recursive execution loops
+			var refreshClient = httpClientFactory.CreateClient(Consts.PrzetrwajApiRefreshClientName);
 
 			// Prepare payload matching: {"refreshToken": "string"}
 			var refreshPayload = new { refreshToken };

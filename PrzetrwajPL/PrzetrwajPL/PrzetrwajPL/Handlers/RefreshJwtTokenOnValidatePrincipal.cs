@@ -32,9 +32,8 @@ public static class RefreshJwtTokenOnValidatePrincipal
 			return;
 
 		var clientFactory = context.HttpContext.RequestServices.GetRequiredService<IHttpClientFactory>();
-		var refreshClient = clientFactory.CreateClient();
-		refreshClient.BaseAddress = clientFactory.CreateClient(Consts.PrzetrwajApiClientName).BaseAddress;
-		refreshClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+		// Build a separate refresh token, isolated client to call the refresh endpoint to prevent recursive execution loops
+		var refreshClient = clientFactory.CreateClient(Consts.PrzetrwajApiRefreshClientName);
 		try
 		{
 			var refreshPayload = new { refreshToken };

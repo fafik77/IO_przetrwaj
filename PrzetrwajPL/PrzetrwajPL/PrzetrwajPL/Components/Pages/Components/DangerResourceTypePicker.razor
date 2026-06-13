@@ -1,0 +1,25 @@
+﻿@namespace PrzetrwajPL.Components.Pages.Components
+@using Przetrwaj.CommonLibrary.Models
+
+<div class="selector-group">
+	<label>Typ postów</label>
+	<select class="form-control-region" @bind:get="categoryType" @bind:set="HandleSelectionChanged">
+		<option value="@CategoryTypeFilter.Danger">Zagrożenia</option>
+		<option value="@CategoryTypeFilter.Resource">Zasoby</option>
+		<option value="@CategoryTypeFilter.Both">Zagrożenia i zasoby</option>
+	</select>
+</div>
+
+@code {
+	[Parameter]
+	public CategoryTypeFilter categoryType { get; set; }
+
+	[Parameter] public EventCallback<CategoryTypeFilter> SelectionChanged { get; set; }
+
+	private async Task HandleSelectionChanged(CategoryTypeFilter newValue)
+	{
+		categoryType = newValue;
+		if (SelectionChanged.HasDelegate)
+			await SelectionChanged.InvokeAsync(newValue);
+	}
+}

@@ -11,27 +11,29 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div style="text-align: center">
 	<h1>Widzisz zagrożenie? Zgłoś je!</h1>
-</div>
-<div class="add-post-box">
-   <AuthorizeView Policy="@UserRoles.User">
-    <Authorized>
-            <a href="/addPost">Dodaj Post o Zagrożeniu</a>
-    </Authorized>
-</AuthorizeView>
-    <AuthorizeView Policy="@UserRoles.Moderator">
-    <Authorized>
-            <a href="/addPost">Dodaj Post o Zasobie</a>
-    </Authorized>
-</AuthorizeView>
+
+	<div class="cascade-selectors">
+		<AuthorizeView Policy="@UserRoles.User">
+			<Authorized>
+				<a href="/addPost">Dodaj Post o Zagrożeniu</a>
+			</Authorized>
+		</AuthorizeView>
+
+		<AuthorizeView Policy="@UserRoles.Moderator">
+			<Authorized>
+				<a href="/addPost">Dodaj Post o Zasobie</a>
+			</Authorized>
+		</AuthorizeView>
+	</div>
 </div>
 
 
 <div class="filters">
     <div class="picker">
-        <RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="@(regionId => FilterByRegion(regionId, "", myTypePicker?.SelectedTypeId ?? 0))" />
+		<RegionPicker @ref="myRegionPicker" SelectedRegionIdChanged="SelectedRegionScopeChanged" />
     </div>
     <div class="picker">
-        <TypePicker @ref="myTypePicker" SelectedTypeIdChanged="@(typeId => FilterByRegion(myRegionPicker?.SelectedRegionId ?? 0, "", typeId))" />
+		<DangerResourceTypePicker @ref="dangerResourceTypePicker" SelectionChanged="SelectedRegionScopeChanged" />
     </div>
     
 </div>
@@ -67,7 +69,7 @@ else
 	private Task<AuthenticationState> AuthStateTask { get; set; }
 
 	private RegionPicker myRegionPicker; // The RegionPicker reference
-	private TypePicker myTypePicker;
+	private DangerResourceTypePicker dangerResourceTypePicker;
 	private List<PostOverviewDto>? posts;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -152,6 +154,10 @@ else
 			}
 		}
 		catch (Exception) { }
+	}
+	private void SelectedRegionScopeChanged()
+	{
+		Console.WriteLine($"{myRegionPicker.SelectedGmiId}, {dangerResourceTypePicker.categoryType}");
 	}
 }
 

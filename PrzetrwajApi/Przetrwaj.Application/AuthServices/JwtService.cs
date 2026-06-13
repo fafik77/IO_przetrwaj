@@ -51,9 +51,6 @@ public class JwtService : IJwtService
 		if (res.RefreshToken != refreshToken) return null;
 		if (res.ValidTill <= DateTimeOffset.Now)
 			return null;
-		//if(--res.UsesLeft == 0)
-		//{	//some logic to make it secure ???
-		//}
 		var user = await _userRepository.GetByIdAsync(userId, ct);
 		if (user is null) return null;
 		var userDto = (UserWithPersonalDataDto)user;
@@ -63,8 +60,6 @@ public class JwtService : IJwtService
 		var (tokens, userJwt) = GenerateTokens(userDto, res.Jwi);
 		res.RefreshToken = userJwt.RefreshToken;
 		res.ValidTill = userJwt.ValidTill;
-		//invalidate old JWT Jti
-		_logoutCache.Logout(userId, tokenId);
 		_userJwtRefreshRepository.Update(res);
 		await _unitOfWork.SaveChangesAsync(ct);
 		return tokens;

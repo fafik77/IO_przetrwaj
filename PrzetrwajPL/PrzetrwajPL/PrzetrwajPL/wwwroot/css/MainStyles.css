@@ -1,10 +1,6 @@
 ﻿button {
 	cursor: pointer;
 }
-	button:hover {
-		opacity: 0.8;
-		border: double;
-	}
 
 	.white-button-blue-text {
 		background-color: ghostwhite;

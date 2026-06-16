@@ -5,7 +5,7 @@ using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models.Posts;
 using PrzetrwajPL.Components.Pages.Components;
 
-namespace PrzetrwajPL.Components.Pages;
+namespace PrzetrwajPL.Components.Pages.Posts;
 
 public partial class List
 {

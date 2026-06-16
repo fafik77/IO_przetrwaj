@@ -6,7 +6,7 @@
 		<label>Widoczność na skalę</label>
 		@* min *@
 		<div class="selector-group">
-			<label>Od</label>
+			@* <label>Od</label> *@
             <select class="form-control-region" value="@min">
 				<option value="@RegionPrecision.PL">Polska</option>
 				<option value="@RegionPrecision.WOJ">Województwo</option>
@@ -30,7 +30,7 @@
 
 @code {
 	[Parameter]
-	public RegionPrecision min { get; set; }
+	public RegionPrecision min { get; set; } = RegionPrecision.GMI;
 	[Parameter]
-	public RegionPrecision max{ get; set; }
+	public RegionPrecision max { get; set; } = RegionPrecision.PL;
 }

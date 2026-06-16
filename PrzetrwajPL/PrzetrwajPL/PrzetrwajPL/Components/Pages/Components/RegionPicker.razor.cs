@@ -28,6 +28,13 @@ public partial class RegionPicker
 	public int? SelectedWojId { get; private set; }
 	public int? SelectedPowId { get; private set; }
 	public int? SelectedGmiId { get; private set; }
+	public int? GetRegionId(RegionPrecision regionPrecision) => regionPrecision switch
+	{
+		RegionPrecision.PL => 0,
+		RegionPrecision.WOJ => SelectedWojId,
+		RegionPrecision.POW => SelectedPowId,
+		RegionPrecision.GMI => SelectedGmiId,
+	};
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -263,11 +270,6 @@ public partial class RegionPicker
 		SelectedGmiId = null;
 		powiaty = null;
 		gminy = null;
-	}
-
-	private async Task ResetToId(int id)
-	{
-		await LoadRegionFromId(id);
 	}
 
 	private class GeolocationCoords

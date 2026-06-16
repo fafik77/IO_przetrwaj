@@ -8,7 +8,7 @@ public record CategoryDto
 	public string Name { get; set; } = null!;
 	public CategoryType Type { get; set; }
 
-	public static explicit operator CategoryDto?(Category? category)
+	public static CategoryDto? Map(Category? category)
 	{
 		return category is null ? null : new CategoryDto
 		{

@@ -28,6 +28,6 @@ public class CreateResourceCategoryCommandHandler : ICommandHandler<CreateResour
 		{
 			throw new BadUpdateCommand(ex.InnerException.Message);
 		}
-		return (CategoryDto)category!;
+		return CategoryDto.Map(category)!;
 	}
 }

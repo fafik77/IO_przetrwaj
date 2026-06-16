@@ -28,6 +28,6 @@ internal class CreateDangerCategoryCommandHandler : ICommandHandler<CreateDanger
 		{
 			throw new BadUpdateCommand(ex.InnerException.Message);
 		}
-		return (CategoryDto)category!;
+		return CategoryDto.Map(category)!;
 	}
 }

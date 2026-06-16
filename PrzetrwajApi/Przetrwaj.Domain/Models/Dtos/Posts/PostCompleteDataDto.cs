@@ -3,7 +3,8 @@
 namespace Przetrwaj.Domain.Models.Dtos.Posts;
 
 /// <summary>
-/// Contains all the post data: full title & description, category, region, author, 
+/// Contains all the post data: full title & description, category, region, author.
+/// As well as: votes count, users vote status (that can not be filled in from Post directly).
 /// </summary>
 public class PostCompleteDataDto
 {
@@ -15,7 +16,7 @@ public class PostCompleteDataDto
 	public RegionOnlyDto? Region { get; set; }
 	public LatLong? LatLong { get; set; }
 
-	public UserGeneralDtoSimpleRegion? Author { get; set; }
+	public UserGeneralDtoNoRegion? Author { get; set; }
 	public DateTimeOffset DateCreated { get; set; }
 	public VoteDto? MyVote { get; set; } = null;
 
@@ -28,8 +29,7 @@ public class PostCompleteDataDto
 	public virtual IEnumerable<AttachmentDto?> Attachments { get; set; } = [];
 
 
-
-	public static explicit operator PostCompleteDataDto?(Post? post)
+	public static PostCompleteDataDto? Map(Post? post, string baseUrl)
 	{
 		if (post is null) return null;
 		return post is null ? null : new PostCompleteDataDto
@@ -38,14 +38,14 @@ public class PostCompleteDataDto
 			Title = post.Title,
 			Description = post.Description,
 			//if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
-			Category = (CategoryDto?)post.IdCategoryNavigation,
+			Category = CategoryDto.Map(post.IdCategoryNavigation),
 			CategoryType = post.CategoryType,
-			//Region = (RegionOnlyDto?)post.IdRegionNavigation,
+			Region = RegionOnlyDto.Map(post.RegionNavigation),
 			LatLong = post.Lat is null ? null : new LatLong((double)post.Lat, (double)post.Long!),
-			Author = (UserGeneralDtoSimpleRegion?)post.IdAutorNavigation,
+			Author = (UserGeneralDtoNoRegion?)post.IdAutorNavigation,
 			DateCreated = post.DateCreated,
-			//Attachments = post.Attachments.Select(a => (AttachmentDto?)a).ToList(),
-			Comments = post.Comments.Select(c => (CommentDto)c).ToList(),
+			Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, baseUrl)).ToList(),
+			Comments = post.Comments.Select(c => CommentDto.Map(c)).ToList(),
 		};
 	}
 }

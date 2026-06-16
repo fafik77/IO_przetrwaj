@@ -2,22 +2,21 @@
 using Przetrwaj.Application.Services;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Models.Dtos.Posts;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class AddDangerCommandHandler : ICommandHandler<AddDangerInternallCommand, PostCompleteDataDto>
+public class AddDangerCommandHandler : ICommandHandler<AddDangerInternallCommand, Post>
 {
 	private readonly ICategoryRepository _categoryRepository;
-	private readonly IAddPostService _addPostService;
+	private readonly IPostService _addPostService;
 
-	public AddDangerCommandHandler(ICategoryRepository categoryRepository, IAddPostService addPostService)
+	public AddDangerCommandHandler(ICategoryRepository categoryRepository, IPostService addPostService)
 	{
 		_categoryRepository = categoryRepository;
 		_addPostService = addPostService;
 	}
 
-	public async Task<PostCompleteDataDto> Handle(AddDangerInternallCommand request, CancellationToken cancellationToken)
+	public async Task<Post> Handle(AddDangerInternallCommand request, CancellationToken cancellationToken)
 	{
 		var categories = await _categoryRepository.GetDangersAsync(cancellationToken);
 		var post = new Post

@@ -28,7 +28,7 @@ public static class Extensions
 		services.AddHostedService<UnconfirmedUserCleanupService>();
 		services.AddHostedService<PostArchivingService>();
 		services.AddHostedService<ModeratorRolePendingNotificationService>();
-		services.AddScoped<IAddPostService, AddPostService>();
+		services.AddScoped<IPostService, PostService>();
 		services.AddScoped<IJwtService, JwtService>();
 		return services;
 	}

@@ -80,25 +80,12 @@ internal class PostRepository : IPostRepository
 			LatLong = p.Lat == null ? null : new LatLong(p.Lat!.Value, p.Long!.Value),
 			Comments = p.Comments
 			.OrderByDescending(x => x.DateCreated)
-			.Select(c => new CommentDto
-			{
-				Comment = c.Comment,
-				DateCreated = c.DateCreated,
-				Autor = c.IdAutorNavigation != null ? new UserGeneralDtoSimpleRegion
-				{
-					Id = c.IdAutorNavigation.Id,
-					Name = c.IdAutorNavigation.Name ?? "",
-					Surname = c.IdAutorNavigation.Surname ?? "",
-					IdRegion = (c.IdAutorNavigation.GminaId ?? 0) / 100_000,
-					RegistrationDate = c.IdAutorNavigation.RegistrationDate,
-					BanDate = c.IdAutorNavigation.BanDate,
-				} : null
-			})
+			.Select(c => CommentDto.Map(c))
 			.ToList(),
 			DateCreated = p.DateCreated,
 			// we have to re-map the region (as this is on DB side) later in the code
 			Region = RegionOnlyDto.Map(p.RegionNavigation),
-			Author = (UserGeneralDtoSimpleRegion?)p.IdAutorNavigation,
+			Author = (UserGeneralDtoNoRegion?)p.IdAutorNavigation,
 			// if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = p.CustomCategory.Length > 0 ? new CategoryDto
 			{
@@ -106,7 +93,7 @@ internal class PostRepository : IPostRepository
 				Type = p.IdCategoryNavigation.Type,
 				Name = p.CustomCategory,
 			}
-			: (CategoryDto?)p.IdCategoryNavigation,
+			: CategoryDto.Map(p.IdCategoryNavigation),
 
 			// Fetch only the bool values
 			VotePositive = p.Votes.LongCount(p => p.IsUpvote),
@@ -114,11 +101,8 @@ internal class PostRepository : IPostRepository
 			// Map attachments using the URL logic
 			Attachments = p.Attachments
 			.OrderBy(x => x.OrderInList)    //sort by OrderInList asc
-			.Select(a => new AttachmentDto
-			{
-				AlternateDescription = a.AlternateDescription,
-				FileURL = $"/Attachments/{a.IdAttachment}.webp",
-			}).ToList()
+			.Select(a => AttachmentDto.Map(a, string.Empty))
+			.ToList()
 		})
 		.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 		if (res is null) return null;
@@ -173,7 +157,7 @@ internal class PostRepository : IPostRepository
 				Type = p.IdCategoryNavigation.Type,
 				Name = p.CustomCategory,
 			}
-			: (CategoryDto?)p.IdCategoryNavigation,
+			: CategoryDto.Map(p.IdCategoryNavigation),
 			Region = RegionOnlyDto.Map(p.RegionNavigation),
 			// --- VOTE CALCULATIONS (Executed on Database side) ---
 			VotePositive = p.Votes.LongCount(v => v.IsUpvote),

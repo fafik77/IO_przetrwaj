@@ -28,6 +28,7 @@ public partial class PostController : Controller
 {
 	private readonly IMediator _mediator;
 	private readonly IOptions<JwtSettings> _jwtOptions;
+	private readonly IHttpContextAccessor _httpContextAccessor;
 
 	public PostController(IMediator mediator, IOptions<JwtSettings> jwtOptions)
 	{
@@ -261,7 +262,9 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(postI, CT);
-			return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
+			string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
+			var dto = PostCompleteDataDto.Map(res, HttpPath);
+			return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
 		}
 		catch (BaseException ex)
 		{
@@ -288,7 +291,9 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(postI, CT);
-			return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
+			string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
+			var dto = PostCompleteDataDto.Map(res, HttpPath);
+			return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
 		}
 		catch (BaseException ex)
 		{

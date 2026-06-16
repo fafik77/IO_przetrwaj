@@ -2,7 +2,7 @@
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using System.ComponentModel.DataAnnotations;
 
-namespace Przetrwaj.Application.Quaries.Posts;
+namespace Przetrwaj.Application.Queries.Posts;
 
 public class GetPostByIdQuery : IQuery<PostCompleteDataDto>
 {

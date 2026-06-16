@@ -55,12 +55,11 @@ builder.Services.AddHttpClient(Consts.PrzetrwajApiClientName, client =>
 .AddHttpMessageHandler<JwtAuthorizationHandler>()   // include JWT in AuthHeader
 .AddHttpMessageHandler<TokenRefreshHandler>();      // retry login with RefreshToken
 
-//make the same client injection for RefreshToken (only with the JwtAuthorizationHandler, do not include the TokenRefreshHandler)
+//make the same client (same Uri) for RefreshToken (do not include the TokenRefreshHandler | JwtAuthorizationHandler as they make in infinite loop)
 builder.Services.AddHttpClient(Consts.PrzetrwajApiRefreshClientName, client =>
 {
 	client.BaseAddress = new Uri(PrzetrwajApiUri);
-})
-.AddHttpMessageHandler<JwtAuthorizationHandler>();   // include JWT in AuthHeader
+});
 
 
 var app = builder.Build();

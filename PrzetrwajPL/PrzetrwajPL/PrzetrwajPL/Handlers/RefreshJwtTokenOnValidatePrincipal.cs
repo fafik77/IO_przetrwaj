@@ -37,6 +37,7 @@ public static class RefreshJwtTokenOnValidatePrincipal
 		try
 		{
 			var refreshPayload = new { refreshToken };
+			refreshClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 			var refreshResponse = await refreshClient.PostAsJsonAsync("Account/refresh-token", refreshPayload);
 
 			if (refreshResponse.IsSuccessStatusCode)

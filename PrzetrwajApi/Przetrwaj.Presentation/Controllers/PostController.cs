@@ -249,6 +249,8 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
+	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
+	[RequestSizeLimit(50 << 20)] //up to 50 MB
 	public async Task<IActionResult> AddDanger(AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
@@ -278,6 +280,8 @@ public partial class PostController : Controller
 	[Authorize(UserRoles.Moderator)]
 	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
+	[RequestSizeLimit(50 << 20)] //up to 50 MB
 	public async Task<IActionResult> AddResource(AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);

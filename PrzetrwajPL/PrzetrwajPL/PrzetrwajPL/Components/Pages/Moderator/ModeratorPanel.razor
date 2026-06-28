@@ -1,0 +1,20 @@
+﻿@page "/moderator/panel"
+
+@rendermode InteractiveServer
+@inject IHttpClientFactory ClientFactory
+
+<PageTitle>Panel moderatora - Przetrwaj PL</PageTitle>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div style="text-align: center">
+	<h1>Panel moderatora</h1>
+	<div class="cascade-selectors">
+		<a href="/moderator/categories-danger">Zarządzaj kategoriami zagrożeń</a>
+		<a href="/moderator/categories-resource">Zarządzaj kategoriami zasobów</a>
+		<a href="/moderator/impediments">Zarządzaj listą typów ludzi</a>
+	</div>
+</div>
+
+@code {
+
+}

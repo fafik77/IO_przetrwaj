@@ -7,6 +7,7 @@ public record CategoryDto
 	public int Id { get; set; }
 	public string Name { get; set; } = null!;
 	public CategoryType Type { get; set; }
+	public int Impediments { get; set; } = 0;
 
 	public static CategoryDto? Map(Category? category)
 	{
@@ -14,7 +15,8 @@ public record CategoryDto
 		{
 			Id = category.IdCategory,
 			Name = category.Name,
-			Type = category.Type
+			Type = category.Type,
+			Impediments = category.Impediments,
 		};
 	}
 }

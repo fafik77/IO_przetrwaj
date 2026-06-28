@@ -1,0 +1,35 @@
+﻿.cascade-selectors {
+	display: inline-flex;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+	.cascade-selectors a {
+		text-decoration: none;
+		background-color: #fff;
+		color: #0094ff;
+		padding: 10px 40px;
+		font-size: 16px;
+		border: 2px solid #0094ff;
+		border-radius: 4px;
+		cursor: pointer;
+		font-weight: bold;
+	}
+
+		.cascade-selectors a:hover {
+			opacity: 0.8;
+		}
+
+.left-div {
+/*	max-width: 50%;*/
+/*	width:50%;*/
+}
+
+.right-div {
+/*	max-width: 50%;*/
+/*	width: 50%;*/
+}
+
+.category-list{
+
+}

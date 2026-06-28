@@ -27,7 +27,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-		categories = await client.GetFromJsonAsync<List<CategoryDto>>("/Categories/Dangers");
+		categories = await client.GetFromJsonAsync<List<CategoryDto>>("/Categories/dangers");
 	}
 
 	private async Task OnChange(ChangeEventArgs e)

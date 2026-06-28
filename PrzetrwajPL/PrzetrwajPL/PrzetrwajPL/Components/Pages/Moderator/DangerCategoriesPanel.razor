@@ -1,0 +1,55 @@
+﻿@page "/moderator/categories-danger"
+@using PrzetrwajPL.Components.Pages.Components
+
+@rendermode InteractiveServer
+@inject IHttpClientFactory ClientFactory
+
+<PageTitle>Zarządzaj kategoriami zagrożeń - Przetrwaj PL</PageTitle>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div style="text-align: center">
+	<h1>Panel moderatora</h1>
+	<h2>Zarządzaj kategoriami zagrożeń</h2>
+</div>
+
+<div class="cascade-selectors" style="text-align: inherit">
+	@* Left side with add new button and categories list *@
+	<div class="left-div">
+		<button type="button" class="button white-button-blue-text">
+			Dodaj nową kategorię
+		</button>
+		<div class="category-list">
+			<div class="category-item">
+				<span>1.</span>
+				<span>Category</span>
+			</div>
+			<div class="category-item">
+				<span>2.</span>
+				<span>Category</span>
+			</div>
+		</div>
+	</div>
+
+	@* Right side with edit box and impediments*@
+	<div class="right-div">
+		Id: 1
+		Nazwa:
+		Category
+		Dotyczy:
+		<div class="picker-container">
+			@* Picker with animation *@
+			<div class="picker-slider @(isPreferencesCheckboxGridOpen ? "expanded" : "collapsed")">
+				<div class="picker-inner-content">
+					<div class="picker">
+						<CheckboxGrid @ref="AppliesToCheckboxGrid" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	bool isPreferencesCheckboxGridOpen = false;
+	CheckboxGrid AppliesToCheckboxGrid;
+}

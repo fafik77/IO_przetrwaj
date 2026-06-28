@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Przetrwaj.Application.Commands.Categories;
 using Przetrwaj.Application.Commands.Categories.Resources;
 using Przetrwaj.Application.Quaries.Categories;
 using Przetrwaj.Domain;
@@ -35,19 +36,19 @@ public class ResourceCategoriesController : ControllerBase
 		return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
 	}
 
-	[HttpPut]
+	[HttpPut("{id:int}")]
 	[Authorize(UserRoles.Moderator)]
 	[Consumes("application/json")]
 	[SwaggerOperation("Update a Resource category (Moderator)")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> Update([FromBody] UpdateResourceCategoryCommand cmd, CancellationToken ct)
+	public async Task<IActionResult> Update([FromRoute] int id, [FromBody] AddUpdateCategory cmd, CancellationToken ct)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		try
 		{
-			await _mediator.Send(cmd, ct);
+			await _mediator.Send(new UpdateResourceCategoryCommand { Category = cmd, Id = id }, ct);
 			return NoContent();
 		}
 		catch (BaseException ex)
@@ -71,7 +72,7 @@ public class ResourceCategoriesController : ControllerBase
 
 
 	[HttpGet]
-	[SwaggerOperation("List all Resource categories")]
+	[SwaggerOperation("List all Resource categories (order by ID)")]
 	[ProducesResponseType(typeof(IEnumerable<CategoryDto>), StatusCodes.Status200OK)]
 	public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAll(CancellationToken ct)
 	{

@@ -32,7 +32,7 @@ namespace PrzetrwajPL.Components.Pages
 
 		private async Task UploadAll()
 		{
-			if (string.IsNullOrEmpty(PostId) || !Attachments.Any()) return;
+			if (string.IsNullOrEmpty(PostId) || Attachments.Count == 0) return;
 
 			isUploading = true;
 			try

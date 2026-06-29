@@ -5,4 +5,5 @@ public class CategoryDto
 	public int Id { get; set; }
 	public string Name { get; set; } = null!;
 	public CategoryType Type { get; set; }
+	public int Impediments { get; set; }
 }

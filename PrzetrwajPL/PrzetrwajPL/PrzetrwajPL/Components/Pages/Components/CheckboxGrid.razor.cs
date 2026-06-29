@@ -3,7 +3,7 @@ namespace PrzetrwajPL.Components.Pages.Components;
 public partial class CheckboxGrid
 {
 	private Dictionary<int, CheckboxItem> _slots = new();
-	public Dictionary<int, string> KeyLabelPairs { get; set; } = new();
+	public Dictionary<int, string> KeyLabelPairs { get; protected set; } = new();
 
 	/// <summary>
 	/// Dynamicly updates checkbox in slot [0; 31]
@@ -51,14 +51,18 @@ public partial class CheckboxGrid
 
 	public void CheckItem(int index, bool check) => _slots[index].IsChecked = check;
 
-	public void LoadFromIntBitField(int bits, Dictionary<int, string> KeyLabelPairs)
+	public void LoadKeyLabelPairs(Dictionary<int, string> KeyLabelPairs)
 	{
+		if (KeyLabelPairs.Count == 0) return;
+		_slots.Clear();
 		this.KeyLabelPairs = KeyLabelPairs;
 		foreach (var item in KeyLabelPairs)
-		{
 			AddCheckbox(item.Key, item.Value, updateState: false);
-		}
 		StateHasChanged();
+	}
+
+	protected void LoadFromIntBitField(int bits)
+	{
 		int pos = 0;
 		while (bits != 0)
 		{
@@ -69,6 +73,13 @@ public partial class CheckboxGrid
 			bits >>= 1;
 			pos++;
 		}
+		StateHasChanged();
+	}
+
+	public void LoadFromIntBitField(int bits, Dictionary<int, string> KeyLabelPairs)
+	{
+		LoadKeyLabelPairs(KeyLabelPairs);
+		LoadFromIntBitField(bits);
 	}
 
 	public int GetSelectedAsIntBitField()

@@ -24,7 +24,7 @@ public partial class UserSettings
 	private string successMessage = string.Empty;
 	private RegionPicker? myRegionPicker;
 	private bool isRegionPickerOpen = false;
-	private CheckboxGrid? preferencesCheckboxGrid;
+	private ImpedimentsCheckboxGrid? preferencesCheckboxGrid;
 	private bool isPreferencesCheckboxGridOpen = false;
 	private int userRegionId = -1;
 	private string? oldEmail;
@@ -55,7 +55,6 @@ public partial class UserSettings
 			// start fetching full user data from API
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var getUserDetailsTask = client.GetAsync("/Account");
-			var getImpedimentsTask = client.GetAsync("/Impediments");
 
 			// in the meantime populate something from the token
 			try
@@ -81,7 +80,6 @@ public partial class UserSettings
 
 			// populate everything from the user info
 			var userDetails = await getUserDetailsTask;
-			var impedimentsResponse = await getImpedimentsTask;
 			if (userDetails.IsSuccessStatusCode)
 			{
 				var userInfo = await userDetails.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
@@ -92,8 +90,7 @@ public partial class UserSettings
 					UserUpdateRequest.Surname = userInfo.Surname;
 					UserUpdateRequest.Email = userInfo.Email;
 					UserUpdateRequest.Impediments = userInfo.Impediments;
-					var impediments = await impedimentsResponse.Content.ReadFromJsonAsync<Dictionary<int, string>>() ?? new();
-					preferencesCheckboxGrid.LoadFromIntBitField(userInfo.Impediments, impediments);
+					await preferencesCheckboxGrid?.LoadFromIntBitFieldAsync(userInfo.Impediments);
 
 					// Store region ID to set the picker later
 					if (userInfo.Region != null)

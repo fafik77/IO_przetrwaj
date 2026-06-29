@@ -14,13 +14,13 @@
 	<div class="cascade-selectors">
 		<AuthorizeView Policy="@UserRoles.User">
 			<Authorized>
-				<a href="/addPost">Dodaj Post o Zagrożeniu</a>
+				<a href="/add-post-danger">Dodaj Post o Zagrożeniu</a>
 			</Authorized>
 		</AuthorizeView>
 
 		<AuthorizeView Policy="@UserRoles.Moderator">
 			<Authorized>
-				<a href="/addPost">Dodaj Post o Zasobie</a>
+				<a href="/add-post-resource">Dodaj Post o Zasobie</a>
 			</Authorized>
 		</AuthorizeView>
 	</div>

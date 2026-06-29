@@ -1,4 +1,5 @@
-﻿@page "/addPost"
+﻿@page "/add-post-{PostType}"
+@* valid values for API are: (danger, resource) *@
 @rendermode InteractiveServer
 
 @namespace PrzetrwajPL.Components.Pages.Components
@@ -8,7 +9,7 @@
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Nav
 
-<h3>Dodaj nowe zagrożenie</h3>
+<h3>Dodaj nowe zagrożenie -@PostType</h3>
 
 <EditForm Model="@model" OnValidSubmit="HandleSubmit">
     <DataAnnotationsValidator />
@@ -28,7 +29,7 @@
 
     <div class="mb-3">
         <label>Kategoria</label>
-		<DangerCategoryPicker @ref="DangerCategoryPicker" @bind-SelectedCategoryId="model.IdCategory" />
+		<CategoryPicker @ref="CategoryPicker" @bind-SelectedCategoryId="model.IdCategory" CategoriesTypeNamePlural="@PostTypePlural" />
 		<ValidationMessage For="@(() => model.IdCategory)" style="color:red; font-size: 12px;" />
     </div>
 
@@ -70,9 +71,14 @@
 }
 
 @code {
+	[Parameter]
+	public string PostType { get; set; } = string.Empty;
+	public string PostApiEndpoint => "/Posts/" + PostType;
+	public string PostTypePlural => PostType + "s";
+
 	private EditContext? editContext;
 	private ValidationMessageStore? messageStore;
-	private DangerCategoryPicker DangerCategoryPicker;
+	private CategoryPicker CategoryPicker;
 
 	private AddPostCommand model = new() { Title = "" };
 	private string? error;
@@ -107,11 +113,11 @@
 			error = "Post musi przynależeć do kategori";
 			return;
 		}
-		else if (InneCategoryRegex.IsMatch(DangerCategoryPicker.SelectedCategoryName ?? string.Empty))
+		else if (InneCategoryRegex.IsMatch(CategoryPicker.SelectedCategoryName ?? string.Empty))
 		{
-			if (string.IsNullOrWhiteSpace(model.CustomCategory) || model.CustomCategory.Length < 3 || model.CustomCategory.Length > 60)
+			if (string.IsNullOrWhiteSpace(model.CustomCategory) || model.CustomCategory.Length < 3 || model.CustomCategory.Length > 100)
 			{
-				error = "Własna kategoria musi mieć od 3 do 60 znaków";
+				error = "Własna kategoria musi mieć od 3 do 100 znaków";
 				messageStore?.Add(() => model.CustomCategory, error);
 				// Notify the context that validation state has changed to show the message in the UI
 				editContext?.NotifyValidationStateChanged();
@@ -122,7 +128,7 @@
 		try
 		{
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-			var response = await client.PostAsJsonAsync("/Posts/Danger", model);
+			var response = await client.PostAsJsonAsync(PostApiEndpoint, model);
 
 			if (response.IsSuccessStatusCode)
 			{

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Requests;
@@ -5,10 +6,12 @@ using PrzetrwajPL.Components.Pages.Components;
 
 namespace PrzetrwajPL.Components.Pages.Moderator;
 
-public partial class DangerCategoriesPanel
+public partial class CategoriesPanel
 {
-	public required string CategoriesToReach { get; set; } = "dangers";
-	private string CategoriesToReachEndpoint => "/Categories/" + CategoriesToReach;
+	[Parameter]
+	public required string CategoriesType { get; set; } = "dangers";
+	private string CategoriesToReachEndpoint => "/Categories/" + CategoriesType;
+	private string CategoriesPlName => CategoriesType.Equals("dangers", StringComparison.OrdinalIgnoreCase) ? "zagro¿eñ" : "zasobów";
 	private List<CategoryDto>? categories;
 	private CategoryDto? currentCategory;
 

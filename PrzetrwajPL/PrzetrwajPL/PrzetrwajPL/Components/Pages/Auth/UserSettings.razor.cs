@@ -63,49 +63,28 @@ public partial class UserSettings
 				UserUpdateRequest.Email = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 				UserUpdateRequest.Name = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimNames.Name)?.Value;
 				UserUpdateRequest.Surname = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimNames.Surname)?.Value;
+				var impedimentsStr = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimNames.Impediments)?.Value;
 				if (!string.IsNullOrEmpty(regionStr)) UserUpdateRequest.GminaId = userRegionId = int.Parse(regionStr);
+				if (!string.IsNullOrEmpty(impedimentsStr)) UserUpdateRequest.Impediments = int.Parse(impedimentsStr);
 			}
 			catch (Exception)
 			{
 				// fail silently as this was only the local cookie which might have been corrupted or missing!
 			}
 
-			//show the succesfully applied message when redirected from this:"/account/refresh-cookie?"...
-			if (!string.IsNullOrEmpty(Success))
-			{
-				successMessage = Success;
-				await myRegionPicker.LoadRegionFromId(userRegionId);
-				return;
-			}
 
-			// populate everything from the user info
-			var userDetails = await getUserDetailsTask;
-			if (userDetails.IsSuccessStatusCode)
-			{
-				var userInfo = await userDetails.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
-				if (userInfo != null)
-				{
-					// Map data to the update command
-					UserUpdateRequest.Name = userInfo.Name;
-					UserUpdateRequest.Surname = userInfo.Surname;
-					UserUpdateRequest.Email = userInfo.Email;
-					UserUpdateRequest.Impediments = userInfo.Impediments;
-					await preferencesCheckboxGrid?.LoadFromIntBitFieldAsync(userInfo.Impediments);
 
-					// Store region ID to set the picker later
-					if (userInfo.Region != null)
-					{
-						UserUpdateRequest.GminaId = userRegionId = userInfo.Region.Id;
-					}
-				}
-			}
+			// populate everything from the user info (if not redirected from refresh)
+			if (string.IsNullOrEmpty(Success))
+				await GetUserDetailsFromApi(getUserDetailsTask);
 			else
-			{
-				errorMessage = "Nie uda³o siê pobraæ danych u¿ytkownika.";
-			}
+				//show the succesfully applied message when redirected from this:"/account/refresh-cookie?"...
+				successMessage = Success;
 
+			//otherwise only populate from local data
 			oldEmail = UserUpdateRequest.Email;
 			await myRegionPicker.LoadRegionFromId(userRegionId);
+			await preferencesCheckboxGrid.LoadFromIntBitFieldAsync(UserUpdateRequest.Impediments ?? 0);
 		}
 		catch (Exception ex)
 		{
@@ -114,6 +93,31 @@ public partial class UserSettings
 		finally
 		{
 			isLoading = false;
+		}
+	}
+
+	private async Task GetUserDetailsFromApi(Task<HttpResponseMessage> getUserDetailsTask)
+	{
+		var userDetails = await getUserDetailsTask;
+		if (userDetails.IsSuccessStatusCode)
+		{
+			var userInfo = await userDetails.Content.ReadFromJsonAsync<UserWithPersonalDataDto>();
+			if (userInfo != null)
+			{
+				// Map data to the update command
+				UserUpdateRequest.Name = userInfo.Name;
+				UserUpdateRequest.Surname = userInfo.Surname;
+				UserUpdateRequest.Email = userInfo.Email;
+				UserUpdateRequest.Impediments = userInfo.Impediments;
+
+				// Store region ID to set the picker later
+				if (userInfo.Region != null)
+					UserUpdateRequest.GminaId = userRegionId = userInfo.Region.Id;
+			}
+		}
+		else
+		{
+			errorMessage = "Nie uda³o siê pobraæ danych u¿ytkownika.";
 		}
 	}
 

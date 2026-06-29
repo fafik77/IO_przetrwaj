@@ -35,36 +35,3 @@ div p {
     white-space: pre-wrap;
 }
 
-.picker-conteiner {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-
-
-
-
-
-
-/* Region button showing the picked region */
-.btn-toggle-picker {
-	background-color: #e6f4ff;
-	color: #0094ff;
-	border: 1px solid #bae7ff;
-	padding: 2px 4px;
-	border-radius: 6px;
-	cursor: pointer;
-	font-weight: 600;
-	font-size: 14px;
-	display: inline-flex;
-	align-items: center;
-	transition: all 0.2s ease-in-out;
-	margin-bottom: 8px;
-	width: auto;
-}
-
-	.btn-toggle-picker:hover {
-		background-color: #bae7ff;
-		color: #007adb;
-	}

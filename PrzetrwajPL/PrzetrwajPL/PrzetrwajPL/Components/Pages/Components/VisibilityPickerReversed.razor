@@ -1,0 +1,22 @@
+﻿@namespace PrzetrwajPL.Components.Pages.Components
+@using Przetrwaj.CommonLibrary.Models
+
+<div class="picker-box">
+	<div class="cascade-selectors">
+		<label>Widoczność posta</label>
+		@* min *@
+		<div class="selector-group">
+			<select class="form-control-region" value="@visibility">
+				<option value="@RegionPrecision.GMI" selected>Gmina</option>
+				<option value="@RegionPrecision.POW">Powiat</option>
+				<option value="@RegionPrecision.WOJ">Województwo</option>
+				<option value="@RegionPrecision.PL">Polska</option>
+			</select>
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public RegionPrecision visibility { get; set; } = RegionPrecision.GMI;
+}

@@ -19,7 +19,7 @@ public class AddPostCommand
 	public string? CustomCategory { get; set; }
 
 	[Required(ErrorMessage = "Lokalizacja zdarzenia jest wymagana")]
-	public LatLong LatLong { get; set; }
+	public LatLong LatLong { get; set; } = new(0, 0);
 
 
 	public RegionPrecision RegionPrecision { get; set; } = RegionPrecision.GMI;

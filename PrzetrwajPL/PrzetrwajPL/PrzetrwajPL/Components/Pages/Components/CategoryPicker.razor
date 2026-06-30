@@ -3,7 +3,7 @@
 @inject IHttpClientFactory ClientFactory
 
 <select class="form-select" @onchange="OnChange">
-	<option value="0">-- wybierz kategorię @NamePl --</option>
+	<option value="-1">-- wybierz kategorię @NamePl --</option>
 
     @if (categories != null)
     {
@@ -25,6 +25,7 @@
 	protected string NamePl => CategoriesTypeNamePlural.StartsWith("dangers", StringComparison.OrdinalIgnoreCase) ? "zagrożenia" : "zasobu";
 
 	public string? SelectedCategoryName { get; private set; }
+	public bool IsCategorySelected => SelectedCategoryId > 0;
 
 	private List<CategoryDto>? categories;
 

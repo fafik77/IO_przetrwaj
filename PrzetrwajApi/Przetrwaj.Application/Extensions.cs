@@ -27,6 +27,7 @@ public static class Extensions
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddHostedService<UnconfirmedUserCleanupService>();
 		services.AddHostedService<PostArchivingService>();
+		services.AddHostedService<ExpiredTokenCleanupService>();
 		services.AddHostedService<ModeratorRolePendingNotificationService>();
 		services.AddScoped<IPostService, PostService>();
 		services.AddScoped<IJwtService, JwtService>();

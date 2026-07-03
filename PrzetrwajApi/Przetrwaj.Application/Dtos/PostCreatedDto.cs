@@ -5,7 +5,7 @@ namespace Przetrwaj.Application.Dtos;
 
 public class PostCreatedDto
 {
-	public PostOverviewDto Post { get; set; }
+	public required PostOverviewDto Post { get; set; }
 	public AddAttachmentsResult? Attachments { get; set; }
 
 	public static PostCreatedDto Map((Post, AddAttachmentsResult?) res, string httpPath)

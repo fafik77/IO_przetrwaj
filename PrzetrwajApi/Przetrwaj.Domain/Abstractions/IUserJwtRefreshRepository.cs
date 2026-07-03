@@ -10,6 +10,10 @@ public interface IUserJwtRefreshRepository
 	void Update(UserJwtRefresh userJwtRefresh);
 	Task DeleteAsync(UserJwtRefresh userJwtRefresh, CancellationToken ct);
 	Task DeleteAsync(string userId, string tokenId, CancellationToken ct);
+	/// <summary>
+	/// Removes all entries older than a point in time
+	/// </summary>
+	/// <param name="dateTimeOffset">Point in time that removes entries older than specyfid time</param>
 	Task DeleteEntriesOlderThanAsync(DateTimeOffset dateTimeOffset, CancellationToken ct);
 	Task DeleteAllAsync(string userId, CancellationToken ct);
 }

@@ -45,7 +45,7 @@ public class UnconfirmedUserCleanupService : BackgroundService
 		// Fetch users: Email unconfirmed AND RegistrationDate (or similar field) is older than 24 hours
 		// ASP.NET Identity's ApplicationUser doesn't have a default RegistrationDate, so you must add it.
 		var staleUsers = userManager.Users
-			.Where(u => !u.EmailConfirmed && u.RegistrationDate < cutoffDate) // Assuming you added RegistrationDate to ApplicationUser
+			.Where(u => !u.EmailConfirmed && u.RegistrationDate < cutoffDate)
 			.ToList();
 		if (staleUsers.Count == 0)
 		{

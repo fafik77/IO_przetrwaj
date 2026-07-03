@@ -1,4 +1,5 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
+using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Services;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions.Posts;

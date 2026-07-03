@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Przetrwaj.Application.Configuration.Commands;
+using Przetrwaj.Application.Dtos;
 
 namespace Przetrwaj.Application.Commands.Posts.Attachments;
 

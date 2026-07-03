@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
+using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Helpers;
 using Przetrwaj.Application.Quaries.Posts;
 using Przetrwaj.Application.Queries.Posts;
@@ -246,7 +247,7 @@ public partial class PostController : Controller
 	[HttpPost("danger")]
 	[SwaggerOperation("Add a Danger post (User)")]
 	[Authorize(UserRoles.User)]
-	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(PostCreatedDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
 	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
@@ -265,8 +266,8 @@ public partial class PostController : Controller
 		{
 			var res = await _mediator.Send(postI, CT);
 			string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
-			var dto = PostCompleteDataDto.Map(res, HttpPath);
-			return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+			var dto = PostCreatedDto.Map(res, HttpPath);
+			return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
 		}
 		catch (BaseException ex)
 		{
@@ -278,7 +279,7 @@ public partial class PostController : Controller
 	[HttpPost("resource")]
 	[SwaggerOperation("Add a Resource post (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(PostCreatedDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
 	[RequestSizeLimit(50 << 20)] //up to 50 MB
@@ -296,8 +297,8 @@ public partial class PostController : Controller
 		{
 			var res = await _mediator.Send(postI, CT);
 			string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
-			var dto = PostCompleteDataDto.Map(res, HttpPath);
-			return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+			var dto = PostCreatedDto.Map(res, HttpPath);
+			return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
 		}
 		catch (BaseException ex)
 		{

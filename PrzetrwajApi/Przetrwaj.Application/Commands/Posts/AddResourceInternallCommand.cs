@@ -1,10 +1,11 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
+using Przetrwaj.Application.Dtos;
 using Przetrwaj.Domain.Entities;
 using System.Security.Claims;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public record AddResourceInternallCommand : ICommand<Post>
+public record AddResourceInternallCommand : ICommand<(Post, AddAttachmentsResult?)>
 {
 	public required AddPostCommand AddPostCommand { get; set; }
 	public CategoryType Category { get; set; } = CategoryType.Resource;

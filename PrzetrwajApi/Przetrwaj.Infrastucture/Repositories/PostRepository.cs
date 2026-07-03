@@ -57,11 +57,13 @@ internal class PostRepository : IPostRepository
 
 	public async Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default)
 	{
+#pragma warning disable CA1862 // the 'StringComparison' method is not allowed on the DB side
 		var posts = await _context.Posts
 			.Where(p => p.Active == true && p.IdAutor == idAuthor.ToLower())
 			.Include(p => p.IdCategoryNavigation)
 			.Select(p => SelectAsPostOverview(p))
 			.ToListAsync(cancellationToken);
+#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
 		return posts;
 	}
 
@@ -144,26 +146,7 @@ internal class PostRepository : IPostRepository
 	/// </summary>
 	/// <param name="p">the post on which DB is running Select</param>
 	/// <returns>PostOverviewDto</returns>
-	private static PostOverviewDto SelectAsPostOverview(Post p)
-	{
-		return new PostOverviewDto
-		{
-			Id = p.IdPost,
-			Title = p.Title,
-			DateCreated = p.DateCreated,
-			Category = p.CustomCategory.Length > 0 ? new CategoryDto
-			{
-				Id = p.IdCategory,
-				Type = p.IdCategoryNavigation.Type,
-				Name = p.CustomCategory,
-			}
-			: CategoryDto.Map(p.IdCategoryNavigation),
-			Region = RegionOnlyDto.Map(p.RegionNavigation),
-			// --- VOTE CALCULATIONS (Executed on Database side) ---
-			VotePositive = p.Votes.LongCount(v => v.IsUpvote),
-			VoteNegative = p.Votes.LongCount(v => !v.IsUpvote),
-		};
-	}
+	private static PostOverviewDto SelectAsPostOverview(Post p) => PostOverviewDto.Map(p);
 
 	/// <summary>
 	/// The new optimal metod to get Posts

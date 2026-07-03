@@ -1,11 +1,12 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
+using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Services;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class AddResourceCommandHandler : ICommandHandler<AddResourceInternallCommand, Post>
+public class AddResourceCommandHandler : ICommandHandler<AddResourceInternallCommand, (Post, AddAttachmentsResult?)>
 {
 	private readonly ICategoryRepository _categoryRepository;
 	private readonly IPostService _addPostService;
@@ -16,7 +17,7 @@ public class AddResourceCommandHandler : ICommandHandler<AddResourceInternallCom
 		_addPostService = addPostService;
 	}
 
-	public async Task<Post> Handle(AddResourceInternallCommand request, CancellationToken cancellationToken)
+	public async Task<(Post, AddAttachmentsResult?)> Handle(AddResourceInternallCommand request, CancellationToken cancellationToken)
 	{
 		IEnumerable<CategoryResource> categories = await _categoryRepository.GetResourcesAsync(cancellationToken);
 		var post = new Post

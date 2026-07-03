@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
+using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
@@ -30,7 +31,7 @@ public interface IPostService
 	/// <param name="ClaimsPrincipal">requesting user claims (only Moderator+ can add Resource Posts)</param>
 	/// <param name="cancellationToken">Cancellation Token</param>
 	/// <returns></returns>
-	public Task<Post> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, ClaimsPrincipal ClaimsPrincipal, CancellationToken cancellationToken);
+	public Task<(Post, AddAttachmentsResult?)> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, ClaimsPrincipal ClaimsPrincipal, CancellationToken cancellationToken);
 
 	/// <summary>
 	/// Adds attachments to a post
@@ -67,7 +68,7 @@ internal class PostService : IPostService
 		_httpContextAccessor = contextAccessor;
 	}
 
-	public async Task<Post> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, ClaimsPrincipal ClaimsPrincipal, CancellationToken ct)
+	public async Task<(Post, AddAttachmentsResult?)> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, ClaimsPrincipal ClaimsPrincipal, CancellationToken ct)
 	{
 		#region Claims to RegionPrecision Visibility check
 		switch (addPostData.RegionPrecision)
@@ -146,12 +147,13 @@ internal class PostService : IPostService
 			throw new PostNotValidException(ex.InnerException.Message);
 		}
 
+		AddAttachmentsResult? attachments = null;
 		if (addPostData.Attachments != null)
 		{
-			await AddAttachments(addPostData.Attachments, post, ct);
+			attachments = await AddAttachments(addPostData.Attachments, post, ct);
 		}
 
-		return post;
+		return (post, attachments);
 	}
 
 	private async Task<(short Woj, short Pow, int Gmi)> RegionFromLocationAsync(LatLong latLong, RegionPrecision regionPrecision, CancellationToken ct)

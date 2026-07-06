@@ -11,7 +11,7 @@
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 
-<h3>Dodaj nowe zagrożenie - @PostType</h3>
+<h3>Dodaj nowy post o @PostTypeAboutPl</h3>
 
 <EditForm Model="@model" OnValidSubmit="HandleSubmit">
 	<DataAnnotationsValidator />
@@ -31,7 +31,7 @@
 
 	<div class="mb-3">
 		<label>Kategoria</label>
-		<CategoryPicker @ref="CategoryPicker" @bind-SelectedCategoryId="model.IdCategory" CategoriesTypeNamePlural="@PostTypePlural" />
+		<CategoryPicker @ref="CategoryPicker" @bind-SelectedCategoryId="model.IdCategory" CategoriesTypeToPickPlural="@PostTypePlural" />
 		<ValidationMessage For="@(() => model.IdCategory)" style="color:red; font-size: 12px;" />
 	</div>
 
@@ -71,6 +71,11 @@
 		</div>
 	</AuthorizeView>
 
+	@* Attachments *@
+	<div class="card mb-3">
+		<ImageAttachments @ref="ImageAttachments" OnAttachmentsChanged="StateHasChanged" />
+	</div>
+
 	<button class="btn btn-primary" type="submit">Dodaj post</button>
 </EditForm>
 
@@ -105,11 +110,13 @@
 	private const string initializeLocationPickerMapJsName = "initializeLocationPickerMap";
 	private const string locationPickerMapId = "locationPickerMap";
 	private const string setLocationOnMapJsName = "setLocationOnMap";
+	private string PostTypeAboutPl => PostType.Equals("resource", StringComparison.OrdinalIgnoreCase) ? "zasobie" : "zagrożeniu";
 
 	private EditContext? editContext;
 	private ValidationMessageStore? messageStore;
 	private CategoryPicker? CategoryPicker;
 	private VisibilityPickerReversed? visibilityPickerReversed;
+	private ImageAttachments? ImageAttachments;
 
 	private AddPostCommand model = new() { Title = "" };
 	private string? error;

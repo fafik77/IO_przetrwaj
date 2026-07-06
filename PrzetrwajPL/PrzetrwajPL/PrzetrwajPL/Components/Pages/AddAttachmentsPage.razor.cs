@@ -1,66 +1,50 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
+ï»¿using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Logic;
-using Przetrwaj.CommonLibrary.Requests;
+using PrzetrwajPL.Components.Pages.Components;
 
-namespace PrzetrwajPL.Components.Pages
+namespace PrzetrwajPL.Components.Pages;
+
+public partial class AddAttachmentsPage
 {
-	public partial class AddAttachmentsPage
+	[Parameter]
+	public string? PostId { get; set; }
+
+	private ImageAttachments? attachmentsComponent;
+	private bool isUploading = false;
+	private string? message;
+
+	private async Task UploadAll()
 	{
-		[Parameter, SupplyParameterFromQuery(Name = "post")]
-		public string? PostId { get; set; }
+		var items = attachmentsComponent?.Items;
+		if (string.IsNullOrEmpty(PostId) || items == null || items.Count == 0) return;
 
-		private List<AttachmentItem> Attachments = new();
-		private bool isUploading = false;
-		private string? message;
-
-		private void LoadFiles(InputFileChangeEventArgs e)
+		isUploading = true;
+		try
 		{
-			//Attachments.Clear();
-			message = null;
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 
-			// Filter for image types only
-			var files = e.GetMultipleFiles(10).Where(f => f.ContentType.StartsWith("image/"));
+			// Pass the single unified list to the logic helper
+			(string url, MultipartFormDataContent data) = CreateUploadAttachments.CreateData(PostId, items);
 
-			foreach (var file in files)
+			var response = await client.PostAsync(url, data);
+
+			if (response.IsSuccessStatusCode)
 			{
-				if (Attachments.Count >= 10) break;
-				Attachments.Add(new AttachmentItem { File = file, AltDescription = string.Empty });
+				Nav.NavigateTo($"/post/{PostId}");
+			}
+			else
+			{
+				message = $"BÅ‚Ä…d serwera: {response.StatusCode}";
 			}
 		}
-
-		private async Task UploadAll()
+		catch (Exception ex)
 		{
-			if (string.IsNullOrEmpty(PostId) || Attachments.Count == 0) return;
-
-			isUploading = true;
-			try
-			{
-				var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-
-				// Pass the single unified list to the logic helper
-				(string url, MultipartFormDataContent data) = CreateUploadAttachments.CreateData(PostId, Attachments);
-
-				var response = await client.PostAsync(url, data);
-
-				if (response.IsSuccessStatusCode)
-				{
-					Nav.NavigateTo($"/post/{PostId}");
-				}
-				else
-				{
-					message = $"B³¹d serwera: {response.StatusCode}";
-				}
-			}
-			catch (Exception ex)
-			{
-				message = $"B³¹d po³¹czenia: {ex.Message}";
-			}
-			finally
-			{
-				isUploading = false;
-			}
+			message = $"BÅ‚Ä…d poÅ‚Ä…czenia: {ex.Message}";
+		}
+		finally
+		{
+			isUploading = false;
 		}
 	}
 }

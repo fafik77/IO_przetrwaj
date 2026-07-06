@@ -20,9 +20,9 @@
 	[Parameter]
 	public EventCallback<int> SelectedCategoryIdChanged { get; set; }
 	[Parameter]
-	public string CategoriesTypeNamePlural { get; set; } = "dangers";
-	public string CategoriesTypeEndpoint => "/Categories/" + CategoriesTypeNamePlural;
-	protected string NamePl => CategoriesTypeNamePlural.StartsWith("dangers", StringComparison.OrdinalIgnoreCase) ? "zagrożenia" : "zasobu";
+	public string CategoriesTypeToPickPlural { get; set; } = "dangers";
+	public string CategoriesTypeEndpoint => "/Categories/" + CategoriesTypeToPickPlural;
+	protected string NamePl => CategoriesTypeToPickPlural.StartsWith("dangers", StringComparison.OrdinalIgnoreCase) ? "zagrożenia" : "zasobu";
 
 	public string? SelectedCategoryName { get; private set; }
 	public bool IsCategorySelected => SelectedCategoryId > 0;

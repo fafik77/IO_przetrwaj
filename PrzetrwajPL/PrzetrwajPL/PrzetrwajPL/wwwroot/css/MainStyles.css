@@ -1,5 +1,11 @@
-﻿button {
+button, .button {
 	cursor: pointer;
+}
+
+.button:focus, select.button:focus, .form-control-region:focus {
+	outline: 3px solid #0094ff !important;
+	outline-offset: 1px;
+	box-shadow: 0 0 0 4px rgba(0, 148, 255, 0.35) !important;
 }
 
 	.white-button-blue-text {
@@ -7,6 +13,16 @@
 		color: #0094ff;
 		padding: 14px 20px;
 		border: 3px solid #0094ff;
+		border-radius: 10px;
+		text-shadow: #808080;
+		font-weight: bold;
+	}
+
+	.white-button-red-text {
+		background-color: ghostwhite;
+		color: #ff3421;
+		padding: 14px 20px;
+		border: 3px solid #ff3421;
 		border-radius: 10px;
 		text-shadow: #808080;
 		font-weight: bold;

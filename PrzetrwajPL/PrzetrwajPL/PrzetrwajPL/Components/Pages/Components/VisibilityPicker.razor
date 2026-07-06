@@ -1,4 +1,4 @@
-﻿@namespace PrzetrwajPL.Components.Pages.Components
+@namespace PrzetrwajPL.Components.Pages.Components
 @using Przetrwaj.CommonLibrary.Models
 
 <div class="picker-box">
@@ -7,7 +7,7 @@
 		@* min *@
 		<div class="selector-group">
 			@* <label>Od</label> *@
-            <select class="form-control-region" value="@min">
+            <select class="form-control-region button" value="@min">
 				<option value="@RegionPrecision.PL">Polska</option>
 				<option value="@RegionPrecision.WOJ">Województwo</option>
 				<option value="@RegionPrecision.POW">Powiat</option>
@@ -18,7 +18,7 @@
 		@* max *@
 		<div class="selector-group">
 			<label>Do</label>
-			<select class="form-control-region" value="@max">
+			<select class="form-control-region button" value="@max">
 				<option value="@RegionPrecision.PL" selected>Polska</option>
 				<option value="@RegionPrecision.WOJ">Województwo</option>
 				<option value="@RegionPrecision.POW">Powiat</option>

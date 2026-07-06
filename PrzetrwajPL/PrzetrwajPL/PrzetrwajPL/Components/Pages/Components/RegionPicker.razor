@@ -20,7 +20,7 @@
         @* Layer 1: Województwo *@
         <div class="selector-group">
             <label>Województwo:</label>
-            <select class="form-control-region" @onchange="HandleWojSelect" value="@SelectedWojId">
+            <select class="form-control-region button" @onchange="HandleWojSelect" value="@SelectedWojId">
                 <option value="">-- Wybierz Województwo --</option>
                 @if (wojewodztwa != null)
                 {
@@ -35,7 +35,7 @@
         @* Layer 2: Powiat *@
         <div class="selector-group">
             <label>Powiat:</label>
-            <select class="form-control-region" @onchange="HandlePowSelect" value="@SelectedPowId" disabled="@(powiaty == null)">
+            <select class="form-control-region button" @onchange="HandlePowSelect" value="@SelectedPowId" disabled="@(powiaty == null)">
                 <option value="">-- @(powiaty == null ? "Najpierw wybierz województwo" : "Wybierz Powiat") --</option>
                 @if (powiaty != null)
                 {
@@ -50,7 +50,7 @@
         @* Layer 3: Gmina *@
         <div class="selector-group">
             <label>Gmina:</label>
-            <select class="form-control-region" @onchange="HandleGmiSelect" value="@SelectedGmiId" disabled="@(gminy == null)">
+            <select class="form-control-region button" @onchange="HandleGmiSelect" value="@SelectedGmiId" disabled="@(gminy == null)">
                 <option value="">-- @(gminy == null ? "Najpierw wybierz powiat" : "Wybierz Gminę") --</option>
                 @if (gminy != null)
                 {

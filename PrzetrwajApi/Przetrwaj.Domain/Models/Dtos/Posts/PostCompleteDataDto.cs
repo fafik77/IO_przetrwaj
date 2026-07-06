@@ -25,11 +25,11 @@ public class PostCompleteDataDto
 	public long VotePositive { get; set; }
 	public long VoteNegative { get; set; }
 
-	public virtual IEnumerable<CommentDto?>? Comments { get; set; } = [];
-	public virtual IEnumerable<AttachmentDto?> Attachments { get; set; } = [];
+	public virtual IEnumerable<CommentDto>? Comments { get; set; } = [];
+	public virtual IEnumerable<AttachmentDto> Attachments { get; set; } = [];
 
 
-	public static PostCompleteDataDto? Map(Post? post, string baseUrl)
+	public static PostCompleteDataDto? Map(Post? post, Uri baseUrl)
 	{
 		if (post is null) return null;
 		return post is null ? null : new PostCompleteDataDto
@@ -44,7 +44,7 @@ public class PostCompleteDataDto
 			LatLong = post.Lat is null ? null : new LatLong((double)post.Lat, (double)post.Long!),
 			Author = (UserGeneralDtoNoRegion?)post.IdAutorNavigation,
 			DateCreated = post.DateCreated,
-			Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, baseUrl)).ToList(),
+			Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, baseUrl)!).ToList(),
 			Comments = post.Comments.Select(c => CommentDto.Map(c)).ToList(),
 		};
 	}

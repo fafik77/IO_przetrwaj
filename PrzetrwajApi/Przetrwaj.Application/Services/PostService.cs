@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
 using Przetrwaj.Application.Dtos;
+using Przetrwaj.Application.Helpers;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
@@ -176,11 +177,11 @@ internal class PostService : IPostService
 
 
 		int attCount = post.Attachments.Count;
-		string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
+		var resourcePath = HttpPathHelper.HttpPath(_httpContextAccessor);
 		if (request.Items is null || request.Items.Count == 0)
 		{
 			results = (AddAttachmentsResult)new NothingChangedException("No Attachments");
-			results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, HttpPath)!).ToList();
+			results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, resourcePath)!).ToList();
 			return results;
 		}
 		int addedFiles = 0;
@@ -228,7 +229,7 @@ internal class PostService : IPostService
 				if (alreadyExists != null)
 				{
 					var item = (AddAttachmentResult)new InvalidFileException($"Re-encoded \"{file.FileName}\" is too big. Max size is {_attachmentSettings.MaxFileSizeInMB} MiB");
-					item.AttachmentDto = AttachmentDto.Map(alreadyExists, HttpPath);
+					item.AttachmentDto = AttachmentDto.Map(alreadyExists, resourcePath);
 					results.Results.Add(item);
 					continue; //already exists
 				}
@@ -255,7 +256,7 @@ internal class PostService : IPostService
 					Status = "success",
 					StatusCodeEnum = System.Net.HttpStatusCode.Created,
 					Timestamp = DateTimeOffset.UtcNow,
-					AttachmentDto = AttachmentDto.Map(attInDB, HttpPath)
+					AttachmentDto = AttachmentDto.Map(attInDB, resourcePath)
 				};
 				results.Results.Add(attAdded);
 			}
@@ -284,7 +285,7 @@ internal class PostService : IPostService
 		{
 			throw new BadUpdateCommand(ex.InnerException.Message);
 		}
-		results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, HttpPath)!).ToList();
+		results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, resourcePath)!).ToList();
 		results.Timestamp = DateTimeOffset.UtcNow;
 		return results;
 	}

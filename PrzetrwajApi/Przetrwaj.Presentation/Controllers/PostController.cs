@@ -29,7 +29,6 @@ public partial class PostController : Controller
 {
 	private readonly IMediator _mediator;
 	private readonly IOptions<JwtSettings> _jwtOptions;
-	private readonly IHttpContextAccessor _httpContextAccessor;
 
 	public PostController(IMediator mediator, IOptions<JwtSettings> jwtOptions)
 	{
@@ -252,7 +251,7 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
 	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
 	[RequestSizeLimit(50 << 20)] //up to 50 MB
-	public async Task<IActionResult> AddDanger(AddPostCommand newPost, CancellationToken CT)
+	public async Task<IActionResult> AddDanger([FromForm] AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var postI = new AddDangerInternallCommand
@@ -265,8 +264,8 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(postI, CT);
-			string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
-			var dto = PostCreatedDto.Map(res, HttpPath);
+			Uri resourcePath = HttpPathHelper.HttpPath(Request);
+			var dto = PostCreatedDto.Map(res, resourcePath);
 			return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
 		}
 		catch (BaseException ex)
@@ -283,7 +282,7 @@ public partial class PostController : Controller
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
 	[RequestSizeLimit(50 << 20)] //up to 50 MB
-	public async Task<IActionResult> AddResource(AddPostCommand newPost, CancellationToken CT)
+	public async Task<IActionResult> AddResource([FromForm] AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var postI = new AddResourceInternallCommand
@@ -296,8 +295,8 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(postI, CT);
-			string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
-			var dto = PostCreatedDto.Map(res, HttpPath);
+			Uri resourcePath = HttpPathHelper.HttpPath(Request);
+			var dto = PostCreatedDto.Map(res, resourcePath);
 			return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
 		}
 		catch (BaseException ex)

@@ -10,9 +10,9 @@ public record AttachmentDto
 
 	private string fileName = string.Empty;
 	[JsonIgnore]
-	public string BaseUrl { get; set; } = string.Empty;
+	public Uri? BaseUrl { get; set; }
 
-	public static AttachmentDto? Map(Attachment? attachment, string baseUrl)
+	public static AttachmentDto? Map(Attachment? attachment, Uri? baseUrl)
 	{
 		return attachment is null ? null : new AttachmentDto
 		{

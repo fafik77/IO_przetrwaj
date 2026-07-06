@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Przetrwaj.Application.Configuration.Quaries;
+using Przetrwaj.Application.Helpers;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions.Posts;
 using Przetrwaj.Domain.Models.Dtos;
@@ -23,11 +24,11 @@ public class GetPostByIdQueryHandler : IQueryHandler<GetPostByIdQuery, PostCompl
 	{
 		var resDto = await _postRepository.GetFullROPostByIdAsync(request.Id, cancellationToken);
 		if (resDto is null) throw new PostNotFoundException(request.Id);
-		string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
+		var resourcePath = HttpPathHelper.HttpPath(_httpContextAccessor);
 		foreach (var attachment in resDto.Attachments)
 		{
 			if (attachment != null)
-				attachment.BaseUrl = HttpPath;
+				attachment.BaseUrl = resourcePath;
 		}
 		if (request.UserId != null)
 			resDto.MyVote = (VoteDto)await _postRepository.GetVoteAsync(request.Id, request.UserId, cancellationToken);

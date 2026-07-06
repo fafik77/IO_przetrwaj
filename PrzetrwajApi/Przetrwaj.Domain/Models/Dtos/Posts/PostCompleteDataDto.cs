@@ -21,7 +21,6 @@ public class PostCompleteDataDto
 	public VoteDto? MyVote { get; set; } = null;
 
 
-	///To add all this bellow
 	public long VotePositive { get; set; }
 	public long VoteNegative { get; set; }
 

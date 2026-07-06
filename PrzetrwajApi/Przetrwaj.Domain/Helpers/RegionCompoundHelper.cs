@@ -54,4 +54,6 @@ public class RegionCompoundHelper
 		if (RegionId % 1_00 == 0) RegionId /= 1_00;
 		return RegionId;
 	}
+
+	public static int FromTERCtoDBId(int TercId) => TercId / 10;
 }

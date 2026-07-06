@@ -25,7 +25,7 @@ window.initializePolandMap = (containerId, markersData) => {
 						<div style="font-family: sans-serif;">
 							<h4 style="margin: 0 0 5px 0; color: #333;">${marker.title}</h4>
 							<p style="margin: 0; font-size: 12px; color: #666;">Kategoria: ${marker.idCategory}</p>
-							<a href="/post/${marker.idPost}" style="display:inline-block; margin-top:8px; font-size:12px; color:#0094ff; text-decoration:none; font-weight:bold;">Zobacz szczegóły &raquo;</a>
+							<a href="/posts/${marker.idPost}" style="display:inline-block; margin-top:8px; font-size:12px; color:#0094ff; text-decoration:none; font-weight:bold;">Zobacz szczegóły &raquo;</a>
 						</div>
 					`);
 			}

@@ -146,6 +146,13 @@
 @code {
 	[Parameter]
 	public string Id { get; set; }
+	private const string PostsApiPath = "/Posts";
+	private const string VotePositiveApiName = "vote-positive";
+	private const string VoteNegativeApiName = "vote-negative";
+	private const string CommentApiName = "comment";
+
+	private string PostApiEndpoint => $"{PostsApiPath}/{Id}";
+
 
 	private PostCompleteDataDto? post;
 	private bool isLoading = true;
@@ -166,7 +173,7 @@
 		try
 		{
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-			post = await client.GetFromJsonAsync<PostCompleteDataDto>($"/Post/{Id}");
+			post = await client.GetFromJsonAsync<PostCompleteDataDto>(PostApiEndpoint);
 		}
 		catch (Exception ex)
 		{
@@ -186,7 +193,7 @@
 		try
 		{
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-			var response = await client.PostAsync($"/Post/{Id}/VotePositive", null);
+			var response = await client.PostAsync($"{PostApiEndpoint}/{VotePositiveApiName}", null);
 
 			if (response.IsSuccessStatusCode)
 			{
@@ -217,7 +224,7 @@
 		try
 		{
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-			var response = await client.PostAsync($"/Post/{Id}/VoteNegative", null);
+			var response = await client.PostAsync($"{PostApiEndpoint}/{VoteNegativeApiName}", null);
 
 			if (response.IsSuccessStatusCode)
 			{
@@ -246,7 +253,7 @@
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 			var commentNew = new AddCommentCommand { Comment = newCommentContent };
 
-			var response = await client.PostAsJsonAsync($"/Posts/{Id}/Comment", commentNew);
+			var response = await client.PostAsJsonAsync($"{PostApiEndpoint}/{CommentApiName}", commentNew);
 
             if (response.IsSuccessStatusCode)
             {

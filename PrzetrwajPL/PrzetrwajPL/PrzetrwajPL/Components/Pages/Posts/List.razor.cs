@@ -12,6 +12,8 @@ public partial class List
 	// Access basic user info from the cookie claims
 	[CascadingParameter]
 	private Task<AuthenticationState> AuthStateTask { get; set; }
+	private const double DebounceDalaySec = 1;
+
 
 	private RegionPicker? regionPicker;
 	private DangerResourceTypePicker? dangerResourceTypePicker;
@@ -19,7 +21,6 @@ public partial class List
 
 	private IEnumerable<PostOverviewDto>? posts;
 	private CancellationTokenSource? debounceCts;
-	private const double DebounceDalaySec = 1;
 	private bool startedLoadingPosts = false;
 	private string? errorMsg = null;
 
@@ -79,10 +80,11 @@ public partial class List
 
 	private async Task LoadPosts()
 	{
+		if (visibilityPicker is null) return;
 		errorMsg = null;
 		posts = null;
-		var regionScopeMin = visibilityPicker.min;
-		var regionScopeMax = visibilityPicker.max;
+		var regionScopeMin = visibilityPicker.Min;
+		var regionScopeMax = visibilityPicker.Max;
 		var regionId = regionPicker.GetRegionId(regionScopeMin);
 		var dangerResourceType = dangerResourceTypePicker.categoryType;
 		if (regionId == null || regionId < 0)

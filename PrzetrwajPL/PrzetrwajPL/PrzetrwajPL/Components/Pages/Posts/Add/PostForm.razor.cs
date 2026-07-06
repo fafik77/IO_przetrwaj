@@ -14,6 +14,8 @@ public partial class PostForm
 	public string PostType { get; set; } = string.Empty;
 	public string PostApiEndpoint => "/Posts/" + PostType;
 	public string PostTypePlural => PostType + "s";
+	[CascadingParameter]
+	private HttpContext? HttpContext { get; set; }
 
 
 	private const string getUserLocationJsName = "getUserLocation";
@@ -30,7 +32,6 @@ public partial class PostForm
 
 	private readonly AddPostCommand model = new() { Title = "" };
 	private string? error;
-	private bool success = false;
 	private string? newPostId;
 
 	private LatLong? latLong;
@@ -98,9 +99,9 @@ public partial class PostForm
 
 	private async Task HandleSubmit()
 	{
+		if (!string.IsNullOrEmpty(newPostId)) return; //already added a post
 		messageStore?.Clear();
 		error = null;
-		success = false;
 
 		if (string.IsNullOrEmpty(model.Title))
 		{
@@ -145,8 +146,13 @@ public partial class PostForm
 				var location = response.Headers.Location;
 				if (location != null)
 				{
+					//this locks the ability to add it again
 					newPostId = location.Segments.Last().TrimEnd('/');
-					success = true;
+					var redirectUrl = $"posts/{newPostId}";
+					if (HttpContext?.Response != null)
+						HttpContext.Response.Redirect(redirectUrl);
+					else
+						Nav.NavigateTo(redirectUrl);
 				}
 			}
 			else

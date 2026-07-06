@@ -7,19 +7,19 @@
 		@* min *@
 		<div class="selector-group">
 			@* <label>Od</label> *@
-            <select class="form-control-region button" value="@min">
+			<select class="form-control-region button" @bind:get="Min" @bind:set="HandleMinChanged">
 				<option value="@RegionPrecision.PL">Polska</option>
 				<option value="@RegionPrecision.WOJ">Województwo</option>
 				<option value="@RegionPrecision.POW">Powiat</option>
-				<option value="@RegionPrecision.GMI" selected>Gmina</option>
+				<option value="@RegionPrecision.GMI" >Gmina</option>
 			</select>
 		</div>
 
 		@* max *@
 		<div class="selector-group">
 			<label>Do</label>
-			<select class="form-control-region button" value="@max">
-				<option value="@RegionPrecision.PL" selected>Polska</option>
+			<select class="form-control-region button" @bind:get="Max" @bind:set="HandleMaxChanged">
+				<option value="@RegionPrecision.PL" >Polska</option>
 				<option value="@RegionPrecision.WOJ">Województwo</option>
 				<option value="@RegionPrecision.POW">Powiat</option>
 				<option value="@RegionPrecision.GMI">Gmina</option>
@@ -30,7 +30,24 @@
 
 @code {
 	[Parameter]
-	public RegionPrecision min { get; set; } = RegionPrecision.GMI;
+	public RegionPrecision Min { get; set; } = RegionPrecision.GMI;
 	[Parameter]
-	public RegionPrecision max { get; set; } = RegionPrecision.PL;
+	public RegionPrecision Max { get; set; } = RegionPrecision.PL;
+
+
+	[Parameter] public EventCallback<RegionPrecision> SelectionChanged { get; set; }
+
+	private async Task HandleMinChanged(RegionPrecision newValue)
+	{
+		Min = newValue;
+		if (SelectionChanged.HasDelegate)
+			await SelectionChanged.InvokeAsync(newValue);
+	}
+
+	private async Task HandleMaxChanged(RegionPrecision newValue)
+	{
+		Max = newValue;
+		if (SelectionChanged.HasDelegate)
+			await SelectionChanged.InvokeAsync(newValue);
+	}
 }

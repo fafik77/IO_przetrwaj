@@ -77,19 +77,8 @@
 		<ImageAttachments @ref="ImageAttachments" OnAttachmentsChanged="StateHasChanged" />
 	</div>
 
-	<button class="btn btn-primary" type="submit">Dodaj post</button>
+	<button class="btn btn-primary" type="submit"> Dodaj post</button>
 </EditForm>
-
-@if (success && !string.IsNullOrEmpty(newPostId))
-{
-	<div class="alert alert-success mt-3">
-		<h4>Post został dodany!</h4>
-		<div class="d-flex gap-2">
-			<a href="/addAttachments?post=@newPostId" class="btn btn-outline-primary">Dodaj zdjęcia do posta</a>
-			<a href="/post/@newPostId" class="btn btn-primary">Przejdź do posta</a>
-		</div>
-	</div>
-}
 
 
 @if (!string.IsNullOrEmpty(error))
@@ -97,7 +86,7 @@
 	<div class="alert alert-danger mt-3">@error</div>
 }
 
-@if (success)
+@if (!string.IsNullOrEmpty(newPostId))
 {
 	<div class="alert alert-success mt-3">Post został dodany!</div>
 }

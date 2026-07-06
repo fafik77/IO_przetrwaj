@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
-using Przetrwaj.CommonLibrary.Logic;
+using Przetrwaj.CommonLibrary.Extensions;
+using Przetrwaj.CommonLibrary.Requests;
 using PrzetrwajPL.Components.Pages.Components;
 
 namespace PrzetrwajPL.Components.Pages;
@@ -24,14 +25,16 @@ public partial class AddAttachmentsPage
 		{
 			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
 
+			string url = $"Posts/{PostId}/attachment";
 			// Pass the single unified list to the logic helper
-			(string url, MultipartFormDataContent data) = CreateUploadAttachments.CreateData(PostId, items);
+			MultipartFormDataContent data = new();
+			data.AddContent(new AddAttachments { Items = items });
 
 			var response = await client.PostAsync(url, data);
 
 			if (response.IsSuccessStatusCode)
 			{
-				Nav.NavigateTo($"/post/{PostId}");
+				Nav.NavigateTo($"/posts/{PostId}");
 			}
 			else
 			{

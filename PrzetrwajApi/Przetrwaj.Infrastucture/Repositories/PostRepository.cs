@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Posts;
@@ -82,7 +82,12 @@ internal class PostRepository : IPostRepository
 			LatLong = p.Lat == null ? null : new LatLong(p.Lat!.Value, p.Long!.Value),
 			Comments = p.Comments
 			.OrderByDescending(x => x.DateCreated)
-			.Select(c => CommentDto.Map(c))
+			.Select(c => new CommentDto
+			{
+				Comment = c.Comment,
+				DateCreated = c.DateCreated,
+				Autor = (UserGeneralDtoNoRegion?)c.IdAutorNavigation
+			})
 			.ToList(),
 			DateCreated = p.DateCreated,
 			// we have to re-map the region (as this is on DB side) later in the code

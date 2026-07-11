@@ -86,7 +86,7 @@ internal class PostRepository : IPostRepository
 			{
 				Comment = c.Comment,
 				DateCreated = c.DateCreated,
-				Autor = (UserGeneralDtoNoRegion?)c.IdAutorNavigation
+				Author = (UserGeneralDtoNoRegion?)c.IdAutorNavigation
 			})
 			.ToList(),
 			DateCreated = p.DateCreated,

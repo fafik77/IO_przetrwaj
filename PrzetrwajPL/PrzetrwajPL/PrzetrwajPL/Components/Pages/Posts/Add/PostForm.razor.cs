@@ -27,7 +27,7 @@ public partial class PostForm
 	private EditContext? editContext;
 	private ValidationMessageStore? messageStore;
 	private CategoryPicker? CategoryPicker;
-	private VisibilityPickerReversed? visibilityPickerReversed;
+	private VisibilityPickerSingle? visibilityPickerSingle;
 	private ImageAttachments? ImageAttachments;
 
 	private readonly AddPostCommand model = new() { Title = "" };
@@ -129,8 +129,8 @@ public partial class PostForm
 			return;
 		}
 
-		if (visibilityPickerReversed != null)
-			model.RegionPrecision = visibilityPickerReversed.visibility;
+		if (visibilityPickerSingle != null)
+			model.RegionPrecision = visibilityPickerSingle.visibility;
 		if (ImageAttachments != null)
 			model.Attachments = new AddAttachments { Items = ImageAttachments.Items };
 

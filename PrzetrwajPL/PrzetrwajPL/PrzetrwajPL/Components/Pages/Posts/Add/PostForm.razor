@@ -68,7 +68,7 @@
 	@* Moderator only: Post visibility *@
 	<AuthorizeView Policy="@UserRoles.Moderator" Context="Moderator">
 		<div class="mb-3">
-			<VisibilityPickerReversed @ref="visibilityPickerReversed" />
+			<VisibilityPickerSingle @ref="visibilityPickerSingle" />
 		</div>
 	</AuthorizeView>
 

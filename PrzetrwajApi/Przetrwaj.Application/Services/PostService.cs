@@ -125,7 +125,7 @@ internal class PostService : IPostService
 				break;
 			case RegionPrecision.WOJ:
 				post.IdRegion = Woj;
-				break;
+				goto default;
 			case RegionPrecision.POW:
 				post.IdRegion = Pow;
 				goto default;

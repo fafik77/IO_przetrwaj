@@ -41,7 +41,7 @@ public class PostCompleteDataDto
 			CategoryType = post.CategoryType,
 			Region = RegionOnlyDto.Map(post.RegionNavigation),
 			LatLong = post.Lat is null ? null : new LatLong((double)post.Lat, (double)post.Long!),
-			Author = (UserGeneralDtoNoRegion?)post.IdAutorNavigation,
+			Author = UserGeneralDtoNoRegion.Map(post.IdAutorNavigation),
 			DateCreated = post.DateCreated,
 			Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, baseUrl)!).ToList(),
 			Comments = post.Comments.Select(c => CommentDto.Map(c)).ToList(),

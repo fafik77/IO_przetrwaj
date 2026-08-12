@@ -41,7 +41,7 @@ public class AddCommentCommandHandler : ICommandHandler<AddCommentInternalComman
 			throw new BadUpdateCommand(ex.InnerException.Message);
 		}
 		var dto = CommentDto.Map(res);
-		dto.Author = (UserGeneralDtoNoRegion?)user!;
+		dto.Author = UserGeneralDtoNoRegion.Map(user);
 		return dto;
 	}
 }

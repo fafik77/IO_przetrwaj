@@ -14,6 +14,7 @@ public class PostOverviewDto
 	public RegionOnlyDto? Region { get; set; }
 	public LatLong? LatLong { get; set; }
 	public DateTimeOffset DateCreated { get; set; }
+	public UserGeneralDtoNoRegion? Author { get; set; }
 
 
 	public long VotePositive { get; set; }
@@ -28,10 +29,11 @@ public class PostOverviewDto
 			Title = p.Title,
 			DateCreated = p.DateCreated,
 			LatLong = latLong,
+			Author = UserGeneralDtoNoRegion.Map(p.IdAutorNavigation),
 			Category = p.CustomCategory.Length > 0 ? new CategoryDto
 			{
 				Id = p.IdCategory,
-				Type = p.IdCategoryNavigation.Type,
+				Type = p.IdCategoryNavigation?.Type ?? p.CategoryType,
 				Name = p.CustomCategory,
 			}
 			: CategoryDto.Map(p.IdCategoryNavigation),

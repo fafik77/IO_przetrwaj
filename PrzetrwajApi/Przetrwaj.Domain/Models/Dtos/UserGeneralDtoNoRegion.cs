@@ -10,8 +10,7 @@ public class UserGeneralDtoNoRegion
 	public DateTimeOffset RegistrationDate { get; set; }
 	public DateTimeOffset? BanDate { get; set; }
 
-
-	public static explicit operator UserGeneralDtoNoRegion?(AppUser? registeredUser)
+	public static UserGeneralDtoNoRegion? Map(AppUser? registeredUser)
 	{
 		return registeredUser is null ? null : new UserGeneralDtoNoRegion
 		{

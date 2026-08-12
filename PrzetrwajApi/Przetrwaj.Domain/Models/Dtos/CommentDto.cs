@@ -16,7 +16,7 @@ public record CommentDto
 		{
 			Comment = comment.Comment,
 			DateCreated = comment.DateCreated,
-			Author = (UserGeneralDtoNoRegion?)comment.IdAutorNavigation,
+			Author = UserGeneralDtoNoRegion.Map(comment.IdAutorNavigation),
 		};
 	}
 }

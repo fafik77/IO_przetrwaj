@@ -86,13 +86,13 @@ internal class PostRepository : IPostRepository
 			{
 				Comment = c.Comment,
 				DateCreated = c.DateCreated,
-				Author = (UserGeneralDtoNoRegion?)c.IdAutorNavigation
+				Author = UserGeneralDtoNoRegion.Map(c.IdAutorNavigation)
 			})
 			.ToList(),
 			DateCreated = p.DateCreated,
 			// we have to re-map the region (as this is on DB side) later in the code
 			Region = RegionOnlyDto.Map(p.RegionNavigation),
-			Author = (UserGeneralDtoNoRegion?)p.IdAutorNavigation,
+			Author = UserGeneralDtoNoRegion.Map(p.IdAutorNavigation),
 			// if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = p.CustomCategory.Length > 0 ? new CategoryDto
 			{
@@ -190,6 +190,8 @@ internal class PostRepository : IPostRepository
 			.Where(p => p.IdRegion == Gmi || p.IdRegion == Pow || p.IdRegion == Woj || p.IdRegion == 0)
 			.OrderByDescending(p => p.DateCreated)
 			.Include(p => p.IdCategoryNavigation)
+			.Include(p => p.IdAutorNavigation)
+			.Include(p => p.RegionNavigation)
 			.Select(p => SelectAsPostOverview(p))
 			.ToListAsync(ct);
 		return await FillInPostDataAfterFetch(posts, ct);

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+ï»¿using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
 using System.Net;
 
@@ -18,7 +18,7 @@ public partial class ConfirmEmailChange
 		if (string.IsNullOrEmpty(UserId) || string.IsNullOrEmpty(Code) || string.IsNullOrEmpty(NewEmail))
 		{
 			_status = LoadingStatus.Error;
-			_errorMessage = "Nieprawid³owy link zmiany adresu e-mail.";
+			_errorMessage = "Nieprawidï¿½owy link zmiany adresu e-mail.";
 			return;
 		}
 
@@ -36,13 +36,13 @@ public partial class ConfirmEmailChange
 			else
 			{
 				_status = LoadingStatus.Error;
-				_errorMessage = "Link wygas³ lub zosta³ ju¿ wykorzystany.";
+				_errorMessage = "Link wygasï¿½ lub zostaï¿½ juï¿½ wykorzystany.";
 			}
 		}
 		catch (Exception)
 		{
 			_status = LoadingStatus.Error;
-			_errorMessage = "Wyst¹pi³ b³¹d po³¹czenia z serwerem.";
+			_errorMessage = "Wystï¿½piï¿½ bï¿½ï¿½d poï¿½ï¿½czenia z serwerem.";
 		}
 	}
 }

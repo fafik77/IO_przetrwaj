@@ -41,7 +41,7 @@ public partial class ImpedimentsPanel
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"Nie uda�o si� wczyta� listy kategorii: {ex.Message}";
+			errorMessage = $"Nie udało się wczytać listy kategorii: {ex.Message}";
 		}
 	}
 
@@ -58,7 +58,7 @@ public partial class ImpedimentsPanel
 		if (currentSelection == null) return;
 		if (string.IsNullOrWhiteSpace(currentSelectionName))
 		{
-			errorMessage = "Nazwa typu nie mo�e by� pusta.";
+			errorMessage = "Nazwa typu nie może być pusta.";
 			return;
 		}
 
@@ -77,19 +77,19 @@ public partial class ImpedimentsPanel
 
 			if (response.IsSuccessStatusCode)
 			{
-				successMessage = "Zmiany zosta�y zapisane pomy�lnie.";
+				successMessage = "Zmiany zostały zapisane pomyślnie.";
 				currentSelection = null; // deselect item and free the form
 				await LoadCategoriesList(); // refresh Master-List
 			}
 			else
 			{
 				var errorResult = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-				errorMessage = errorResult?.Error?.Message ?? "Wyst�pi� b��d podczas zapisywania typu.";
+				errorMessage = errorResult?.Error?.Message ?? "Wystąpił błąd podczas zapisywania typu.";
 			}
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B��d komunikacji z API: {ex.Message}";
+			errorMessage = $"Błąd komunikacji z API: {ex.Message}";
 		}
 		finally
 		{

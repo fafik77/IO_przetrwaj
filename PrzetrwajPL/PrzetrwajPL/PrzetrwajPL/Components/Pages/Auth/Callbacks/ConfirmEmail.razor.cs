@@ -15,7 +15,7 @@ public partial class ConfirmEmail
 	{
 		if (string.IsNullOrWhiteSpace(UserId) || string.IsNullOrWhiteSpace(Code))
 		{
-			_errorMessage = "Brakuj�cy identyfikator u�ytkownika lub kod weryfikacyjny.";
+			_errorMessage = "Brakujący identyfikator użytkownika lub kod weryfikacyjny.";
 			_isProcessing = false;
 			return;
 		}
@@ -34,12 +34,12 @@ public partial class ConfirmEmail
 			else
 			{
 				// Here we could parse ExceptionCasting object if needed
-				_errorMessage = "Link wygas� lub jest nieprawid�owy.";
+				_errorMessage = "Link wygasł lub jest nieprawidłowy.";
 			}
 		}
 		catch (Exception)
 		{
-			_errorMessage = "Nie uda�o si� po��czy� z serwerem.";
+			_errorMessage = "Nie udało się połączyć z serwerem.";
 		}
 		finally
 		{

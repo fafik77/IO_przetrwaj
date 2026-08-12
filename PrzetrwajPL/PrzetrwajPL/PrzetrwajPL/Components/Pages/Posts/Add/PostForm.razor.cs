@@ -22,7 +22,7 @@ public partial class PostForm
 	private const string initializeLocationPickerMapJsName = "initializeLocationPickerMap";
 	private const string locationPickerMapId = "locationPickerMap";
 	private const string setLocationOnMapJsName = "setLocationOnMap";
-	private string PostTypeAboutPl => PostType.Equals("resource", StringComparison.OrdinalIgnoreCase) ? "zasobie" : "zagro�eniu";
+	private string PostTypeAboutPl => PostType.Equals("resource", StringComparison.OrdinalIgnoreCase) ? "zasobie" : "zagrożeniu";
 
 	private EditContext? editContext;
 	private ValidationMessageStore? messageStore;
@@ -105,19 +105,19 @@ public partial class PostForm
 
 		if (string.IsNullOrEmpty(model.Title))
 		{
-			error = "Post musi mie� tytu�";
+			error = "Post musi mieć tytuł";
 			return;
 		}
 		else if (model.IdCategory <= 0)
 		{
-			error = "Post musi przynale�e� do kategori";
+			error = "Post musi przynależeć do kategori";
 			return;
 		}
 		else if (InneCategoryRegex.IsMatch(CategoryPicker?.SelectedCategoryName ?? string.Empty))
 		{
 			if (string.IsNullOrWhiteSpace(model.CustomCategory) || model.CustomCategory.Length < 3 || model.CustomCategory.Length > 100)
 			{
-				error = "W�asna kategoria musi mie� od 3 do 100 znak�w";
+				error = "Własna kategoria musi mieć od 3 do 100 znaków";
 				messageStore?.Add(() => model.CustomCategory ?? "", error);
 				editContext?.NotifyValidationStateChanged();
 				return;
@@ -158,12 +158,12 @@ public partial class PostForm
 			else
 			{
 				var msg = await response.Content.ReadAsStringAsync();
-				error = $"Nie uda�o si� doda� posta. Kod: {response.StatusCode}, odpowied�: {msg}";
+				error = $"Nie udało się dodać posta. Kod: {response.StatusCode}, odpowiedź: {msg}";
 			}
 		}
 		catch (Exception ex)
 		{
-			error = $"B��d po��czenia: {ex.Message}";
+			error = $"Błąd połączenia: {ex.Message}";
 		}
 	}
 

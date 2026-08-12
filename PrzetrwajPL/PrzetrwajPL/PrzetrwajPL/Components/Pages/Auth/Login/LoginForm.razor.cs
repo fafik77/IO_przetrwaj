@@ -73,16 +73,16 @@ namespace PrzetrwajPL.Components.Pages.Auth.Login
 				else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
 				{
 					var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-					errorMessage = "Nieprawid�owy email lub has�o.";
+					errorMessage = "Nieprawidłowy email lub hasło.";
 				}
 				else
 				{
-					errorMessage = "Nieprawid�owy email lub has�o.";
+					errorMessage = "Nieprawidłowy email lub hashasłoo.";
 				}
 			}
 			catch (Exception ex)
 			{
-				errorMessage = $"B��d po��czenia: {ex.Message}";
+				errorMessage = $"Błąd połączenia: {ex.Message}";
 			}
 			finally
 			{

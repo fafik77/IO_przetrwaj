@@ -16,7 +16,7 @@ public partial class RegisterForm
 	{
 		if (registerRequest.ConfirmPassword != registerRequest.Password)
 		{
-			errorMessage = "Has�a nie s� takie same!";
+			errorMessage = "Hasła nie są takie same!";
 			return;
 		}
 		isLoading = true;
@@ -45,7 +45,7 @@ public partial class RegisterForm
 				else
 				{
 					var errorResult = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-					errorMessage = errorResult?.Error?.Message ?? "Wyst�pi� nieoczekiwany b��d.";
+					errorMessage = errorResult?.Error?.Message ?? "Wystąpił nieoczekiwany błąd.";
 				}
 			}
 			else
@@ -56,7 +56,7 @@ public partial class RegisterForm
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B��d po��czenia: {ex.Message}";
+			errorMessage = $"Błąd połączenia: {ex.Message}";
 		}
 		finally
 		{

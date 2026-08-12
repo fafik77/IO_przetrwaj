@@ -88,7 +88,7 @@ public partial class UserSettings
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B��d podczas pobierania danych: {ex.Message}";
+			errorMessage = $"Błąd podczas pobierania danych: {ex.Message}";
 		}
 		finally
 		{
@@ -117,13 +117,13 @@ public partial class UserSettings
 		}
 		else
 		{
-			errorMessage = "Nie uda�o si� pobra� danych u�ytkownika.";
+			errorMessage = "Nie udało się pobrać danych użytkownika.";
 		}
 	}
 
 	private async Task HandleInvalid()
 	{
-		errorMessage = "W formularzu znajduj� si� niepoprawne dan�!";
+		errorMessage = "W formularzu znajdują się niepoprawne danę!";
 		return;
 	}
 
@@ -186,7 +186,7 @@ public partial class UserSettings
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B��d po��czenia: {ex.Message}";
+			errorMessage = $"Błąd połączenia: {ex.Message}";
 		}
 		finally
 		{
@@ -197,7 +197,7 @@ public partial class UserSettings
 	private async Task ConfirmAndLogoutAll()
 	{
 		// localized Yes/No = Tak/Nie
-		bool isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz wylogowa� wszystkie aktywne sesje na urz�dzeniach?");
+		bool isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz wylogować wszystkie aktywne sesje na urządzeniach?");
 
 		if (isConfirmed)
 		{

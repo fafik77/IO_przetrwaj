@@ -115,7 +115,7 @@ public partial class List
 			);
 			if (!res.IsSuccessStatusCode)
 			{
-				errorMsg = "Wyst�pi� problem podczas �adowania post�w.";
+				errorMsg = "Wystąpił problem podczas ładowania postów.";
 				return;
 			}
 			posts = await res.Content.ReadFromJsonAsync<IEnumerable<PostOverviewDto>>();

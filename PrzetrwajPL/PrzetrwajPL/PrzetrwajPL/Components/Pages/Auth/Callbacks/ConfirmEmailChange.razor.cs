@@ -18,7 +18,7 @@ public partial class ConfirmEmailChange
 		if (string.IsNullOrEmpty(UserId) || string.IsNullOrEmpty(Code) || string.IsNullOrEmpty(NewEmail))
 		{
 			_status = LoadingStatus.Error;
-			_errorMessage = "Nieprawid�owy link zmiany adresu e-mail.";
+			_errorMessage = "Nieprawidłowy link zmiany adresu e-mail.";
 			return;
 		}
 
@@ -36,13 +36,13 @@ public partial class ConfirmEmailChange
 			else
 			{
 				_status = LoadingStatus.Error;
-				_errorMessage = "Link wygas� lub zosta� ju� wykorzystany.";
+				_errorMessage = "Link wygasł lub został już wykorzystany.";
 			}
 		}
 		catch (Exception)
 		{
 			_status = LoadingStatus.Error;
-			_errorMessage = "Wyst�pi� b��d po��czenia z serwerem.";
+			_errorMessage = "Wystąpił błąd połączenia z serwerem.";
 		}
 	}
 }

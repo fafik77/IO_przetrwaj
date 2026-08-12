@@ -30,7 +30,7 @@ public partial class LogoutAllSesions
 			{
 				// Log the exception but do not block the execution flow. 
 				// We still want to clear local cookies even if the backend is down.
-				Console.WriteLine($"B��d podczas uniewa�niania token�w w API: {ex.Message}");
+				Console.WriteLine($"Błąd podczas unieważniania tokenów w API: {ex.Message}");
 			}
 
 			// Clear local application session cookies

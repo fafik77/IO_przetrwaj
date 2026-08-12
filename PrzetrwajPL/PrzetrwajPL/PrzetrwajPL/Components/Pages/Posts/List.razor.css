@@ -1,4 +1,4 @@
-﻿button:hover {
+button:hover {
 	opacity: 0.8;
 	border: double;
 }
@@ -7,56 +7,82 @@
     display: block;
 }
 
-.post {
-    border: 2px solid #dedede;
-    background-color: #f7f7f7;
-    border-radius: 4px;
-    padding: 15px 15px 10px 20px;
-    margin: 10px auto;
+.post-card {
+    display: block;
     width: 74%;
+    margin: 0 auto;
+    padding: 16px 0;
+    border-bottom: 2px solid #000000;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.15s ease-in-out;
 }
 
-    .post:nth-child(2n+1) {
-        border-color: #ccc;
-        background-color: #ddd;
-    }
+.post-card:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
 
-.post::after {
-    content: "";
-    clear: both;
-    display: table;
+.post-card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.post-card-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.post-title {
+    font-size: 24px;
+    font-weight: 500;
+    color: #000000;
+}
+
+.post-category {
+    font-size: 20px;
+    color: #000000;
+}
+
+.post-meta {
+    font-size: 18px;
+    color: #777777;
+}
+
+.post-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    min-width: 100px;
+}
+
+.post-votes {
+    font-size: 24px;
+    font-weight: normal;
 }
 
 .up-vote {
-    float: right;
-    color: #27d950;
+    color: #5c6bc0;
     font-weight: bold;
-}
-.down-vote {
-    float: right;
-    color: #ff3421;
-    font-weight: bold;
-}
-.divide {
-    float: right;
-    color: #b3b3b3;
-    font-weight: bold;
-}
-.time-right {
-    float: right;
-    color: #aaa;
-    margin-right: 6px;
 }
 
-.post a {
-    text-decoration: none;
-    color: black;
+.divide {
+    color: #000000;
+    margin: 0 4px;
+    font-weight: bold;
 }
-    .post a::after {
-        content: "";
-        clear: both;
-        display: table;
-    }
+
+.down-vote {
+    color: #e53935;
+    font-weight: bold;
+}
+
+.post-author {
+    font-size: 18px;
+    color: #999999;
+}
 
 .filters {
     display: flex;

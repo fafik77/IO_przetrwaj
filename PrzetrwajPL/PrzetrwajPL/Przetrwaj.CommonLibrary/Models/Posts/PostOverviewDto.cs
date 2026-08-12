@@ -1,4 +1,6 @@
-﻿namespace Przetrwaj.CommonLibrary.Models.Posts;
+﻿using Przetrwaj.CommonLibrary.Requests;
+
+namespace Przetrwaj.CommonLibrary.Models.Posts;
 
 
 /// <summary>
@@ -10,12 +12,10 @@ public class PostOverviewDto
 	public required string Title { get; set; }
 	public CategoryDto? Category { get; set; }
 	public RegionOnlyDto? Region { get; set; }
+	public LatLong? LatLong { get; set; }
 	public DateTimeOffset DateCreated { get; set; }
+	public UserGeneralDtoNoRegion? Author { get; set; }
 
-
-	///To add all this bellow
 	public long VotePositive { get; set; }
 	public long VoteNegative { get; set; }
-	public long VoteSum { get; set; }
-	public float VoteRatio { get; set; }
 }

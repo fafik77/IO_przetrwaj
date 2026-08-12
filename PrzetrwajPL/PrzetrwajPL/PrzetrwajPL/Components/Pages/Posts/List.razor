@@ -1,4 +1,4 @@
-﻿@page "/list"
+@page "/list"
 
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
@@ -58,13 +58,23 @@ else
 {
 	@foreach (var post in posts)
 	{
-		<div class="post">
-			<a href="/posts/@post.Id">@post.Title</a>
-			<span class="down-vote">@post.VoteNegative</span>
-			<span class="divide">/</span>
-			<span class="up-vote">@post.VotePositive</span>
-			<span class="time-right">@post.DateCreated.ToString("dd.MM.yyyy HH:mm")</span>
-		</div>
+		<a href="/posts/@post.Id" class="post-card">
+			<div class="post-card-content">
+				<div class="post-card-left">
+					<span class="post-title">@post.Title</span>
+					<span class="post-category">@(post.Category?.Name ?? "Brak kategorii")</span>
+					<span class="post-meta">@(post.Region?.Name ?? "Brak lokalizacji") @post.DateCreated.ToString("HH:mm dd.MM.yyyy")</span>
+				</div>
+				<div class="post-card-right">
+					<div class="post-votes">
+						<span class="up-vote">@post.VotePositive</span>
+						<span class="divide">/</span>
+						<span class="down-vote">@post.VoteNegative</span>
+					</div>
+					<span class="post-author">@(post.Author?.Name ?? "Anonim")</span>
+				</div>
+			</div>
+		</a>
 	}
 }
 @if (!string.IsNullOrEmpty(errorMsg))

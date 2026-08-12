@@ -102,10 +102,10 @@ internal class PostRepository : IPostRepository
 			}
 			: CategoryDto.Map(p.IdCategoryNavigation),
 
-			// Fetch only the bool values
+			// Calculate votes on the DB side
 			VotePositive = p.Votes.LongCount(p => p.IsUpvote),
 			VoteNegative = p.Votes.LongCount(p => !p.IsUpvote),
-			// Map attachments using the URL logic
+			// Map attachments (add URL later)
 			Attachments = p.Attachments
 			.OrderBy(x => x.OrderInList)    //sort by OrderInList asc
 			.Select(a => AttachmentDto.Map(a, null)!)

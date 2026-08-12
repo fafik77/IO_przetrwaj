@@ -6,7 +6,7 @@
 		<label>Widoczność posta</label>
 		@* min *@
 		<div class="selector-group">
-			<select class="form-control-region" value="@visibility">
+			<select class="form-control-region" @bind="visibility" >
 				<option value="@RegionPrecision.GMI" selected>Gmina</option>
 				<option value="@RegionPrecision.POW">Powiat</option>
 				<option value="@RegionPrecision.WOJ">Województwo</option>

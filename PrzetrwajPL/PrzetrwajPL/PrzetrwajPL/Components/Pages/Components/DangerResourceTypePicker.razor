@@ -12,7 +12,7 @@
 
 @code {
 	[Parameter]
-	public CategoryTypeFilter categoryType { get; set; }
+	public CategoryTypeFilter categoryType { get; set; } = CategoryTypeFilter.Both;
 
 	[Parameter] public EventCallback<CategoryTypeFilter> SelectionChanged { get; set; }
 

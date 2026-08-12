@@ -8,10 +8,10 @@
 		<div class="selector-group">
 			@* <label>Od</label> *@
 			<select class="form-control-region button" @bind:get="Min" @bind:set="HandleMinChanged">
-				<option value="@RegionPrecision.PL">Polska</option>
-				<option value="@RegionPrecision.WOJ">Województwo</option>
+				<option value="@RegionPrecision.GMI">Gmina</option>
 				<option value="@RegionPrecision.POW">Powiat</option>
-				<option value="@RegionPrecision.GMI" >Gmina</option>
+				<option value="@RegionPrecision.WOJ">Województwo</option>
+				<option value="@RegionPrecision.PL">Polska</option>
 			</select>
 		</div>
 
@@ -19,10 +19,10 @@
 		<div class="selector-group">
 			<label>Do</label>
 			<select class="form-control-region button" @bind:get="Max" @bind:set="HandleMaxChanged">
-				<option value="@RegionPrecision.PL" >Polska</option>
-				<option value="@RegionPrecision.WOJ">Województwo</option>
-				<option value="@RegionPrecision.POW">Powiat</option>
 				<option value="@RegionPrecision.GMI">Gmina</option>
+				<option value="@RegionPrecision.POW">Powiat</option>
+				<option value="@RegionPrecision.WOJ">Województwo</option>
+				<option value="@RegionPrecision.PL">Polska</option>
 			</select>
 		</div>
 	</div>

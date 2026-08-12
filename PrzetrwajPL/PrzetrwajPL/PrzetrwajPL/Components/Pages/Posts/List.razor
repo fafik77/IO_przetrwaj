@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
 @using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Models
 @using PrzetrwajPL.Components.Pages.Components
 
 <PageTitle>Lokalnie - Przetrwaj PL</PageTitle>
@@ -61,7 +62,17 @@ else
 		<a href="/posts/@post.Id" class="post-card">
 			<div class="post-card-content">
 				<div class="post-card-left">
-					<span class="post-title">@post.Title</span>
+					<span class="post-title">
+						@if (post.Category?.Type == CategoryType.Danger)
+						{
+							<span class="post-icon icon-danger">⚠</span>
+						}
+						else
+						{
+							<span class="post-icon icon-resource">ⓘ</span>
+						}
+						@post.Title
+					</span>
 					<span class="post-category">@(post.Category?.Name ?? "Brak kategorii")</span>
 					<span class="post-meta">@(post.Region?.Name ?? "Brak lokalizacji") @post.DateCreated.ToString("HH:mm dd.MM.yyyy")</span>
 				</div>

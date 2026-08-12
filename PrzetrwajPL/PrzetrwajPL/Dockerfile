@@ -3,8 +3,8 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 COPY ["PrzetrwajPL/PrzetrwajPL.csproj", "./PrzetrwajPL/"]
 COPY ["PrzetrwajPL.Client/PrzetrwajPL.Client.csproj", "./PrzetrwajPL.Client/"]
+COPY ["Przetrwaj.CommonLibrary/Przetrwaj.CommonLibrary.csproj", "./Przetrwaj.CommonLibrary/"]
 RUN dotnet restore "PrzetrwajPL/PrzetrwajPL.csproj"
-RUN dotnet restore "PrzetrwajPL.Client/PrzetrwajPL.Client.csproj"
 COPY . .
 RUN dotnet build "./PrzetrwajPL/PrzetrwajPL.csproj" -c Release -o /app/build
 

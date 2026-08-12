@@ -4,7 +4,7 @@ namespace Przetrwaj.Domain.Models.Dtos;
 
 
 /// <summary>
-/// Remove this class as the `Region Name and Surname` are a sensitive information
+/// Warning `Region, Name, Surname` are a sensitive information when combined
 /// </summary>
 public class UserGeneralDto
 {

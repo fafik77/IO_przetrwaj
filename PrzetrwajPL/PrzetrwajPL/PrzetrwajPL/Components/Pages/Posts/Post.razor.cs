@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using Przetrwaj.CommonLibrary.Consts;
+using Przetrwaj.CommonLibrary.Extensions;
 using Przetrwaj.CommonLibrary.Models.Posts;
 using Przetrwaj.CommonLibrary.Requests;
 using System;
@@ -181,7 +182,7 @@ public partial class Post
 		}
 		else
 		{
-			return dateCreated.ToString("HH:mm dd.MM.yyyy");
+			return dateCreated.ToWarsawTime().ToString("HH:mm dd.MM.yyyy");
 		}
 	}
 

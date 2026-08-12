@@ -1,4 +1,4 @@
-﻿@page "/posts/{Id}"
+@page "/posts/{Id}"
 
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
@@ -32,8 +32,8 @@
 					{
 						<span class="meta-city">@post.Region.Name</span>
 					}
-					<span class="meta-time">@post.DateCreated.ToString("HH:mm")</span>
-					<span class="meta-date">@post.DateCreated.ToString("dd.MM.yyyy")</span>
+					<span class="meta-time">@post.DateCreated.ToWarsawTime().ToString("HH:mm")</span>
+					<span class="meta-date">@post.DateCreated.ToWarsawTime().ToString("dd.MM.yyyy")</span>
 					@if (post.Author != null)
 					{
 						<span class="meta-author">@post.Author.Name @post.Author.Surname</span>

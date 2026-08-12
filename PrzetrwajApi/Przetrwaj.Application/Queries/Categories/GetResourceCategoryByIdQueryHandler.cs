@@ -4,14 +4,14 @@ using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Models.Dtos;
 
 internal class GetResourceCategoryByIdQueryHandler
-    : IQueryHandler<GetResourceCategoryByIdQuery, CategoryDto?>
+	: IQueryHandler<GetResourceCategoryByIdQuery, CategoryDto?>
 {
-    private readonly ICategoryRepository _repo;
-    public GetResourceCategoryByIdQueryHandler(ICategoryRepository repo) => _repo = repo;
+	private readonly ICategoryRepository _repo;
+	public GetResourceCategoryByIdQueryHandler(ICategoryRepository repo) => _repo = repo;
 
-    public async Task<CategoryDto?> Handle(GetResourceCategoryByIdQuery q, CancellationToken ct)
-    {
-        var e = await _repo.GetResourceByIdAsync(q.IdCategory, ct);
-        return e is null ? null : (CategoryDto?)e;
-    }
+	public async Task<CategoryDto?> Handle(GetResourceCategoryByIdQuery q, CancellationToken ct)
+	{
+		var e = await _repo.GetResourceByIdAsync(q.IdCategory, ct);
+		return CategoryDto.Map(e);
+	}
 }

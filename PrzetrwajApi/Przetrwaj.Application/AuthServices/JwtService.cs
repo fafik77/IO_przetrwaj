@@ -81,6 +81,10 @@ public class JwtService : IJwtService
 		await _userJwtRefreshRepository.DeleteAllAsync(userId, ct);
 		await _unitOfWork.SaveChangesAsync(ct);
 	}
+	public async Task DeleteEntriesOlderThanAsync(DateTimeOffset dateTimeOffset, CancellationToken ct)
+	{
+		await _userJwtRefreshRepository.DeleteEntriesOlderThanAsync(dateTimeOffset, ct);
+	}
 
 
 

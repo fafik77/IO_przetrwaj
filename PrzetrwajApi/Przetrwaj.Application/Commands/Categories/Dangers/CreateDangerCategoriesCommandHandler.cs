@@ -32,6 +32,6 @@ internal class CreateDangerCategoriesCommandHandler : ICommandHandler<CreateDang
 		{
 			throw new BadUpdateCommand(ex.InnerException.Message);
 		}
-		return categories.Select(c => (CategoryDto)c!).ToList();
+		return categories.Select(c => CategoryDto.Map(c)!).ToList();
 	}
 }

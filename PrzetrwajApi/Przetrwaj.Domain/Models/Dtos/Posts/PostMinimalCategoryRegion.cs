@@ -12,8 +12,8 @@ public record PostMinimalCategoryRegion
 	public required string Title { get; set; }
 	public int IdCategory { get; set; }
 
-	public double Lat { get; set; }
-	public double Long { get; set; }
+	public double? Lat { get; set; }
+	public double? Long { get; set; }
 	public bool Active { get; set; }
 
 

@@ -2,7 +2,7 @@
 using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Models.Dtos;
 
-namespace Przetrwaj.Application.Commands.Posts.Attachments;
+namespace Przetrwaj.Application.Dtos;
 
 public class AddAttachmentsResult : ExceptionCasting
 {

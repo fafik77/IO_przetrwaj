@@ -20,9 +20,10 @@ public class UpdateDangerCategoryCommandHandler : ICommandHandler<UpdateDangerCa
 	{
 		var cat = await _categoryRepository.GetDangerByIdAsync(request.Id, cancellationToken);
 		if (cat is null) throw new CategoryNotFoundException(request.Id);
-		cat.CategoryIcon = request.CategoryIcon;
-		cat.Name = request.Name;
-		if (request.Impediments != null) cat.Impediments = (int)request.Impediments;
+		if (!string.IsNullOrEmpty(request.Category.CategoryIcon))
+			cat.CategoryIcon = request.Category.CategoryIcon;
+		cat.Name = request.Category.Name;
+		if (request.Category.Impediments != null) cat.Impediments = (int)request.Category.Impediments;
 		_categoryRepository.Update(cat);
 		try
 		{

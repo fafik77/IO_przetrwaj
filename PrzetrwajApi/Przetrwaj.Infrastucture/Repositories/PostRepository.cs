@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions.Posts;
@@ -57,11 +57,13 @@ internal class PostRepository : IPostRepository
 
 	public async Task<IEnumerable<PostOverviewDto>> GetAllAuthoredByAsync(string idAuthor, CancellationToken cancellationToken = default)
 	{
+#pragma warning disable CA1862 // the 'StringComparison' method is not allowed on the DB side
 		var posts = await _context.Posts
 			.Where(p => p.Active == true && p.IdAutor == idAuthor.ToLower())
 			.Include(p => p.IdCategoryNavigation)
 			.Select(p => SelectAsPostOverview(p))
 			.ToListAsync(cancellationToken);
+#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
 		return posts;
 	}
 
@@ -84,21 +86,13 @@ internal class PostRepository : IPostRepository
 			{
 				Comment = c.Comment,
 				DateCreated = c.DateCreated,
-				Autor = c.IdAutorNavigation != null ? new UserGeneralDtoSimpleRegion
-				{
-					Id = c.IdAutorNavigation.Id,
-					Name = c.IdAutorNavigation.Name ?? "",
-					Surname = c.IdAutorNavigation.Surname ?? "",
-					IdRegion = (c.IdAutorNavigation.GminaId ?? 0) / 100_000,
-					RegistrationDate = c.IdAutorNavigation.RegistrationDate,
-					BanDate = c.IdAutorNavigation.BanDate,
-				} : null
+				Author = UserGeneralDtoNoRegion.Map(c.IdAutorNavigation)
 			})
 			.ToList(),
 			DateCreated = p.DateCreated,
 			// we have to re-map the region (as this is on DB side) later in the code
 			Region = RegionOnlyDto.Map(p.RegionNavigation),
-			Author = (UserGeneralDtoSimpleRegion?)p.IdAutorNavigation,
+			Author = UserGeneralDtoNoRegion.Map(p.IdAutorNavigation),
 			// if CustomCategory, fill this data with {id=customId, Name=CustomName not "other/inne"}
 			Category = p.CustomCategory.Length > 0 ? new CategoryDto
 			{
@@ -106,19 +100,16 @@ internal class PostRepository : IPostRepository
 				Type = p.IdCategoryNavigation.Type,
 				Name = p.CustomCategory,
 			}
-			: (CategoryDto?)p.IdCategoryNavigation,
+			: CategoryDto.Map(p.IdCategoryNavigation),
 
-			// Fetch only the bool values
+			// Calculate votes on the DB side
 			VotePositive = p.Votes.LongCount(p => p.IsUpvote),
 			VoteNegative = p.Votes.LongCount(p => !p.IsUpvote),
-			// Map attachments using the URL logic
+			// Map attachments (add URL later)
 			Attachments = p.Attachments
 			.OrderBy(x => x.OrderInList)    //sort by OrderInList asc
-			.Select(a => new AttachmentDto
-			{
-				AlternateDescription = a.AlternateDescription,
-				FileURL = $"/Attachments/{a.IdAttachment}.webp",
-			}).ToList()
+			.Select(a => AttachmentDto.Map(a, null)!)
+			.ToList()
 		})
 		.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 		if (res is null) return null;
@@ -160,26 +151,7 @@ internal class PostRepository : IPostRepository
 	/// </summary>
 	/// <param name="p">the post on which DB is running Select</param>
 	/// <returns>PostOverviewDto</returns>
-	private static PostOverviewDto SelectAsPostOverview(Post p)
-	{
-		return new PostOverviewDto
-		{
-			Id = p.IdPost,
-			Title = p.Title,
-			DateCreated = p.DateCreated,
-			Category = p.CustomCategory.Length > 0 ? new CategoryDto
-			{
-				Id = p.IdCategory,
-				Type = p.IdCategoryNavigation.Type,
-				Name = p.CustomCategory,
-			}
-			: (CategoryDto?)p.IdCategoryNavigation,
-			Region = RegionOnlyDto.Map(p.RegionNavigation),
-			// --- VOTE CALCULATIONS (Executed on Database side) ---
-			VotePositive = p.Votes.LongCount(v => v.IsUpvote),
-			VoteNegative = p.Votes.LongCount(v => !v.IsUpvote),
-		};
-	}
+	private static PostOverviewDto SelectAsPostOverview(Post p) => PostOverviewDto.Map(p);
 
 	/// <summary>
 	/// The new optimal metod to get Posts
@@ -218,6 +190,8 @@ internal class PostRepository : IPostRepository
 			.Where(p => p.IdRegion == Gmi || p.IdRegion == Pow || p.IdRegion == Woj || p.IdRegion == 0)
 			.OrderByDescending(p => p.DateCreated)
 			.Include(p => p.IdCategoryNavigation)
+			.Include(p => p.IdAutorNavigation)
+			.Include(p => p.RegionNavigation)
 			.Select(p => SelectAsPostOverview(p))
 			.ToListAsync(ct);
 		return await FillInPostDataAfterFetch(posts, ct);

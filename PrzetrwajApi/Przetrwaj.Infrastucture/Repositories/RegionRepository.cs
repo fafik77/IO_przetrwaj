@@ -113,7 +113,7 @@ public class RegionRepository : IRegionRepository
 	{
 		var gmina = await GetGminaByCoordinatesAsync(location);
 		if (gmina is null) throw new LocationNotInPolandException(location);
-		var res = await GetByIdAsync(gmina.Jpt_kod_je, ct);
+		var res = await GetByIdAsync(RegionCompoundHelper.FromTERCtoDBId(gmina.Jpt_kod_je), ct);
 		if (res is null) throw new RegionNotFoundException(gmina.Jpt_kod_je);
 		return res;
 	}

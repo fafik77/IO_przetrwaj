@@ -2,6 +2,10 @@
 
 namespace Przetrwaj.Domain.Models.Dtos;
 
+
+/// <summary>
+/// Warning `Region, Name, Surname` are a sensitive information when combined
+/// </summary>
 public class UserGeneralDto
 {
 	public required string Id { get; set; }

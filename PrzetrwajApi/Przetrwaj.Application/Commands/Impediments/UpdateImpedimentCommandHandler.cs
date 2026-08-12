@@ -20,7 +20,7 @@ public class UpdateImpedimentCommandHandler : ICommandHandler<UpdateImpedimentCo
 	{
 		var item = request.Map();
 		if (!(item.Id >= 0 && item.Id <= 31)) throw new ImpedimentIdException($"{item.Id} is not in [0;31] range");
-		var exists = _repo.GetByIdAsync(item.Id, cancellationToken);
+		var exists = await _repo.GetByIdAsync(item.Id, cancellationToken);
 		if (exists != null)
 			_repo.Update(item);
 		else

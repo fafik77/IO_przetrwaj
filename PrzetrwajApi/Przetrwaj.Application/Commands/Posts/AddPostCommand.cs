@@ -1,4 +1,5 @@
-﻿using Przetrwaj.Domain.Entities;
+﻿using Przetrwaj.Application.Commands.Posts.Attachments;
+using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos;
 using System.ComponentModel.DataAnnotations;
 
@@ -19,5 +20,7 @@ public record AddPostCommand
 	[Required]
 	public required LatLong LatLong { get; set; }
 	public RegionPrecision RegionPrecision { get; set; } = RegionPrecision.GMI;
+
+	public AddAttachments? Attachments { get; set; }
 }
 

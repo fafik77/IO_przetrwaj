@@ -7,16 +7,16 @@ public record CommentDto
 	//there is no point in including Id, or Post info (as we already know the post)
 	public required string Comment { get; set; }
 	public DateTimeOffset DateCreated { get; set; }
-	public UserGeneralDtoSimpleRegion? Autor { get; set; }
+	public UserGeneralDtoNoRegion? Author { get; set; }
 
 
-	public static explicit operator CommentDto(UserComment comment)
+	public static CommentDto Map(UserComment comment)
 	{
 		return new CommentDto
 		{
 			Comment = comment.Comment,
 			DateCreated = comment.DateCreated,
-			Autor = (UserGeneralDtoSimpleRegion?)comment.IdAutorNavigation,
+			Author = UserGeneralDtoNoRegion.Map(comment.IdAutorNavigation),
 		};
 	}
 }

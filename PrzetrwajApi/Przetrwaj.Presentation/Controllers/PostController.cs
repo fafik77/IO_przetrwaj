@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
+using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Helpers;
 using Przetrwaj.Application.Quaries.Posts;
 using Przetrwaj.Application.Queries.Posts;
@@ -245,10 +246,12 @@ public partial class PostController : Controller
 	[HttpPost("danger")]
 	[SwaggerOperation("Add a Danger post (User)")]
 	[Authorize(UserRoles.User)]
-	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(PostCreatedDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
-	public async Task<IActionResult> AddDanger(AddPostCommand newPost, CancellationToken CT)
+	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
+	[RequestSizeLimit(50 << 20)] //up to 50 MB
+	public async Task<IActionResult> AddDanger([FromForm] AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var postI = new AddDangerInternallCommand
@@ -261,7 +264,9 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(postI, CT);
-			return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
+			Uri resourcePath = HttpPathHelper.HttpPath(Request);
+			var dto = PostCreatedDto.Map(res, resourcePath);
+			return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
 		}
 		catch (BaseException ex)
 		{
@@ -273,9 +278,11 @@ public partial class PostController : Controller
 	[HttpPost("resource")]
 	[SwaggerOperation("Add a Resource post (Moderator)")]
 	[Authorize(UserRoles.Moderator)]
-	[ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status201Created)]
+	[ProducesResponseType(typeof(PostCreatedDto), StatusCodes.Status201Created)]
 	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	public async Task<IActionResult> AddResource(AddPostCommand newPost, CancellationToken CT)
+	[RequestFormLimits(MultipartBodyLengthLimit = 50 << 20)] //up to 50 MB
+	[RequestSizeLimit(50 << 20)] //up to 50 MB
+	public async Task<IActionResult> AddResource([FromForm] AddPostCommand newPost, CancellationToken CT)
 	{
 		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
 		var postI = new AddResourceInternallCommand
@@ -288,7 +295,9 @@ public partial class PostController : Controller
 		try
 		{
 			var res = await _mediator.Send(postI, CT);
-			return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
+			Uri resourcePath = HttpPathHelper.HttpPath(Request);
+			var dto = PostCreatedDto.Map(res, resourcePath);
+			return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
 		}
 		catch (BaseException ex)
 		{

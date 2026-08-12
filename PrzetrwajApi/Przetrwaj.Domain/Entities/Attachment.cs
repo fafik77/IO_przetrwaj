@@ -21,4 +21,5 @@ public partial class Attachment
 
 
 	public virtual Post IdPostNavigation { get; set; } = null!;
+	public virtual string FileName => IdAttachment + ".webp";
 }

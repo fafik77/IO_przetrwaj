@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Przetrwaj.Application.Configuration.Quaries;
+using Przetrwaj.Application.Helpers;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions.Posts;
 using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 
-namespace Przetrwaj.Application.Quaries.Posts;
+namespace Przetrwaj.Application.Queries.Posts;
 
 public class GetPostByIdQueryHandler : IQueryHandler<GetPostByIdQuery, PostCompleteDataDto>
 {
@@ -23,9 +24,12 @@ public class GetPostByIdQueryHandler : IQueryHandler<GetPostByIdQuery, PostCompl
 	{
 		var resDto = await _postRepository.GetFullROPostByIdAsync(request.Id, cancellationToken);
 		if (resDto is null) throw new PostNotFoundException(request.Id);
-		//var dto = (PostCompleteDataDto?)res;
-		string HttpPath = $"{_httpContextAccessor.HttpContext?.Request.Scheme}://{_httpContextAccessor.HttpContext?.Request.Host.Value}";
-		resDto.Attachments = resDto.Attachments.Select(a => AttachmentDto.Map(a, HttpPath)).ToList();
+		var resourcePath = HttpPathHelper.HttpPath(_httpContextAccessor);
+		foreach (var attachment in resDto.Attachments)
+		{
+			if (attachment != null)
+				attachment.BaseUrl = resourcePath;
+		}
 		if (request.UserId != null)
 			resDto.MyVote = (VoteDto)await _postRepository.GetVoteAsync(request.Id, request.UserId, cancellationToken);
 		return resDto;

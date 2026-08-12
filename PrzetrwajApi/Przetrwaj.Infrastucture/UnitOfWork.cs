@@ -14,6 +14,7 @@ internal class UnitOfWork : IUnitOfWork
 	}
 	public async Task SaveChangesAsync(CancellationToken cancellationToken)
 	{
+		if (cancellationToken.IsCancellationRequested) return;
 		//UpdateEntitiesTime();
 		await _appDbContext.SaveChangesAsync(cancellationToken);
 	}

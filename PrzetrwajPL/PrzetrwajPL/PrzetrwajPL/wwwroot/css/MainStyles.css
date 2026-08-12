@@ -1,16 +1,28 @@
-﻿button {
+button, .button {
 	cursor: pointer;
 }
-	button:hover {
-		opacity: 0.8;
-		border: double;
-	}
+
+.button:focus, select.button:focus, .form-control-region:focus {
+	outline: 3px solid #0094ff !important;
+	outline-offset: 1px;
+	box-shadow: 0 0 0 4px rgba(0, 148, 255, 0.35) !important;
+}
 
 	.white-button-blue-text {
 		background-color: ghostwhite;
 		color: #0094ff;
 		padding: 14px 20px;
 		border: 3px solid #0094ff;
+		border-radius: 10px;
+		text-shadow: #808080;
+		font-weight: bold;
+	}
+
+	.white-button-red-text {
+		background-color: ghostwhite;
+		color: #ff3421;
+		padding: 14px 20px;
+		border: 3px solid #ff3421;
 		border-radius: 10px;
 		text-shadow: #808080;
 		font-weight: bold;
@@ -26,7 +38,11 @@
 		font-weight: bold;
 	}
 
-
+.picker-container {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
 /* smooth slide from top to bottom and reversed */
 .picker-slider {
 	display: grid;
@@ -55,3 +71,87 @@
 	opacity: 1;
 }
 
+
+/* Region button showing the picked region */
+.btn-toggle-picker {
+	background-color: #e6f4ff;
+	color: #0094ff;
+	border: 1px solid #bae7ff;
+	padding: 2px 4px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 14px;
+	display: inline-flex;
+	align-items: center;
+	transition: all 0.2s ease-in-out;
+	margin-bottom: 8px;
+	width: auto;
+}
+
+	.btn-toggle-picker:hover {
+		background-color: #bae7ff;
+		color: #007adb;
+	}
+
+.selector-group {
+	flex: 1;
+	min-width: 180px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+	.selector-group label {
+		font-size: 12px;
+		font-weight: bold;
+		color: #555;
+	}
+
+
+.btn-geo {
+	background-color: #28a745;
+	color: white;
+	border: none;
+	padding: 8px 14px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+	transition: background 0.2s ease;
+}
+
+	.btn-geo:hover {
+		background-color: #218838;
+	}
+
+	.btn-geo:disabled {
+		background-color: #6c757d;
+		cursor: not-allowed;
+	}
+
+.geo-action-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 1px dashed #dcdcdc;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+
+.form-control-region {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background-color: white;
+	font-size: 14px;
+	outline: none;
+}
+
+	.form-control-region:disabled {
+		background-color: #e9ecef;
+		color: #6c757d;
+	}

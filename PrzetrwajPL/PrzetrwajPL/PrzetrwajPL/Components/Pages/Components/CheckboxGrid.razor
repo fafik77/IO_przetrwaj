@@ -1,4 +1,6 @@
-﻿<div class="checkbox-grid-container">
+﻿@inject IHttpClientFactory ClientFactory
+
+<div class="checkbox-grid-container">
 	@for (int currentSlot = 0; currentSlot <= 31; currentSlot++)
 	{
 		@if (_slots.TryGetValue(currentSlot, out var item))
@@ -12,8 +14,8 @@
 		}
 		else
 		{
-			// empty cell that preserves the 4x8 grid
-			<div class="grid-cell empty-cell"></div>
+			// empty cell that preserves the grid
+			@* <div class="grid-cell empty-cell"></div> *@
 		}
 	}
 </div>

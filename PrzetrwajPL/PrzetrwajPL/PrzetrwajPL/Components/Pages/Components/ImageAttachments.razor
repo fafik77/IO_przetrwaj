@@ -1,0 +1,144 @@
+@inject IJSRuntime JS
+@using Microsoft.AspNetCore.Components.Forms
+@using Przetrwaj.CommonLibrary.Requests
+@using System.IO
+
+<div class="attachments-wrapper">
+	<!-- Add Photo Column -->
+	<div class="attachment-column add-column">
+		<label for="@ImageUploadId" class="white-button-blue-text add-photo-btn" tabindex="0" @onkeydown="OnLabelKeyDown">
+			Dodaj zdjęcie
+		</label>
+		<InputFile id="@ImageUploadId" OnChange="OnFilesSelected" multiple accept=".jpg,.jpeg,.png,.gif,.webp,image/*" style="display: none;" />
+	</div>
+
+	<!-- Attachment Columns -->
+	@foreach (var wrapper in attachments)
+	{
+		<div class="attachment-column">
+			<button type="button" class="white-button-red-text remove-photo-btn" @onclick="() => RemoveAttachment(wrapper)">
+				Usuń
+			</button>
+			
+			<div class="thumbnail-container">
+				@if (!string.IsNullOrEmpty(wrapper.PreviewUrl))
+				{
+					<img src="@wrapper.PreviewUrl" alt="Podgląd załącznika" class="thumbnail-img" />
+				}
+				else
+				{
+					<div class="thumbnail-placeholder">
+						<i class="fa fa-spinner fa-spin"></i>
+					</div>
+				}
+			</div>
+
+			<input type="text" 
+				   class="description-input" 
+				   placeholder="Opis zdjęcia ..."
+				   name="image-attachment"
+				   @bind="wrapper.Item.AltDescription" 
+				   @bind:event="oninput" />
+		</div>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public EventCallback OnAttachmentsChanged { get; set; }
+
+	private const string ImageUploadId = "image-upload";
+
+	private List<AttachmentWrapper> attachments = new();
+
+	// Queryable property for the parent page
+	public List<AttachmentItem> Items => attachments.Select(w => w.Item).ToList();
+
+	private class AttachmentWrapper
+	{
+		public required AttachmentItem Item { get; set; }
+		public string? PreviewUrl { get; set; }
+	}
+
+	private async Task OnFilesSelected(InputFileChangeEventArgs e)
+	{
+		// Allow up to 10 files, only images
+		var files = e.GetMultipleFiles(10).Where(f => f.ContentType.StartsWith("image/"));
+
+		foreach (var file in files)
+		{
+			if (attachments.Count >= 10)
+				break;
+
+			// Read full file bytes immediately to prevent browser file ID expiration
+			byte[] fileBytes;
+			try
+			{
+				using var stream = file.OpenReadStream(maxAllowedSize: 10 << 20);
+				using var ms = new MemoryStream();
+				await stream.CopyToAsync(ms);
+				fileBytes = ms.ToArray();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error reading file content: {ex.Message}");
+				continue;
+			}
+			var inMemoryFile = new InMemoryBrowserFile(
+				file.Name,
+				file.LastModified,
+				file.Size,
+				file.ContentType,
+				fileBytes
+			);
+			var item = new AttachmentItem
+			{
+				File = inMemoryFile,
+				AltDescription = string.Empty
+			};
+
+			// Generate resized preview immediately from the original file while it is still valid
+			string previewUrl = "";
+			try
+			{
+				var resizedFile = await file.RequestImageFileAsync("image/png", 300, 300);
+				using var pStream = resizedFile.OpenReadStream(maxAllowedSize: 1 << 20);
+				using var pMs = new MemoryStream();
+				await pStream.CopyToAsync(pMs);
+				var pBase64 = Convert.ToBase64String(pMs.ToArray());
+				previewUrl = $"data:image/png;base64,{pBase64}";
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error generating preview: {ex.Message}");
+				previewUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='%23eee'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%23999'>Błąd podglądu</text></svg>";
+			}
+			var wrappedItem = new AttachmentWrapper
+			{
+				Item = item,
+				PreviewUrl = previewUrl
+			};
+			attachments.Add(wrappedItem);
+		}
+
+		StateHasChanged();
+
+		if (OnAttachmentsChanged.HasDelegate)
+			await OnAttachmentsChanged.InvokeAsync();
+	}
+
+	private async Task RemoveAttachment(AttachmentWrapper wrapper)
+	{
+		attachments.Remove(wrapper);
+		StateHasChanged();
+		
+		if (OnAttachmentsChanged.HasDelegate)
+			await OnAttachmentsChanged.InvokeAsync();
+	}
+
+	private async Task OnLabelKeyDown(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter" || e.Key == " ")
+			await JS.InvokeVoidAsync("eval", $"document.getElementById('{ImageUploadId}').click()");
+	}
+}

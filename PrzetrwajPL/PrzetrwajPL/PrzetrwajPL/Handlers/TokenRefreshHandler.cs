@@ -39,12 +39,14 @@ public class TokenRefreshHandler(
 			return response;
 		// Retrieve the refresh token, securely stored inside the encrypted Cookie state
 		var refreshToken = await context.GetTokenAsync("refresh_token");
+		var accessToken = await context.GetTokenAsync("access_token");
 		if (string.IsNullOrEmpty(refreshToken))
 			return response;
 		try
 		{
 			// Build a separate refresh token, isolated client to call the refresh endpoint to prevent recursive execution loops
 			var refreshClient = httpClientFactory.CreateClient(Consts.PrzetrwajApiRefreshClientName);
+			refreshClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
 			// Prepare payload matching: {"refreshToken": "string"}
 			var refreshPayload = new { refreshToken };

@@ -1,0 +1,96 @@
+@page "/list"
+
+@rendermode InteractiveServer
+@inject IHttpClientFactory ClientFactory
+@using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Models
+@using PrzetrwajPL.Components.Pages.Components
+
+<PageTitle>Lokalnie - Przetrwaj PL</PageTitle>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<div style="text-align: center">
+	<h1>Widzisz zagrożenie? Zgłoś je!</h1>
+
+	<div class="cascade-selectors">
+		<AuthorizeView Policy="@UserRoles.User">
+			<Authorized>
+				<a href="/add-post-danger">Dodaj Post o Zagrożeniu</a>
+			</Authorized>
+		</AuthorizeView>
+
+		<AuthorizeView Policy="@UserRoles.Moderator">
+			<Authorized>
+				<a href="/add-post-resource">Dodaj Post o Zasobie</a>
+			</Authorized>
+		</AuthorizeView>
+	</div>
+</div>
+
+
+<div class="filters">
+	<div class="picker">
+		<RegionPicker @ref="regionPicker" SelectedRegionIdChanged="SelectedRegionScopeChanged" />
+	</div>
+	<div class="picker">
+		<DangerResourceTypePicker @ref="dangerResourceTypePicker" SelectionChanged="SelectedRegionScopeChanged" />
+
+		<VisibilityPicker @ref="visibilityPicker" SelectionChanged="SelectedRegionScopeChanged" />
+	</div>
+	
+</div>
+
+<div style="text-align: center">
+	<h2>Lista najnowszych informacji w regionie</h2>
+</div>
+@if (startedLoadingPosts == false && posts == null)
+{
+	<p style="text-align: center; margin-top: 20px;">Wybierz region oraz typ informacji, który cię interesuje.</p>
+}
+else if (posts == null)
+{
+	<p style="text-align: center; margin-top: 20px;">Ładowanie postów...</p>
+}
+else if (!posts.Any())
+{
+	<p style="text-align: center; margin-top: 20px;">Brak postów w wybranym regionie.</p>
+}
+else
+{
+	@foreach (var post in posts)
+	{
+		<a href="/posts/@post.Id" class="post-card">
+			<div class="post-card-content">
+				<div class="post-card-left">
+					<span class="post-title">
+						@if (post.Category?.Type == CategoryType.Danger)
+						{
+							<span class="post-icon icon-danger">⚠</span>
+						}
+						else
+						{
+							<span class="post-icon icon-resource">ⓘ</span>
+						}
+						@post.Title
+					</span>
+					<span class="post-category">@(post.Category?.Name ?? "Brak kategorii")</span>
+					<span class="post-meta">@(post.Region?.Name ?? "Brak lokalizacji") @post.DateCreated.ToString("HH:mm dd.MM.yyyy")</span>
+				</div>
+				<div class="post-card-right">
+					<div class="post-votes">
+						<span class="up-vote">@post.VotePositive</span>
+						<span class="divide">/</span>
+						<span class="down-vote">@post.VoteNegative</span>
+					</div>
+					<span class="post-author">@(post.Author?.Name ?? "Anonim")</span>
+				</div>
+			</div>
+		</a>
+	}
+}
+@if (!string.IsNullOrEmpty(errorMsg))
+{
+	<p class="alert alert-danger pre-wrap" style="text-align: center; margin-top: 20px;">@(errorMsg)</p>
+}
+
+

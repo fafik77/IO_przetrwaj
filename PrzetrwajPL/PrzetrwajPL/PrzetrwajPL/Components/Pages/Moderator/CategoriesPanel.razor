@@ -1,0 +1,126 @@
+﻿@page "/moderator/categories-{CategoriesType}"
+@* valid values for the API are: (dangers, resources) *@
+@using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Models
+@using PrzetrwajPL.Components.Pages.Components
+
+@rendermode InteractiveServer
+@inject IHttpClientFactory ClientFactory
+
+<PageTitle>Zarządzaj kategoriami @CategoriesPlName - Przetrwaj PL</PageTitle>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div style="text-align: center; margin-bottom: 30px;">
+	<h1 style="font-weight: bold;">Panel moderatora</h1>
+	<h2 style="color: #555; font-size: 1.5rem;">Zarządzaj kategoriami @CategoriesPlName</h2>
+</div>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+	<div class="alert alert-success" style="background-color: #d4edda; color: #155724; padding: 12px; border-radius: 4px; margin-bottom: 20px; text-align: center;">
+		@successMessage
+	</div>
+}
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 20px; text-align: center;">
+		@errorMessage
+	</div>
+}
+
+<div class="dashboard-container">
+	@* LEWA STRONA: Lista kategorii (Master) *@
+	<div class="left-div">
+		<button type="button" class="button white-button-blue-text w-100" @onclick="InitiateNewCategoryAsync" style="width: 100%; margin-bottom: 15px;">
+			<i class="fa fa-plus me-2"></i> Dodaj nową kategorię
+		</button>
+
+		<div class="category-list">
+			@if (categories == null)
+			{
+				<p style="text-align: center; color: #888; padding: 20px;">Wczytywanie listy kategorii...</p>
+			}
+			else if (!categories.Any())
+			{
+				<p style="text-align: center; color: #888; padding: 20px;">Brak zdefiniowanych kategorii.</p>
+			}
+			else
+			{
+				@foreach (var cat in categories)
+				{
+					<div class="category-item @(currentCategory?.Id == cat.Id && !isNewCategory ? "selected-item" : "")"
+						 @onclick="() => SelectCategoryForEdit(cat)">
+						<span class="index-badge">@cat.Id.</span>
+						<span class="category-name">@cat.Name</span>
+						<i class="fa fa-chevron-right arrow-icon"></i>
+					</div>
+				}
+			}
+		</div>
+	</div>
+
+	@* PRAWA STRONA: Formularz edycji / dodawania (Detail) *@
+	<div class="right-div">
+		@if (currentCategory != null)
+		{
+			<div class="edit-form-card">
+				<h3 class="form-header">
+					@if (isNewCategory)
+					{
+						<span class="badge-new">Nowa kategoria</span>
+					}
+					else
+					{
+						<span>ID: <strong>@currentCategory.Id</strong></span>
+					}
+				</h3>
+
+				<div class="form-group">
+					<label for="catName">Nazwa kategorii:</label>
+					<input type="text" id="catName" @bind="currentCategory.Name" class="form-input-control" placeholder="Wpisz nazwę kategorii..." />
+				</div>
+
+				<div class="form-group" style="margin-top: 15px;">
+					<label class="d-block" style="margin-bottom: 8px;">
+						<i class="fa fa-users"></i> Grupy, których dotyczy zagrożenie:
+						<button type="button" class="btn-toggle-picker" @onclick="ToggleAppliesToCheckboxPicker">
+							Kategorie
+							<i class="fa @(isAppliesToCheckboxGridOpen ? "fa-chevron-up" : "fa-chevron-down") ms-2" style="font-size: 11px;"></i>
+						</button>
+					</label>
+					<div class="picker-container">
+						@* Picker wraz z animacją *@
+						<div class="picker-slider @(isAppliesToCheckboxGridOpen ? "expanded" : "collapsed")">
+							<div class="picker-inner-content">
+								<div class="picker">
+									<ImpedimentsCheckboxGrid @ref="AppliesToCheckboxGrid" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-actions" style="margin-top: 25px; text-align: right;">
+					<button type="button" class="button blue-button-white-text" @onclick="HandleSave" disabled="@isLoading" style="padding: 12px 40px; min-width: 150px;">
+						@if (isLoading)
+						{
+							<span><i class="fa fa-spinner fa-spin"></i> Zapisywanie...</span>
+						}
+						else
+						{
+							<span><i class="fa fa-save"></i> Zapisz</span>
+						}
+					</button>
+				</div>
+			</div>
+		}
+		else
+		{
+			<div class="empty-state-card">
+				<i class="fa fa-folder-open-o" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+				<p>Wybierz kategorię z listy po lewej stronie lub kliknij przycisk, aby dodać zupełnie nową pozycję.</p>
+			</div>
+		}
+	</div>
+</div>
+

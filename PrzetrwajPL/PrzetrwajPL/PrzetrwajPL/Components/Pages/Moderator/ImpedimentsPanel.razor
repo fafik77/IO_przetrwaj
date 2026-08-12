@@ -1,0 +1,94 @@
+﻿@page "/moderator/impediments"
+@using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Models
+@using PrzetrwajPL.Components.Pages.Components
+
+@rendermode InteractiveServer
+@inject IHttpClientFactory ClientFactory
+
+<PageTitle>Zarządzaj listą typów ludzi - Przetrwaj PL</PageTitle>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div style="text-align: center; margin-bottom: 30px;">
+	<h1 style="font-weight: bold;">Panel moderatora</h1>
+	<h2 style="color: #555; font-size: 1.5rem;">Zarządzaj listą typów ludzi</h2>
+</div>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+	<div class="alert alert-success" style="background-color: #d4edda; color: #155724; padding: 12px; border-radius: 4px; margin-bottom: 20px; text-align: center;">
+		@successMessage
+	</div>
+}
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger" style="background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 20px; text-align: center;">
+		@errorMessage
+	</div>
+}
+
+<div class="dashboard-container">
+	@* LEWA STRONA: Lista typów (Master) *@
+	<div class="left-div">
+		<div class="category-list">
+			@if (impediments == null)
+			{
+				<p style="text-align: center; color: #888; padding: 20px;">Wczytywanie listy typów ludzi...</p>
+			}
+			else if (!impediments.Any())
+			{
+				<p style="text-align: center; color: #888; padding: 20px;">Brak zdefiniowanych typów ludzi.</p>
+			}
+			else
+			{
+				@foreach (var cat in impediments)
+				{
+					<div class="category-item @(currentSelection == cat.Key ? "selected-item" : "")"
+						 @onclick="() => SelectItemForEdit(cat.Key)">
+						<span class="index-badge">@cat.Key</span>
+						<span class="category-name">@cat.Value</span>
+						<i class="fa fa-chevron-right arrow-icon"></i>
+					</div>
+				}
+			}
+		</div>
+	</div>
+
+	@* PRAWA STRONA: Formularz edycji / dodawania (Detail) *@
+	<div class="right-div">
+		@if (currentSelection != null)
+		{
+			<div class="edit-form-card">
+				<h3 class="form-header">
+					<span>ID: <strong>@currentSelection</strong></span>
+				</h3>
+
+				<div class="form-group">
+					<label for="catName">Nazwa typu:</label>
+					<input type="text" id="catName" @bind="currentSelectionName" class="form-input-control" placeholder="Wpisz nazwę typu..." />
+				</div>
+
+				<div class="form-actions" style="margin-top: 25px; text-align: right;">
+					<button type="button" class="button blue-button-white-text" @onclick="HandleSave" disabled="@isLoading" style="padding: 12px 40px; min-width: 150px;">
+						@if (isLoading)
+						{
+							<span><i class="fa fa-spinner fa-spin"></i> Zapisywanie...</span>
+						}
+						else
+						{
+							<span><i class="fa fa-save"></i> Zapisz</span>
+						}
+					</button>
+				</div>
+			</div>
+		}
+		else
+		{
+			<div class="empty-state-card">
+				<i class="fa fa-folder-open-o" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+				<p>Wybierz typ ludzi z listy po lewej stronie do edycji.</p>
+			</div>
+		}
+	</div>
+</div>
+

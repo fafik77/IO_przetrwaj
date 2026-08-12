@@ -3,7 +3,7 @@
 @inject IHttpClientFactory ClientFactory
 
 <select class="form-select" @onchange="OnChange">
-    <option value="0">-- wybierz kategorię zagrożenia --</option>
+	<option value="-1">-- wybierz kategorię @NamePl --</option>
 
     @if (categories != null)
     {
@@ -19,15 +19,20 @@
 	public int SelectedCategoryId { get; set; } = -1;
 	[Parameter]
 	public EventCallback<int> SelectedCategoryIdChanged { get; set; }
+	[Parameter]
+	public string CategoriesTypeToPickPlural { get; set; } = "dangers";
+	public string CategoriesTypeEndpoint => "/Categories/" + CategoriesTypeToPickPlural;
+	protected string NamePl => CategoriesTypeToPickPlural.StartsWith("dangers", StringComparison.OrdinalIgnoreCase) ? "zagrożenia" : "zasobu";
 
 	public string? SelectedCategoryName { get; private set; }
+	public bool IsCategorySelected => SelectedCategoryId > 0;
 
 	private List<CategoryDto>? categories;
 
 	protected override async Task OnInitializedAsync()
 	{
 		var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
-		categories = await client.GetFromJsonAsync<List<CategoryDto>>("/Categories/Dangers");
+		categories = await client.GetFromJsonAsync<List<CategoryDto>>(CategoriesTypeEndpoint);
 	}
 
 	private async Task OnChange(ChangeEventArgs e)

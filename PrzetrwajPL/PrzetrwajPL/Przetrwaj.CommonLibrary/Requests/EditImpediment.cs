@@ -2,10 +2,12 @@
 
 namespace Przetrwaj.CommonLibrary.Requests;
 
-public class CreateResourceCategoryCommand
+public class EditImpediment
 {
 	[Required]
-	[MinLength(3)]
-	[MaxLength(100)]
+	[Range(0, 31)]
+	public short Id { get; set; }
+	[Required]
+	[Length(3, 100)]
 	public required string Name { get; set; }
 }

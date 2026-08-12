@@ -1,0 +1,93 @@
+﻿@page "/add-post-{PostType}"
+@* valid values for API are: (danger, resource) *@
+@rendermode InteractiveServer
+@implements IDisposable
+
+@namespace PrzetrwajPL.Components.Pages.Components
+@using System.Text.RegularExpressions
+@using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Requests
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<h3>Dodaj nowy post o @PostTypeAboutPl</h3>
+
+<EditForm Model="@model" OnValidSubmit="HandleSubmit">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<div class="mb-3">
+		<label>Tytuł</label>
+		<InputText class="form-control" @bind-Value="model.Title" />
+		<ValidationMessage For="@(() => model.Title)" style="color:red; font-size: 12px;" />
+	</div>
+
+	<div class="mb-3">
+		<label>Opis</label>
+		<InputTextArea class="form-control" @bind-Value="model.Description" />
+		<ValidationMessage For="@(() => model.Description)" style="color:red; font-size: 12px;" />
+	</div>
+
+	<div class="mb-3">
+		<label>Kategoria</label>
+		<CategoryPicker @ref="CategoryPicker" @bind-SelectedCategoryId="model.IdCategory" CategoriesTypeToPickPlural="@PostTypePlural" />
+		<ValidationMessage For="@(() => model.IdCategory)" style="color:red; font-size: 12px;" />
+	</div>
+
+	<div class="mb-3">
+		<label>Własna kategoria (Inne)</label>
+		<InputText class="form-control" @bind-Value="model.CustomCategory" />
+		<ValidationMessage For="@(() => model.CustomCategory)" style="color:red; font-size: 12px;" />
+	</div>
+
+	@* Location *@
+	<div class="mb-3 border p-3 rounded bg-light">
+		<label class="fw-bold d-block mb-2">Lokalizacja zgłoszenia</label>
+
+		<div class="d-flex gap-2 mb-3">
+			<button type="button" class="btn btn-outline-secondary btn-sm" @onclick="HandleUseMyLocation">
+				<i class="bi bi-geo-alt"></i> Użyj mojej lokalizacji
+			</button>
+			<button type="button" class="btn btn-outline-secondary btn-sm" @onclick="HandleShowMapPicker">
+				<i class="bi bi-map"></i> Wybierz lokalizację na mapie
+			</button>
+		</div>
+
+		@if (latLong != null)
+		{
+			<div class="alert alert-info py-2 px-3 m-0 mb-2" style="font-size: 14px;">
+				<strong>Wybrane współrzędne:</strong>
+				Szerokość: @latLong.Lat.ToString("F5")° | Długość: @latLong.Long.ToString("F5")°
+			</div>
+		}
+
+		<div id="@(locationPickerMapId)" style="height: 300px; width: 100%; border-radius: 8px; border: 1px solid #ccc; display: @(showMap ? "block" : "none");"></div>
+	</div>
+
+	@* Moderator only: Post visibility *@
+	<AuthorizeView Policy="@UserRoles.Moderator" Context="Moderator">
+		<div class="mb-3">
+			<VisibilityPickerSingle @ref="visibilityPickerSingle" />
+		</div>
+	</AuthorizeView>
+
+	@* Attachments *@
+	<div class="card mb-3">
+		<ImageAttachments @ref="ImageAttachments" OnAttachmentsChanged="StateHasChanged" />
+	</div>
+
+	<button class="btn btn-primary" type="submit"> Dodaj post</button>
+</EditForm>
+
+
+@if (!string.IsNullOrEmpty(error))
+{
+	<div class="alert alert-danger mt-3">@error</div>
+}
+
+@if (!string.IsNullOrEmpty(newPostId))
+{
+	<div class="alert alert-success mt-3">Post został dodany!</div>
+}
+

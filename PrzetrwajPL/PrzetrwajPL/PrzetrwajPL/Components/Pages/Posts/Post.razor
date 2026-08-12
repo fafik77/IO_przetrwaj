@@ -1,0 +1,181 @@
+@page "/posts/{Id}"
+
+@rendermode InteractiveServer
+@inject IHttpClientFactory ClientFactory
+@using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Models.Posts
+@using Przetrwaj.CommonLibrary.Requests
+@using PrzetrwajPL;
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IJSRuntime JS
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+<div class="container">
+	@if (isLoading)
+	{
+		<p style="text-align:center">Ładowanie szczegółów posta...</p>
+	}
+	else if (post == null)
+	{
+		<p style="text-align:center">Nie znaleziono posta.</p>
+	}
+	else
+	{
+		<div class="post-header-container">
+			<div class="post-header-left">
+				<h1 class="post-title">@post.Title</h1>
+				<div class="post-meta-line">
+					@if (post.Region != null)
+					{
+						<span class="meta-city">@post.Region.Name</span>
+					}
+					<span class="meta-time">@post.DateCreated.ToString("HH:mm")</span>
+					<span class="meta-date">@post.DateCreated.ToString("dd.MM.yyyy")</span>
+					@if (post.Author != null)
+					{
+						<span class="meta-author">@post.Author.Name @post.Author.Surname</span>
+					}
+				</div>
+				<div class="post-category-line">
+					@post.Category?.Name
+				</div>
+				@if (isAuthor)
+				{
+					<div class="author-actions mt-2">
+						<a href="/posts/@post.Id/add-attachments" class="white-button-blue-text add-photo-btn-extracted">
+							<i class="fa fa-plus-circle"></i> Dodaj zdjęcie
+						</a>
+					</div>
+				}
+			</div>
+			
+			<div class="post-header-right">
+				<AuthorizeView>
+					<NotAuthorized>
+						<div class="vote-section">
+							<button class="upVoteButt" disabled>
+								<i class="fa fa-thumbs-up"></i> @post.VotePositive
+							</button>
+							<button class="downVoteButt" disabled>
+								<i class="fa fa-thumbs-down"></i> @post.VoteNegative
+							</button>
+						</div>
+					</NotAuthorized>
+					<Authorized>
+						<div class="vote-section">
+							<button class="upVoteButt @(IsUpvoted ? "active" : "")" @onclick="VotePositive" disabled="@(isVoting || HasVoted)">
+								<i class="fa fa-thumbs-up"></i> @post.VotePositive
+							</button>
+							<button class="downVoteButt @(IsDownvoted ? "active" : "")" @onclick="VoteNegative" disabled="@(isVoting || HasVoted)">
+								<i class="fa fa-thumbs-down"></i> @post.VoteNegative
+							</button>
+						</div>
+					</Authorized>
+				</AuthorizeView>
+			</div>
+		</div>
+
+		<div class="post-description-container">
+			<p class="post-description-text">@post.Description</p>
+		</div>
+
+		@* Horizontal scrolling images *@
+		<div class="attachments-scroll-wrapper">
+			@if (post.Attachments != null && post.Attachments.Any(a => a != null && !string.IsNullOrEmpty(a.FileURL)))
+			{
+				@foreach (var attachment in post.Attachments)
+				{
+					if (attachment != null && !string.IsNullOrEmpty(attachment.FileURL))
+					{
+						<div class="attachment-col">
+							<img src="@attachment.FileURL" 
+								 alt="@attachment.AlternateDescription" 
+								 class="thumbnail-img" 
+								 @onclick="() => ShowFullScreenImage(attachment.FileURL)" />
+							
+							<span class="attachment-desc">
+								@(string.IsNullOrWhiteSpace(attachment.AlternateDescription) ? "Opis zdjęcia..." : attachment.AlternateDescription)
+							</span>
+						</div>
+					}
+				}
+			}
+			else
+			{
+				<p class="text-muted">Brak załączonych zdjęć.</p>
+			}
+		</div>
+
+		@* Komentarze *@
+		<div class="comments-section">
+			<h3>Komentarze (@(post.Comments?.Count() ?? 0))</h3>
+			
+			<AuthorizeView>
+				<Authorized>
+					<button class="add-comment-trigger-btn" @onclick="ToggleCommentForm">
+						@if (showCommentForm)
+						{
+							<span>Anuluj</span>
+						}
+						else
+						{
+							<i class="fa fa-plus-circle"></i> <span>Dodaj komentarz</span>
+						}
+					</button>
+				</Authorized>
+			</AuthorizeView>
+
+			@if (showCommentForm)
+			{
+				<div class="add-comment-box">
+					<textarea @bind="newCommentContent" placeholder="Wpisz treść komentarza..." class="form-control"></textarea>
+					<button class="btn-send" @onclick="SubmitComment" disabled="@isSendingComment">Wyślij</button>
+				</div>
+			}
+
+			<div class="comments-list">
+				@if (post.Comments != null && post.Comments.Any())
+				{
+					@foreach (var comment in post.Comments)
+					{
+						<div class="comment-item">
+							<div class="comment-header">
+								<span class="comment-author">
+									@if (string.IsNullOrWhiteSpace(comment.Author?.Id))
+									{
+										<span>Anonymus</span>
+									}
+									else
+									{
+										<span>@comment.Author.Name @comment.Author.Surname</span>
+									}
+								</span>
+								<span class="comment-time">@FormatCommentTime(comment.DateCreated)</span>
+							</div>
+							<div class="comment-body">
+								@comment.Comment
+							</div>
+						</div>
+					}
+				}
+				else
+				{
+					<p class="text-muted">Brak komentarzy.</p>
+				}
+			</div>
+		</div>
+
+		@if (!string.IsNullOrEmpty(fullScreenImageUrl))
+		{
+			<div class="lightbox-overlay" @onclick="CloseFullScreenImage">
+				<div class="lightbox-content" @onclick:stopPropagation>
+					<img src="@fullScreenImageUrl" alt="Full screen preview" class="lightbox-img" />
+					<button class="lightbox-close-btn" @onclick="CloseFullScreenImage">&times;</button>
+				</div>
+			</div>
+		}
+	}
+</div>

@@ -5,5 +5,5 @@ namespace Przetrwaj.CommonLibrary.Models;
 public class VoteDto
 {
 	[AllowNull]
-	public bool? IsUpvote { get; set; } = null;
+	public bool? IsUpvoteOrNull { get; set; } = null;
 }

@@ -1,4 +1,4 @@
-namespace PrzetrwajPL.Components.Pages.Components;
+﻿namespace PrzetrwajPL.Components.Pages.Components;
 
 public partial class CheckboxGrid
 {

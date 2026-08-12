@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+ï»¿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.WebUtilities;
 using Przetrwaj.CommonLibrary.Consts;
@@ -115,7 +115,7 @@ public partial class List
 			);
 			if (!res.IsSuccessStatusCode)
 			{
-				errorMsg = "Wyst¹pi³ problem podczas ³adowania postów.";
+				errorMsg = "WystÄ…piÅ‚ problem podczas Å‚adowania postÃ³w.";
 				return;
 			}
 			posts = await res.Content.ReadFromJsonAsync<IEnumerable<PostOverviewDto>>();

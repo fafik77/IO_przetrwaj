@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+ï»¿using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Requests;
@@ -11,7 +11,7 @@ public partial class CategoriesPanel
 	[Parameter]
 	public required string CategoriesType { get; set; } = "dangers";
 	private string CategoriesToReachEndpoint => "/Categories/" + CategoriesType;
-	private string CategoriesPlName => CategoriesType.Equals("dangers", StringComparison.OrdinalIgnoreCase) ? "zagro¿eñ" : "zasobów";
+	private string CategoriesPlName => CategoriesType.Equals("dangers", StringComparison.OrdinalIgnoreCase) ? "zagroÅ¼eÅ„" : "zasobÃ³w";
 	private List<CategoryDto>? categories;
 	private CategoryDto? currentCategory;
 
@@ -42,7 +42,7 @@ public partial class CategoriesPanel
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"Nie uda³o siê wczytaæ listy kategorii: {ex.Message}";
+			errorMessage = $"Nie udaÅ‚o siÄ™ wczytaÄ‡ listy kategorii: {ex.Message}";
 		}
 	}
 
@@ -100,7 +100,7 @@ public partial class CategoriesPanel
 		if (currentCategory == null) return;
 		if (string.IsNullOrWhiteSpace(currentCategory.Name))
 		{
-			errorMessage = "Nazwa kategorii nie mo¿e byæ pusta.";
+			errorMessage = "Nazwa kategorii nie moÅ¼e byÄ‡ pusta.";
 			return;
 		}
 
@@ -133,7 +133,7 @@ public partial class CategoriesPanel
 
 			if (response.IsSuccessStatusCode)
 			{
-				successMessage = isNewCategory ? "Pomyœlnie dodano now¹ kategoriê." : "Zmiany zosta³y zapisane pomyœlnie.";
+				successMessage = isNewCategory ? "PomyÅ›lnie dodano nowÄ… kategoriÄ™." : "Zmiany zostaÅ‚y zapisane pomyÅ›lnie.";
 				currentCategory = null; // deselect category and free the form
 				await LoadCategoriesList(); // refresh Master-List
 				if (AppliesToCheckboxGrid != null) //save the fetched items
@@ -142,12 +142,12 @@ public partial class CategoriesPanel
 			else
 			{
 				var errorResult = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-				errorMessage = errorResult?.Error?.Message ?? "Wyst¹pi³ b³¹d podczas zapisywania kategorii.";
+				errorMessage = errorResult?.Error?.Message ?? "WystÄ…piÅ‚ bÅ‚Ä…d podczas zapisywania kategorii.";
 			}
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B³¹d komunikacji z API: {ex.Message}";
+			errorMessage = $"BÅ‚Ä…d komunikacji z API: {ex.Message}";
 		}
 		finally
 		{

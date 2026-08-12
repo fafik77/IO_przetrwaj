@@ -1,3 +1,3 @@
 :: This script builds the docker image
 
-docker build -t fafik77/przetrwaj:front .
+docker build --no-cache -t fafik77/przetrwaj:front .

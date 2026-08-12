@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+ï»¿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using Przetrwaj.CommonLibrary.Consts;
@@ -88,7 +88,7 @@ public partial class UserSettings
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B³¹d podczas pobierania danych: {ex.Message}";
+			errorMessage = $"BÅ‚Ä…d podczas pobierania danych: {ex.Message}";
 		}
 		finally
 		{
@@ -117,13 +117,13 @@ public partial class UserSettings
 		}
 		else
 		{
-			errorMessage = "Nie uda³o siê pobraæ danych u¿ytkownika.";
+			errorMessage = "Nie udaÅ‚o siÄ™ pobraÄ‡ danych uÅ¼ytkownika.";
 		}
 	}
 
 	private async Task HandleInvalid()
 	{
-		errorMessage = "W formularzu znajduj¹ siê niepoprawne danê!";
+		errorMessage = "W formularzu znajdujÄ… siÄ™ niepoprawne danÄ™!";
 		return;
 	}
 
@@ -186,7 +186,7 @@ public partial class UserSettings
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B³¹d po³¹czenia: {ex.Message}";
+			errorMessage = $"BÅ‚Ä…d poÅ‚Ä…czenia: {ex.Message}";
 		}
 		finally
 		{
@@ -197,7 +197,7 @@ public partial class UserSettings
 	private async Task ConfirmAndLogoutAll()
 	{
 		// localized Yes/No = Tak/Nie
-		bool isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz wylogowaæ wszystkie aktywne sesje na urz¹dzeniach?");
+		bool isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz wylogowaÄ‡ wszystkie aktywne sesje na urzÄ…dzeniach?");
 
 		if (isConfirmed)
 		{

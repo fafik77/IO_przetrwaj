@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication;
+ï»¿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
 
@@ -30,7 +30,7 @@ public partial class LogoutAllSesions
 			{
 				// Log the exception but do not block the execution flow. 
 				// We still want to clear local cookies even if the backend is down.
-				Console.WriteLine($"B³¹d podczas uniewa¿niania tokenów w API: {ex.Message}");
+				Console.WriteLine($"BÅ‚Ä…d podczas uniewaÅ¼niania tokenÃ³w w API: {ex.Message}");
 			}
 
 			// Clear local application session cookies

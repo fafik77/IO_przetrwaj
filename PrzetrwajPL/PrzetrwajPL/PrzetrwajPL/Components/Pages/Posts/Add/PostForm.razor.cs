@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+ï»¿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using Przetrwaj.CommonLibrary.Consts;
@@ -22,7 +22,7 @@ public partial class PostForm
 	private const string initializeLocationPickerMapJsName = "initializeLocationPickerMap";
 	private const string locationPickerMapId = "locationPickerMap";
 	private const string setLocationOnMapJsName = "setLocationOnMap";
-	private string PostTypeAboutPl => PostType.Equals("resource", StringComparison.OrdinalIgnoreCase) ? "zasobie" : "zagro¿eniu";
+	private string PostTypeAboutPl => PostType.Equals("resource", StringComparison.OrdinalIgnoreCase) ? "zasobie" : "zagroÅ¼eniu";
 
 	private EditContext? editContext;
 	private ValidationMessageStore? messageStore;
@@ -105,19 +105,19 @@ public partial class PostForm
 
 		if (string.IsNullOrEmpty(model.Title))
 		{
-			error = "Post musi mieæ tytu³";
+			error = "Post musi mieÄ‡ tytuÅ‚";
 			return;
 		}
 		else if (model.IdCategory <= 0)
 		{
-			error = "Post musi przynale¿eæ do kategori";
+			error = "Post musi przynaleÅ¼eÄ‡ do kategori";
 			return;
 		}
 		else if (InneCategoryRegex.IsMatch(CategoryPicker?.SelectedCategoryName ?? string.Empty))
 		{
 			if (string.IsNullOrWhiteSpace(model.CustomCategory) || model.CustomCategory.Length < 3 || model.CustomCategory.Length > 100)
 			{
-				error = "W³asna kategoria musi mieæ od 3 do 100 znaków";
+				error = "WÅ‚asna kategoria musi mieÄ‡ od 3 do 100 znakÃ³w";
 				messageStore?.Add(() => model.CustomCategory ?? "", error);
 				editContext?.NotifyValidationStateChanged();
 				return;
@@ -158,12 +158,12 @@ public partial class PostForm
 			else
 			{
 				var msg = await response.Content.ReadAsStringAsync();
-				error = $"Nie uda³o siê dodaæ posta. Kod: {response.StatusCode}, odpowiedŸ: {msg}";
+				error = $"Nie udaÅ‚o siÄ™ dodaÄ‡ posta. Kod: {response.StatusCode}, odpowiedÅº: {msg}";
 			}
 		}
 		catch (Exception ex)
 		{
-			error = $"B³¹d po³¹czenia: {ex.Message}";
+			error = $"BÅ‚Ä…d poÅ‚Ä…czenia: {ex.Message}";
 		}
 	}
 

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+Ôªøusing Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models;
@@ -73,16 +73,16 @@ namespace PrzetrwajPL.Components.Pages.Auth.Login
 				else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
 				{
 					var errorText = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-					errorMessage = "Nieprawid≥owy email lub has≥o.";
+					errorMessage = "Nieprawid≈Çowy email lub has≈Ço.";
 				}
 				else
 				{
-					errorMessage = "Nieprawid≥owy email lub has≥o.";
+					errorMessage = "Nieprawid≈Çowy email lub hashas≈Çoo.";
 				}
 			}
 			catch (Exception ex)
 			{
-				errorMessage = $"B≥πd po≥πczenia: {ex.Message}";
+				errorMessage = $"B≈ÇƒÖd po≈ÇƒÖczenia: {ex.Message}";
 			}
 			finally
 			{

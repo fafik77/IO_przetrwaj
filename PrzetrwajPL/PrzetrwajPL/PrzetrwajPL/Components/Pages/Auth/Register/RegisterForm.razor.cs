@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+ï»¿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models;
@@ -16,7 +16,7 @@ public partial class RegisterForm
 	{
 		if (registerRequest.ConfirmPassword != registerRequest.Password)
 		{
-			errorMessage = "Has³a nie s¹ takie same!";
+			errorMessage = "HasÅ‚a nie sÄ… takie same!";
 			return;
 		}
 		isLoading = true;
@@ -45,7 +45,7 @@ public partial class RegisterForm
 				else
 				{
 					var errorResult = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-					errorMessage = errorResult?.Error?.Message ?? "Wyst¹pi³ nieoczekiwany b³¹d.";
+					errorMessage = errorResult?.Error?.Message ?? "WystÄ…piÅ‚ nieoczekiwany bÅ‚Ä…d.";
 				}
 			}
 			else
@@ -56,7 +56,7 @@ public partial class RegisterForm
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B³¹d po³¹czenia: {ex.Message}";
+			errorMessage = $"BÅ‚Ä…d poÅ‚Ä…czenia: {ex.Message}";
 		}
 		finally
 		{

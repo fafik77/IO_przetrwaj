@@ -1,4 +1,4 @@
-using Przetrwaj.CommonLibrary.Consts;
+ï»¿using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Requests;
 
@@ -41,7 +41,7 @@ public partial class ImpedimentsPanel
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"Nie uda³o siê wczytaæ listy kategorii: {ex.Message}";
+			errorMessage = $"Nie udaÅ‚o siÄ™ wczytaÄ‡ listy kategorii: {ex.Message}";
 		}
 	}
 
@@ -58,7 +58,7 @@ public partial class ImpedimentsPanel
 		if (currentSelection == null) return;
 		if (string.IsNullOrWhiteSpace(currentSelectionName))
 		{
-			errorMessage = "Nazwa typu nie mo¿e byæ pusta.";
+			errorMessage = "Nazwa typu nie moÅ¼e byÄ‡ pusta.";
 			return;
 		}
 
@@ -77,19 +77,19 @@ public partial class ImpedimentsPanel
 
 			if (response.IsSuccessStatusCode)
 			{
-				successMessage = "Zmiany zosta³y zapisane pomyœlnie.";
+				successMessage = "Zmiany zostaÅ‚y zapisane pomyÅ›lnie.";
 				currentSelection = null; // deselect item and free the form
 				await LoadCategoriesList(); // refresh Master-List
 			}
 			else
 			{
 				var errorResult = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
-				errorMessage = errorResult?.Error?.Message ?? "Wyst¹pi³ b³¹d podczas zapisywania typu.";
+				errorMessage = errorResult?.Error?.Message ?? "WystÄ…piÅ‚ bÅ‚Ä…d podczas zapisywania typu.";
 			}
 		}
 		catch (Exception ex)
 		{
-			errorMessage = $"B³¹d komunikacji z API: {ex.Message}";
+			errorMessage = $"BÅ‚Ä…d komunikacji z API: {ex.Message}";
 		}
 		finally
 		{

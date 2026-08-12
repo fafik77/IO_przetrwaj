@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+ï»¿using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
 using System.Net;
 
@@ -15,7 +15,7 @@ public partial class ConfirmEmail
 	{
 		if (string.IsNullOrWhiteSpace(UserId) || string.IsNullOrWhiteSpace(Code))
 		{
-			_errorMessage = "Brakuj¹cy identyfikator u¿ytkownika lub kod weryfikacyjny.";
+			_errorMessage = "BrakujÄ…cy identyfikator uÅ¼ytkownika lub kod weryfikacyjny.";
 			_isProcessing = false;
 			return;
 		}
@@ -34,12 +34,12 @@ public partial class ConfirmEmail
 			else
 			{
 				// Here we could parse ExceptionCasting object if needed
-				_errorMessage = "Link wygas³ lub jest nieprawid³owy.";
+				_errorMessage = "Link wygasÅ‚ lub jest nieprawidÅ‚owy.";
 			}
 		}
 		catch (Exception)
 		{
-			_errorMessage = "Nie uda³o siê po³¹czyæ z serwerem.";
+			_errorMessage = "Nie udaÅ‚o siÄ™ poÅ‚Ä…czyÄ‡ z serwerem.";
 		}
 		finally
 		{

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Przetrwaj.CommonLibrary.Consts;
 
 namespace PrzetrwajPL.Components.Pages.Components;

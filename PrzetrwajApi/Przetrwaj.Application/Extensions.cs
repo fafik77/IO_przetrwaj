@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +14,10 @@ public static class Extensions
 {
 	public static IServiceCollection AddApplication(this IServiceCollection services)
 	{
-		services.AddTransient<IEmailSender, EmailAzureService>();
-		services.AddTransient<IEmailSenderMultiple, EmailAzureService>();
+		services.AddTransient<EmailAzureService>();
+		services.AddTransient<EmailCustomSmtpService>();
+		services.AddTransient<IEmailSender, EmailProviderService>();
+		services.AddTransient<IEmailSenderMultiple, EmailProviderService>();
 
 		var ExecutingAssembly = Assembly.GetExecutingAssembly();
 		services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(ExecutingAssembly));

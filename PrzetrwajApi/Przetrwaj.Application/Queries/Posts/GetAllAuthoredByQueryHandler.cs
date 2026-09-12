@@ -1,6 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
 using Przetrwaj.Domain.Abstractions;
-using Przetrwaj.Domain.Exceptions.Users;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 
 namespace Przetrwaj.Application.Quaries.Posts;

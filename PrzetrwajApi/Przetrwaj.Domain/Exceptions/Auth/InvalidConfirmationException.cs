@@ -1,7 +1,6 @@
-﻿using Przetrwaj.Domain.Exceptions._base;
 using System.Net;
 
-namespace Przetrwaj.Domain.Exceptions.Auth;
+namespace Przetrwaj.Domain.Exceptions;
 
 public class InvalidConfirmationException(string msg) : BaseException(msg)
 {

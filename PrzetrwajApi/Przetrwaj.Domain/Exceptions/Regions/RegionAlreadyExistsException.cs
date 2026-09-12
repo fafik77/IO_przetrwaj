@@ -1,7 +1,6 @@
-﻿using Przetrwaj.Domain.Exceptions._base;
 using System.Globalization;
 
-namespace Przetrwaj.Domain.Exceptions.Regions;
+namespace Przetrwaj.Domain.Exceptions;
 
 public class RegionAlreadyExistsException(string identity) : AlreadyExistsException<RegionInfo>(identity)
 { }

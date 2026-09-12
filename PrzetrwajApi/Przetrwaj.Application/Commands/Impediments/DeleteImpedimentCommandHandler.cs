@@ -1,6 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
-using Przetrwaj.Domain.Exceptions.Impediments;
+using Przetrwaj.Domain.Exceptions;
 
 namespace Przetrwaj.Application.Commands.Impediments;
 

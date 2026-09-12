@@ -1,7 +1,6 @@
-﻿using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions._base;
+using Przetrwaj.Domain.Entities;
 
-namespace Przetrwaj.Domain.Exceptions.Users;
+namespace Przetrwaj.Domain.Exceptions;
 
 public class UserNotFoundException(string id) : NotFoundException<AppUser>(id)
 {

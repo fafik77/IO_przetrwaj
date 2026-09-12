@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions.Regions;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Helpers;
 using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;

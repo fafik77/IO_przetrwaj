@@ -6,8 +6,6 @@ namespace Przetrwaj.Application.Queries.Posts;
 
 public class GetPostByIdQuery : IQuery<PostCompleteDataDto>
 {
-	[Required]
-	public required string Id { get; set; }
-
-	public string? UserId { get; set; } = null;
+    [Required]
+    public required string Id { get; set; }
 }

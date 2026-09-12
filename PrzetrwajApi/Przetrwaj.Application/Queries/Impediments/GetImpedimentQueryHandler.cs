@@ -1,7 +1,7 @@
 ﻿using Przetrwaj.Application.Configuration.Quaries;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions.Impediments;
+using Przetrwaj.Domain.Exceptions;
 
 namespace Przetrwaj.Application.Queries.Impediments;
 

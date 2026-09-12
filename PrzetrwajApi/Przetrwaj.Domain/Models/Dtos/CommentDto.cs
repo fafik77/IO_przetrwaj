@@ -4,19 +4,27 @@ namespace Przetrwaj.Domain.Models.Dtos;
 
 public record CommentDto
 {
-	//there is no point in including Id, or Post info (as we already know the post)
-	public required string Comment { get; set; }
-	public DateTimeOffset DateCreated { get; set; }
-	public UserGeneralDtoNoRegion? Author { get; set; }
+    public required string CommentId { get; set; }
+    public required string AuthorId { get; set; }
+    public required string Comment { get; set; }
+    public DateTimeOffset DateCreated { get; set; }
+    public UserGeneralDtoNoRegion? Author { get; set; }
 
 
-	public static CommentDto Map(UserComment comment)
-	{
-		return new CommentDto
-		{
-			Comment = comment.Comment,
-			DateCreated = comment.DateCreated,
-			Author = UserGeneralDtoNoRegion.Map(comment.IdAutorNavigation),
-		};
-	}
+    public static CommentDto Map(UserComment comment)
+    {
+        return CommentDto.Map(comment, comment.IdAutorNavigation);
+    }
+
+    public static CommentDto Map(UserComment comment, AppUser user)
+    {
+        return new CommentDto
+        {
+            CommentId = comment.IdComment,
+            AuthorId = comment.IdAutor,
+            Comment = comment.Comment,
+            DateCreated = comment.DateCreated,
+            Author = UserGeneralDtoNoRegion.Map(user),
+        };
+    }
 }

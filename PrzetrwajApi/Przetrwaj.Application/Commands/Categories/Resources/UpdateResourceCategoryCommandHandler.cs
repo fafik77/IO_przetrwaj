@@ -1,7 +1,6 @@
 ﻿using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Exceptions;
-using Przetrwaj.Domain.Exceptions.Categories;
 
 namespace Przetrwaj.Application.Commands.Categories.Resources;
 

@@ -1,7 +1,6 @@
-﻿using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions._base;
+using Przetrwaj.Domain.Entities;
 
-namespace Przetrwaj.Domain.Exceptions.Categories;
+namespace Przetrwaj.Domain.Exceptions;
 
 public class CategoryNotFoundException(int id) : NotFoundException<Category>(id)
 {

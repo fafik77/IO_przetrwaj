@@ -2,7 +2,7 @@
 using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions.Auth;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.Commands.Login;

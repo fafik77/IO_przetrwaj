@@ -23,6 +23,7 @@ public interface IPostRepository
 	public Task<IEnumerable<PostMinimalCategoryRegion>> GetPostsMinimalCategoryRegion(CancellationToken cancellationToken = default);
 	Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default);
 	public Task<IEnumerable<PostOverviewDto>> GetMatchingPostsAsync(MatchingPostsFilter filter, CancellationToken ct = default);
+	public Task<UserComment?> GetUserCommentAsync(string id, CancellationToken ct = default);
 	#endregion //Get
 
 	public Task<Attachment> AddAttachmentAsync(Attachment attachment, CancellationToken cancellationToken = default);
@@ -30,4 +31,5 @@ public interface IPostRepository
 	public Task<UserComment> AddCommentAsync(UserComment comment, CancellationToken cancellationToken = default);
 	public void Update(Post post, CancellationToken cancellationToken = default);
 	public Task<int> ArchiveInactivePostsAsync(CancellationToken ct = default);
+    void UpdateComment(UserComment comment);
 }

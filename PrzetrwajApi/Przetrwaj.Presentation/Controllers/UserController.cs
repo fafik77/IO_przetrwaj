@@ -9,7 +9,6 @@ using Przetrwaj.Application.Quaries.Users;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
-using Przetrwaj.Domain.Exceptions._base;
 using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Swashbuckle.AspNetCore.Annotations;
@@ -27,167 +26,167 @@ namespace Przetrwaj.Presentation.Controllers;
 [Produces("application/json")]
 public class UserController : Controller
 {
-	private readonly UserManager<AppUser> _userManager;
-	private readonly IMediator _mediator;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly IMediator _mediator;
 
-	public UserController(UserManager<AppUser> userManager, IMediator mediator)
-	{
-		_userManager = userManager;
-		_mediator = mediator;
-	}
-
-
-	[HttpGet("{id}")]
-	[SwaggerOperation("Get publicly visible General data of user by id")]
-	[ProducesResponseType(typeof(UserGeneralDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
-	{
-		try
-		{
-			var user = await _mediator.Send(new GetUserByIdQuery { UserId = id }, cancellationToken);
-			return Ok(user);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
+    public UserController(UserManager<AppUser> userManager, IMediator mediator)
+    {
+        _userManager = userManager;
+        _mediator = mediator;
+    }
 
 
-	[HttpGet("{id}/posts")]
-	[SwaggerOperation("Get all posts made by user id")]
-	[ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetAllPosts(string id, CancellationToken cancellationToken)
-	{
-		var requ = new GetAllAuthoredByQuery { AutorId = id };
-		try
-		{
-			var res = await _mediator.Send(requ, cancellationToken);
-			return Ok(res);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
-
-	[HttpGet("WIP/{id}/comments")]
-	[SwaggerOperation("Get all comments made by user id")]
-	[ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> GetAllComments(string id, CancellationToken cancellationToken)
-	{
-		throw new NotImplementedException();
-	}
+    [HttpGet("{id}")]
+    [SwaggerOperation("Get publicly visible General data of user by id")]
+    [ProducesResponseType(typeof(UserGeneralDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var user = await _mediator.Send(new GetUserByIdQuery { UserId = id }, cancellationToken);
+            return Ok(user);
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+        }
+    }
 
 
-	[HttpPost("make-moderator")]
-	[SwaggerOperation("Grant Moderator role to user by Id or Email (Admin)")]
-	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> AssignModeratorRole(MakeModeratorCommand userInfo, CancellationToken cancellationToken)
-	{
-		if (!ModelState.IsValid) return BadRequest(IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" }));
-		try
-		{
-			var res = await _mediator.Send(userInfo, cancellationToken);
-			return Ok(res);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
+    [HttpGet("{id}/posts")]
+    [SwaggerOperation("Get all posts made by user id")]
+    [ProducesResponseType(typeof(IEnumerable<PostCompleteDataDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAllPosts(string id, CancellationToken cancellationToken)
+    {
+        var requ = new GetAllAuthoredByQuery { AutorId = id };
+        try
+        {
+            var res = await _mediator.Send(requ, cancellationToken);
+            return Ok(res);
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+        }
+    }
 
-	[HttpPost("deny-moderator")]
-	[SwaggerOperation("Deny Moderator role to user by Id or Email (Admin)")]
-	[ProducesResponseType(StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> DenyModeratorRole(DenyModeratorCommand userInfo, CancellationToken cancellationToken)
-	{
-		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-		try
-		{
-			var res = await _mediator.Send(userInfo, cancellationToken);
-			return Ok(res);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
-
-	[HttpPost("make-admin")]
-	[SwaggerOperation("Grant Admin role to user by Id or Email (Admin)")]
-	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	public async Task<IActionResult> AssignAdminRole(MakeAdminCommand request, CancellationToken cancellationToken)
-	{
-		if (!ModelState.IsValid) return BadRequest(IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" }));
-		try
-		{
-			var internallReq = new MakeAdminInternallCommand
-			{
-				Id = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
-				Password = request.Password,
-				UserIdOrEmail = request.UserIdOrEmail,
-			};
-			var res = await _mediator.Send(internallReq, cancellationToken);
-			return Ok(res);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
-
-	[HttpGet("pending-moderators")]
-	[SwaggerOperation("Gets users with Moderator Pending status (Admin)")]
-	[ProducesResponseType(typeof(IEnumerable<ModeratorPendingStatus>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetModeratorPending(CancellationToken cancellationToken)
-	{
-		try
-		{
-			var res = await _mediator.Send(new GetModeratorPendingQuery(), cancellationToken);
-			return Ok(res);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
+    [HttpGet("WIP/{id}/comments")]
+    [SwaggerOperation("WIP. Get all comments made by user id")]
+    [ProducesResponseType(typeof(IEnumerable<CommentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAllComments(string id, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 
 
-	[HttpPost("ban")]
-	[Authorize(UserRoles.Moderator)]
-	[SwaggerOperation("Ban a User by Id or Email (Moderator, Admin)")]
-	[ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
-	[ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
-	public async Task<IActionResult> Ban(BanUserCommand banUserCommand, CancellationToken cancellationToken)
-	{
-		if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-		//get info from the cookie and send a request
-		var command = new BanUserInternallCommand
-		{
-			UserIdOrEmail = banUserCommand.UserIdOrEmail,
-			Reason = banUserCommand.Reason,
-			ModeratorId = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
-		};
-		try
-		{
-			var res = await _mediator.Send(command, cancellationToken);
-			return Ok(res);
-		}
-		catch (BaseException ex)
-		{
-			return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
-		}
-	}
+    [HttpPost("make-moderator")]
+    [SwaggerOperation("Grant Moderator role to user by Id or Email (Admin)")]
+    [ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AssignModeratorRole(MakeModeratorCommand userInfo, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return BadRequest(IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" }));
+        try
+        {
+            var res = await _mediator.Send(userInfo, cancellationToken);
+            return Ok(res);
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+        }
+    }
+
+    [HttpPost("deny-moderator")]
+    [SwaggerOperation("Deny Moderator role to user by Id or Email (Admin)")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DenyModeratorRole(DenyModeratorCommand userInfo, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+        try
+        {
+            var res = await _mediator.Send(userInfo, cancellationToken);
+            return Ok(res);
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+        }
+    }
+
+    [HttpPost("make-admin")]
+    [SwaggerOperation("Grant Admin role to user by Id or Email (Admin)")]
+    [ProducesResponseType(typeof(IdentityResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IdentityResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AssignAdminRole(MakeAdminCommand request, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return BadRequest(IdentityResult.Failed(new IdentityError { Description = $"{ModelState}" }));
+        try
+        {
+            var internallReq = new MakeAdminInternallCommand
+            {
+                Id = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+                Password = request.Password,
+                UserIdOrEmail = request.UserIdOrEmail,
+            };
+            var res = await _mediator.Send(internallReq, cancellationToken);
+            return Ok(res);
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+        }
+    }
+
+    [HttpGet("pending-moderators")]
+    [SwaggerOperation("Gets users with Moderator Pending status (Admin)")]
+    [ProducesResponseType(typeof(IEnumerable<ModeratorPendingStatus>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetModeratorPending(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var res = await _mediator.Send(new GetModeratorPendingQuery(), cancellationToken);
+            return Ok(res);
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+        }
+    }
+
+
+    [HttpPost("ban")]
+    [Authorize(UserRoles.Moderator)]
+    [SwaggerOperation("Ban a User by Id or Email (Moderator, Admin)")]
+    [ProducesResponseType(typeof(UserWithPersonalDataDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> Ban(BanUserCommand banUserCommand, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+        //get info from token and send a request
+        var command = new BanUserInternallCommand
+        {
+            UserIdOrEmail = banUserCommand.UserIdOrEmail,
+            Reason = banUserCommand.Reason,
+            ModeratorId = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+        };
+        try
+        {
+            var res = await _mediator.Send(command, cancellationToken);
+            return Ok(res);
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+        }
+    }
 }

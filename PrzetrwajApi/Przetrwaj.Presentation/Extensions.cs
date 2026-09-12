@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Przetrwaj.Application.Common.Interfaces;
 using Przetrwaj.Application.ValidationPipeline;
+using Przetrwaj.Presentation.Services;
 using System.Text.Json.Serialization;
 
 namespace Przetrwaj.Presentation;
@@ -12,7 +14,9 @@ public static class Extensions
 {
 	public static IServiceCollection AddPresentation(this IServiceCollection services)
 	{
-		services.AddEndpointsApiExplorer();
+		services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+        services.AddEndpointsApiExplorer();
 		//services.AddOpenApi();
 		services.AddSwaggerGen(options =>
 		{

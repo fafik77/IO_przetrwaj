@@ -1,6 +1,6 @@
-﻿using System.Net;
+using System.Net;
 
-namespace Przetrwaj.Domain.Exceptions._base;
+namespace Przetrwaj.Domain.Exceptions;
 
 public class NotFoundException<T> : BaseException
 {

@@ -7,7 +7,6 @@ namespace Przetrwaj.Application.Commands.Posts.Attachments;
 public record AddAttachmentsInternal : AddAttachments, ICommand<AddAttachmentsResult>
 {
 	public required string IdPost { get; set; }
-	public required string IdUser { get; set; }
 }
 public class AttachmentItem
 {

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Przetrwaj.Domain.Abstractions;
-using Przetrwaj.Domain.Exceptions.Users;
+using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 

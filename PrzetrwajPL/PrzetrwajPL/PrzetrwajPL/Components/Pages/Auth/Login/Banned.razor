@@ -1,4 +1,4 @@
-﻿@page "/login-error/Banned"
+@page "/login-error/Banned"
 @using System.Text.Json
 @using Przetrwaj.CommonLibrary.Models
 
@@ -22,7 +22,7 @@
 				{
 					<p>
 						<strong>Data nałożenia blokady:</strong>
-						<span title="dd.MM.yyyy">@banInfo.BanDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+						<span title="dd.MM.yyyy">@banInfo.BanDate.Value.ToWarsawTime().ToString("dd.MM.yyyy HH:mm")</span>
 					</p>
 				}
 

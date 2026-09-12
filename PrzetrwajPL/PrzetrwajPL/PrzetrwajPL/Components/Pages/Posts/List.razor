@@ -1,4 +1,4 @@
-﻿@page "/list"
+@page "/list"
 
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
@@ -74,7 +74,7 @@ else
 						@post.Title
 					</span>
 					<span class="post-category">@(post.Category?.Name ?? "Brak kategorii")</span>
-					<span class="post-meta">@(post.Region?.Name ?? "Brak lokalizacji") @post.DateCreated.ToString("HH:mm dd.MM.yyyy")</span>
+					<span class="post-meta">@(post.Region?.Name ?? "Brak lokalizacji") @post.DateCreated.ToWarsawTime().ToString("HH:mm dd.MM.yyyy")</span>
 				</div>
 				<div class="post-card-right">
 					<div class="post-votes">

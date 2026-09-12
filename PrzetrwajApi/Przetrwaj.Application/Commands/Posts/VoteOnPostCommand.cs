@@ -5,6 +5,5 @@ namespace Przetrwaj.Application.Commands.Posts;
 public record VoteOnPostCommand : ICommand
 {
     public required string IdPost { get; set; }
-    public required string IdUser { get; set; }
     public required bool IsUpvote { get; set; }
 }

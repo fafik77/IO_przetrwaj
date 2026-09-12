@@ -1,7 +1,6 @@
-﻿using Przetrwaj.Domain.Exceptions._base;
 using System.Net;
 
-namespace Przetrwaj.Domain.Exceptions.Impediments;
+namespace Przetrwaj.Domain.Exceptions;
 
 public class ImpedimentIdException(string msg) : BaseException(msg)
 {

@@ -7,14 +7,14 @@ namespace Przetrwaj.Application.Services;
 
 public class EmailAzureService : IEmailSenderMultiple
 {
-	private EmailSettings AzureEmailSettings { get; }
+	private EmailSettingsAzure AzureEmailSettings { get; }
 	private EmailClient? EmailClient { get; } = null;
 
 	public EmailAzureService(IOptions<EmailSettings> options)
 	{
-		AzureEmailSettings = options.Value;
+		AzureEmailSettings = options.Value.Azure;
 		if (string.IsNullOrEmpty(AzureEmailSettings.AzureConnection))
-			return; //do not throw an error at this point, we only injected it
+			return; //do not throw an error at this point, we only injected it but we dont have to use it
 		EmailClient = new EmailClient(AzureEmailSettings.AzureConnection);
 	}
 

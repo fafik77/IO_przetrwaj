@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Przetrwaj.Domain.Exceptions._base;
+using Microsoft.AspNetCore.Http;
 using Przetrwaj.Domain.Models;
 using System.Net;
 
-namespace Przetrwaj.Domain.Exceptions.Auth;
+namespace Przetrwaj.Domain.Exceptions;
 
 public class UserBannedException(string msg, BanInfo banInfo) : BaseException(msg)
 {

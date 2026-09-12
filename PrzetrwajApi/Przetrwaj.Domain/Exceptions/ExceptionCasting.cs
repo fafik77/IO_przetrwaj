@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Przetrwaj.Domain.Exceptions._base;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Net;
 using System.Text.Json.Serialization;
 

@@ -23,4 +23,3 @@ public record AddPostCommand
 
 	public AddAttachments? Attachments { get; set; }
 }
-

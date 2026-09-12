@@ -1,8 +1,7 @@
-﻿using Przetrwaj.Domain.Entities;
-using Przetrwaj.Domain.Exceptions._base;
+using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Models.Dtos;
 
-namespace Przetrwaj.Domain.Exceptions.Posts;
+namespace Przetrwaj.Domain.Exceptions;
 
 public class AlreadyVotedException : AlreadyExistsException<Vote>
 {

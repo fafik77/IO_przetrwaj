@@ -82,14 +82,7 @@ internal class PostRepository : IPostRepository
             LatLong = p.Lat == null ? null : new LatLong(p.Lat!.Value, p.Long!.Value),
             Comments = p.Comments
             .OrderByDescending(x => x.DateCreated)
-            .Select(c => new CommentDto
-            {
-                CommentId = c.IdComment,
-                AuthorId = c.IdAutor,
-                Comment = c.Comment,
-                DateCreated = c.DateCreated,
-                Author = UserGeneralDtoNoRegion.Map(c.IdAutorNavigation)
-            })
+            .Select(c => CommentDto.Map(c, c.IdAutorNavigation))
             .ToList(),
             DateCreated = p.DateCreated,
             // we have to re-map the region (as this is on DB side) later in the code

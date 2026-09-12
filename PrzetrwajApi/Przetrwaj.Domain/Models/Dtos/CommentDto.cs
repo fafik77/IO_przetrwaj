@@ -13,13 +13,18 @@ public record CommentDto
 
     public static CommentDto Map(UserComment comment)
     {
+        return CommentDto.Map(comment, comment.IdAutorNavigation);
+    }
+
+    public static CommentDto Map(UserComment comment, AppUser user)
+    {
         return new CommentDto
         {
             CommentId = comment.IdComment,
             AuthorId = comment.IdAutor,
             Comment = comment.Comment,
             DateCreated = comment.DateCreated,
-            Author = UserGeneralDtoNoRegion.Map(comment.IdAutorNavigation),
+            Author = UserGeneralDtoNoRegion.Map(user),
         };
     }
 }

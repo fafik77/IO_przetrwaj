@@ -72,7 +72,7 @@ internal class PostRepository : IPostRepository
         idPost = idPost.ToLower();
         var res = await _context.Posts
         .AsNoTracking()
-        .Where(u => u.IdPost == idPost)
+        .Where(u => u.IdPost == idPost && u.Active)
         .Select(p => new PostCompleteDataDto
         {
             Id = p.IdPost,
@@ -94,6 +94,7 @@ internal class PostRepository : IPostRepository
                 Id = p.IdCategory,
                 Type = p.IdCategoryNavigation.Type,
                 Name = p.CustomCategory,
+                IsCustom = true,
             }
             : CategoryDto.Map(p.IdCategoryNavigation),
 

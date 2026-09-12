@@ -84,6 +84,7 @@ internal class PostRepository : IPostRepository
             .OrderByDescending(x => x.DateCreated)
             .Select(c => new CommentDto
             {
+                CommentId = c.IdComment,
                 Comment = c.Comment,
                 DateCreated = c.DateCreated,
                 Author = UserGeneralDtoNoRegion.Map(c.IdAutorNavigation)

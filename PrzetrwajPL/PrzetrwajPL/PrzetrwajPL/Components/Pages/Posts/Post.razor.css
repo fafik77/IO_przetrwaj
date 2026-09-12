@@ -1,4 +1,4 @@
-﻿.container {
+.container {
     display: block;
     margin: 20px auto;
     max-width: 800px;
@@ -339,4 +339,192 @@ button:disabled {
     font-size: 16px;
     color: #444;
     line-height: 1.5;
+}
+
+.btn-edit-comment {
+    background: none;
+    border: none;
+    color: #0094ff;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.btn-edit-comment:hover {
+    color: #007adb;
+}
+
+.comment-edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.btn-update-comment {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-update-comment:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.btn-cancel-comment {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-cancel-comment:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+.comment-edit-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+/* Post Editing Styles */
+.author-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-edit-post {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #0094ff;
+    background-color: white;
+    color: #0094ff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-edit-post:hover {
+    background-color: #0094ff;
+    color: white;
+}
+
+.post-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-save-post {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-save-post:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.btn-cancel-post {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background-color: #6c757d;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-cancel-post:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+.btn-delete-post {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background-color: #dc3545;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-delete-post:hover:not(:disabled) {
+    background-color: #bd2130;
+}
+
+.post-title-input {
+    font-size: 22px;
+    font-weight: bold;
+    width: 100%;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 6px 12px;
+}
+
+.post-category-input {
+    max-width: 320px;
+    margin-top: 4px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 4px 10px;
+    font-size: 15px;
+}
+
+.post-description-textarea {
+    width: 100%;
+    min-height: 120px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 10px 12px;
+    font-size: 16px;
+    line-height: 1.6;
+    font-family: inherit;
+    resize: vertical;
 }

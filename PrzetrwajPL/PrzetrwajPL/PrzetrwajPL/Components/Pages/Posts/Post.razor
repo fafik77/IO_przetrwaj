@@ -2,11 +2,6 @@
 
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
-@using Przetrwaj.CommonLibrary.Consts
-@using Przetrwaj.CommonLibrary.Models.Posts
-@using Przetrwaj.CommonLibrary.Requests
-@using PrzetrwajPL;
-@using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IJSRuntime JS
 
@@ -24,9 +19,17 @@
 	}
 	else
 	{
+		@* post main info & likes *@
 		<div class="post-header-container">
 			<div class="post-header-left">
-				<h1 class="post-title">@post.Title</h1>
+				@if (isEditingPost)
+				{
+					<input type="text" class="form-control post-title-input" @bind="editPostCommand.Title" placeholder="Tytuł posta..." />
+				}
+				else
+				{
+					<h1 class="post-title">@post.Title</h1>
+				}
 				<div class="post-meta-line">
 					@if (post.Region != null)
 					{
@@ -40,15 +43,48 @@
 					}
 				</div>
 				<div class="post-category-line">
-					@post.Category?.Name
+					@if (isEditingPost && post.Category?.IsCustom == true)
+					{
+						<input type="text" class="form-control post-category-input" @bind="editPostCommand.CustomCategory" placeholder="Własna kategoria..." />
+					}
+					else
+					{
+						@post.Category?.Name
+					}
 				</div>
-				@if (isAuthor)
+				@if (isAuthorOfPost)
 				{
 					<div class="author-actions mt-2">
-						<a href="/posts/@post.Id/add-attachments" class="white-button-blue-text add-photo-btn-extracted">
-							<i class="fa fa-plus-circle"></i> Dodaj zdjęcie
-						</a>
+						@if (!isEditingPost)
+						{
+							<button type="button" class="btn-edit-post" @onclick="StartEditPost">
+								<i class="fa fa-pencil"></i> Edytuj
+							</button>
+							<a href="/posts/@post.Id/add-attachments" class="white-button-blue-text add-photo-btn-extracted">
+								<i class="fa fa-plus-circle"></i> Dodaj zdjęcie
+							</a>
+						}
+						else
+						{
+							<div class="post-edit-actions">
+								<button type="button" class="btn-save-post" @onclick="() => UpdatePost(editPostCommand)" disabled="@isSavingPost">
+									<i class="fa fa-check"></i> Zapisz
+								</button>
+								<button type="button" class="btn-cancel-post" @onclick="CancelEditPost" disabled="@isSavingPost">
+									<i class="fa fa-times"></i> Anuluj
+								</button>
+								<button type="button" class="btn-delete-post" @onclick="DeletePost" disabled="@isSavingPost">
+									<i class="fa fa-trash"></i> Usuń post
+								</button>
+							</div>
+						}
 					</div>
+					@if (!string.IsNullOrEmpty(postValidationErrorMessage))
+					{
+						<div class="alert alert-danger mt-2 py-1 px-2" style="font-size: 14px;">
+							@postValidationErrorMessage
+						</div>
+					}
 				}
 			</div>
 			
@@ -79,7 +115,14 @@
 		</div>
 
 		<div class="post-description-container">
-			<p class="post-description-text">@post.Description</p>
+			@if (isEditingPost)
+			{
+				<textarea class="form-control post-description-textarea" rows="5" @bind="editPostCommand.Description" placeholder="Opis posta..."></textarea>
+			}
+			else
+			{
+				<p class="post-description-text">@post.Description</p>
+			}
 		</div>
 
 		@* Horizontal scrolling images *@
@@ -154,10 +197,30 @@
 									}
 								</span>
 								<span class="comment-time">@FormatCommentTime(comment.DateCreated)</span>
+								@if(comment.AuthorId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase))
+								{
+									@if (!comment.IsEditing)
+									{
+										<button type="button" class="btn-edit-comment" @onclick="() => StartEditComment(comment)">edytuj</button>
+									}
+								}
 							</div>
-							<div class="comment-body">
-								@comment.Comment
-							</div>
+							@if (comment.IsEditing)
+							{
+								<div class="comment-edit-actions">
+									<button type="button" class="btn-update-comment" @onclick="() => UpdateComment(comment)">Aktualizuj</button>
+									<button type="button" class="btn-cancel-comment" @onclick="() => CancelEditComment(comment)">Anuluj</button>
+								</div>
+								<div class="comment-body">
+									<textarea @bind="comment.InEditComment" class="form-control comment-edit-textarea" rows="3"></textarea>
+								</div>
+							}
+							else
+							{
+								<div class="comment-body">
+									@comment.Comment
+								</div>
+							}
 						</div>
 					}
 				}
@@ -168,6 +231,7 @@
 			</div>
 		</div>
 
+		@* fullscreen image *@
 		@if (!string.IsNullOrEmpty(fullScreenImageUrl))
 		{
 			<div class="lightbox-overlay" @onclick="CloseFullScreenImage">

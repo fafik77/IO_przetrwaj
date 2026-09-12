@@ -405,3 +405,126 @@ button:disabled {
     line-height: 1.5;
     resize: vertical;
 }
+
+/* Post Editing Styles */
+.author-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-edit-post {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #0094ff;
+    background-color: white;
+    color: #0094ff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-edit-post:hover {
+    background-color: #0094ff;
+    color: white;
+}
+
+.post-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-save-post {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-save-post:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.btn-cancel-post {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background-color: #6c757d;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-cancel-post:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+.btn-delete-post {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background-color: #dc3545;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-delete-post:hover:not(:disabled) {
+    background-color: #bd2130;
+}
+
+.post-title-input {
+    font-size: 22px;
+    font-weight: bold;
+    width: 100%;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 6px 12px;
+}
+
+.post-category-input {
+    max-width: 320px;
+    margin-top: 4px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 4px 10px;
+    font-size: 15px;
+}
+
+.post-description-textarea {
+    width: 100%;
+    min-height: 120px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 10px 12px;
+    font-size: 16px;
+    line-height: 1.6;
+    font-family: inherit;
+    resize: vertical;
+}

@@ -6,4 +6,5 @@ public class CategoryDto
 	public string Name { get; set; } = null!;
 	public CategoryType Type { get; set; }
 	public int Impediments { get; set; }
+    public bool IsCustom { get; set; } = false;
 }

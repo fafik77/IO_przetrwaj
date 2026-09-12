@@ -6,6 +6,8 @@ using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Models.Posts;
 using Przetrwaj.CommonLibrary.Requests;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -40,6 +42,14 @@ public partial class Post
 	private bool isSendingComment = false;
 	private string newCommentContent = "";
 	private string? fullScreenImageUrl;
+
+	[Inject]
+	private NavigationManager Nav { get; set; } = default!;
+
+	private bool isEditingPost = false;
+	private bool isSavingPost = false;
+	private UpdatePostCommand editPostCommand = new();
+	private string? postValidationErrorMessage;
 
 	private bool HasVoted => post?.MyVote?.IsUpvoteOrNull != null;
 	private bool IsUpvoted => post?.MyVote?.IsUpvoteOrNull == true;
@@ -234,6 +244,99 @@ public partial class Post
 		catch (Exception ex)
 		{
 			Console.WriteLine("Błąd aktualizacji komentarza: " + ex.Message);
+		}
+	}
+
+	private void StartEditPost()
+	{
+		if (post == null) return;
+		editPostCommand = new UpdatePostCommand
+		{
+			Title = post.Title,
+			Description = post.Description,
+			CustomCategory = post.Category?.IsCustom == true ? post.Category.Name : null
+		};
+		postValidationErrorMessage = null;
+		isEditingPost = true;
+	}
+
+	private void CancelEditPost()
+	{
+		isEditingPost = false;
+		postValidationErrorMessage = null;
+		editPostCommand = new();
+	}
+
+	private async Task UpdatePost(UpdatePostCommand comm)
+	{
+		var validationContext = new ValidationContext(comm);
+		var validationResults = new List<ValidationResult>();
+
+		if (!Validator.TryValidateObject(comm, validationContext, validationResults, validateAllProperties: true))
+		{
+			postValidationErrorMessage = string.Join("; ", validationResults.Select(r => r.ErrorMessage));
+			return;
+		}
+
+		postValidationErrorMessage = null;
+		isSavingPost = true;
+
+		try
+		{
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+			var response = await client.PatchAsJsonAsync(PostApiEndpoint, comm);
+
+			if (response.IsSuccessStatusCode)
+			{
+				isEditingPost = false;
+				await LoadData();
+			}
+			else
+			{
+				postValidationErrorMessage = $"Błąd serwera przy aktualizacji posta: {response.StatusCode}";
+			}
+		}
+		catch (Exception ex)
+		{
+			postValidationErrorMessage = $"Błąd aktualizacji posta: {ex.Message}";
+		}
+		finally
+		{
+			isSavingPost = false;
+		}
+	}
+
+	private async Task DeletePost()
+	{
+		if (post == null) return;
+
+		string confirmMessage = $"Usunąć post {post.Title}?\nPost zostanie przeniesiony do archiwum i nie będzie już dostępny.\nJeśli potrzebujesz usunąć zdjęcie skontatkuj się z administratorem.";
+		bool confirmed = await JS.InvokeAsync<bool>("confirm", confirmMessage);
+		if (!confirmed) return;
+
+		isSavingPost = true;
+
+		try
+		{
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+			var response = await client.DeleteAsync(PostApiEndpoint);
+
+			if (response.IsSuccessStatusCode)
+			{
+				Nav.NavigateTo("/list");
+			}
+			else
+			{
+				postValidationErrorMessage = $"Błąd serwera przy usuwaniu posta: {response.StatusCode}";
+			}
+		}
+		catch (Exception ex)
+		{
+			postValidationErrorMessage = $"Błąd usuwania posta: {ex.Message}";
+		}
+		finally
+		{
+			isSavingPost = false;
 		}
 	}
 }

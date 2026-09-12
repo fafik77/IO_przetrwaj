@@ -6,10 +6,11 @@ using Przetrwaj.Domain.Extensions;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class UpdatePostCommandHandler(ICurrentUserService currentUserService, IPostRepository postRepository) : ICommandHandler<UpdatePostInternalCommand>
+public class UpdatePostCommandHandler(ICurrentUserService currentUserService, IPostRepository postRepository, IUnitOfWork unitOfWork) : ICommandHandler<UpdatePostInternalCommand>
 {
     private readonly ICurrentUserService _currentUserService = currentUserService;
     private readonly IPostRepository _postRepository = postRepository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task Handle(UpdatePostInternalCommand request, CancellationToken cancellationToken)
     {
@@ -31,5 +32,6 @@ public class UpdatePostCommandHandler(ICurrentUserService currentUserService, IP
             post.CustomCategory = model.CustomCategory!;
 
         _postRepository.Update(post, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

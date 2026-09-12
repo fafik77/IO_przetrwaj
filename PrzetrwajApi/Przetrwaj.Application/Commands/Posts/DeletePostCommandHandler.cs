@@ -5,10 +5,11 @@ using Przetrwaj.Domain.Exceptions;
 
 namespace Przetrwaj.Application.Commands.Posts;
 
-public class DeletePostCommandHandler(ICurrentUserService currentUserService, IPostRepository postRepository) : ICommandHandler<DeletePostCommand>
+public class DeletePostCommandHandler(ICurrentUserService currentUserService, IPostRepository postRepository, IUnitOfWork unitOfWork) : ICommandHandler<DeletePostCommand>
 {
     private readonly ICurrentUserService _currentUserService = currentUserService;
     private readonly IPostRepository _postRepository = postRepository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task Handle(DeletePostCommand request, CancellationToken cancellationToken)
     {
@@ -21,5 +22,6 @@ public class DeletePostCommandHandler(ICurrentUserService currentUserService, IP
 
         post.Active = false;
         _postRepository.Update(post, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

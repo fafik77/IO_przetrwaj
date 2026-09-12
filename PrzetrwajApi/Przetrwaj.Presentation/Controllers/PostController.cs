@@ -373,4 +373,24 @@ public partial class PostController : Controller
             return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
         }
     }
+
+    [HttpDelete("{id}")]
+    [SwaggerOperation("Delete a post from view, deactivate it. (Owner)")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeletePostById([FromRoute] string id, CancellationToken CT)
+    {
+        if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+        try
+        {
+            await _mediator.Send(new DeletePostCommand { Id = id }, CT);
+            return NoContent();
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+        }
+    }
 }

@@ -85,6 +85,7 @@ internal class PostRepository : IPostRepository
             .Select(c => new CommentDto
             {
                 CommentId = c.IdComment,
+                AuthorId = c.IdAutor,
                 Comment = c.Comment,
                 DateCreated = c.DateCreated,
                 Author = UserGeneralDtoNoRegion.Map(c.IdAutorNavigation)

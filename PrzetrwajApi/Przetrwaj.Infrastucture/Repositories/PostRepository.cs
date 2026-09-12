@@ -203,6 +203,11 @@ internal class PostRepository : IPostRepository
         _context.Posts.Update(post);
     }
 
+    public void UpdateComment(UserComment comment)
+    {
+        _context.Comments.Update(comment);
+    }
+
     public async Task<Vote?> GetVoteAsync(string idPost, string idUser, CancellationToken cancellationToken = default)
     {
         idPost = idPost.ToLower();
@@ -232,4 +237,12 @@ internal class PostRepository : IPostRepository
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.Active, false), ct);
         return affectedRows;
     }
+
+    public async Task<UserComment?> GetUserCommentAsync(string id, CancellationToken ct = default)
+    {
+        return await _context.Comments
+            .Where(x => x.IdComment == id)
+            .FirstOrDefaultAsync(ct);
+    }
+
 }

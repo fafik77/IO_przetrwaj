@@ -136,6 +136,31 @@ public partial class PostController : Controller
         }
     }
 
+    [HttpPut("comment/{id}")]
+    [SwaggerOperation("Update comment by id. (Owner of comment)")]
+    [Authorize(UserRoles.User)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateComment(string id, AddCommentCommand command, CancellationToken CT)
+    {
+        if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
+        var internalCommand = new UpdateCommentInternalCommand
+        {
+            Comment = command.Comment,
+            IdComment = id,
+        };
+        try
+        {
+            await _mediator.Send(internalCommand, CT);
+            return NoContent();
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
+        }
+    }
+
     //KL Done
     [HttpPost("{id}/vote-positive")]
     [SwaggerOperation("Add a Positive vote to the post (User)")]

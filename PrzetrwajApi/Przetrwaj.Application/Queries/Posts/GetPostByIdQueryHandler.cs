@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Przetrwaj.Application.Common.Interfaces;
 using Przetrwaj.Application.Configuration.Quaries;
 using Przetrwaj.Application.Helpers;
 using Przetrwaj.Domain.Abstractions;
@@ -12,11 +13,13 @@ public class GetPostByIdQueryHandler : IQueryHandler<GetPostByIdQuery, PostCompl
 {
     private readonly IPostRepository _postRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICurrentUserService _currentUserService;
 
-    public GetPostByIdQueryHandler(IPostRepository postRepository, IHttpContextAccessor httpContextAccessor)
+    public GetPostByIdQueryHandler(IPostRepository postRepository, IHttpContextAccessor httpContextAccessor, ICurrentUserService currentUserService)
     {
         _postRepository = postRepository;
         _httpContextAccessor = httpContextAccessor;
+        _currentUserService = currentUserService;
     }
 
 
@@ -30,8 +33,9 @@ public class GetPostByIdQueryHandler : IQueryHandler<GetPostByIdQuery, PostCompl
             if (attachment != null)
                 attachment.BaseUrl = resourcePath;
         }
-        if (request.UserId != null)
-            resDto.MyVote = (VoteDto)await _postRepository.GetVoteAsync(request.Id, request.UserId, cancellationToken);
+        var userId = _currentUserService.UserId;
+        if (userId != null)
+            resDto.MyVote = (VoteDto)await _postRepository.GetVoteAsync(request.Id, userId, cancellationToken);
         return resDto;
     }
 }

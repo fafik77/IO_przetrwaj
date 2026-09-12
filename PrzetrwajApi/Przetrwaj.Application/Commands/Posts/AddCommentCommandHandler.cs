@@ -1,4 +1,5 @@
-﻿using Przetrwaj.Application.Configuration.Commands;
+﻿using Przetrwaj.Application.Common.Interfaces;
+using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain.Abstractions;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Domain.Exceptions;
@@ -11,22 +12,26 @@ public class AddCommentCommandHandler : ICommandHandler<AddCommentInternalComman
     private readonly IUserRepository _userRepository;
     private readonly IPostRepository _postRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
 
-    public AddCommentCommandHandler(IPostRepository postRepository, IUnitOfWork unitOfWork, IUserRepository userRepository)
+    public AddCommentCommandHandler(IPostRepository postRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, ICurrentUserService currentUserService)
     {
         _postRepository = postRepository;
         _unitOfWork = unitOfWork;
         _userRepository = userRepository;
+        _currentUserService = currentUserService;
     }
 
     public async Task<CommentDto> Handle(AddCommentInternalCommand request, CancellationToken cancellationToken)
     {
         if (!await _postRepository.ExistsActivePostIdAsync(request.IdPost, cancellationToken))
             throw new PostNotFoundException(request.IdPost);
-        var user = await _userRepository.GetByIdAsync(request.IdAutor, cancellationToken);
+        var userId = _currentUserService.UserId
+            ?? throw new InvalidAuthorizationException("Not Authorized");
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         var comment = new UserComment
         {
-            IdAutor = request.IdAutor,
+            IdAutor = userId,
             IdPost = request.IdPost,
             Comment = request.Comment,
         };

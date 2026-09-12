@@ -6,5 +6,4 @@ namespace Przetrwaj.Application.Commands.Posts;
 public record AddCommentInternalCommand : AddCommentCommand, ICommand<CommentDto>
 {
 	public required string IdPost { get; set; }
-	public required string IdAutor { get; set; }
 }

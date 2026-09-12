@@ -9,6 +9,4 @@ public record AddResourceInternallCommand : ICommand<(Post, AddAttachmentsResult
 {
 	public required AddPostCommand AddPostCommand { get; set; }
 	public CategoryType Category { get; set; } = CategoryType.Resource;
-	public required string IdAutor { get; set; }
-	public required ClaimsPrincipal ClaimsPrincipal { get; set; }
 }

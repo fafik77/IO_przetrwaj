@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
+using Przetrwaj.Application.Common.Interfaces;
 using Przetrwaj.Application.Dtos;
 using Przetrwaj.Application.Helpers;
 using Przetrwaj.Application.Settings;
@@ -13,7 +14,6 @@ using Przetrwaj.Domain.Helpers;
 using Przetrwaj.Domain.Models.Dtos;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
@@ -27,10 +27,9 @@ public interface IPostService
     /// <param name="post">the new post to be added (id of wchich does not exist in DB yet)</param>
     /// <param name="addPostData">the data to apply to post</param>
     /// <param name="categories">used to verify that given/custom category is valid</param>
-    /// <param name="ClaimsPrincipal">requesting user claims (only Moderator+ can add Resource Posts)</param>
     /// <param name="cancellationToken">Cancellation Token</param>
     /// <returns></returns>
-    public Task<(Post, AddAttachmentsResult?)> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, ClaimsPrincipal ClaimsPrincipal, CancellationToken cancellationToken);
+    public Task<(Post, AddAttachmentsResult?)> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, CancellationToken cancellationToken);
 
     /// <summary>
     /// Adds attachments to a post
@@ -56,8 +55,9 @@ internal class PostService : IPostService
     private readonly IAttachmentRepository _attachmentRepository;
     private readonly AttachmentSettings _attachmentSettings;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICurrentUserService _currentUserService;
 
-    public PostService(IPostRepository postRepository, IUnitOfWork unitOfWork, IRegionRepository regionRepository, IAttachmentRepository attachmentRepository, IOptions<AttachmentSettings> options, IHttpContextAccessor contextAccessor)
+    public PostService(IPostRepository postRepository, IUnitOfWork unitOfWork, IRegionRepository regionRepository, IAttachmentRepository attachmentRepository, IOptions<AttachmentSettings> options, IHttpContextAccessor contextAccessor, ICurrentUserService currentUserService)
     {
         _postRepository = postRepository;
         _unitOfWork = unitOfWork;
@@ -65,9 +65,12 @@ internal class PostService : IPostService
         _attachmentRepository = attachmentRepository;
         _attachmentSettings = options.Value;
         _httpContextAccessor = contextAccessor;
+        _currentUserService = currentUserService;
     }
 
-    public async Task<(Post, AddAttachmentsResult?)> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, ClaimsPrincipal ClaimsPrincipal, CancellationToken ct)
+
+    /// <inheritdoc/>
+    public async Task<(Post, AddAttachmentsResult?)> FillPostFromDataAndAddAsync(Post post, AddPostCommand addPostData, IEnumerable<Category> categories, CancellationToken ct)
     {
         #region Claims to RegionPrecision Visibility check
         switch (addPostData.RegionPrecision)
@@ -76,8 +79,8 @@ internal class PostService : IPostService
             case RegionPrecision.WOJ:
             case RegionPrecision.POW:
                 {
-                    if (ClaimsPrincipal.IsInRole(UserRoles.Moderator) ||
-                        ClaimsPrincipal.IsInRole(UserRoles.Admin))
+                    if (_currentUserService.IsInRole(UserRoles.Moderator) ||
+                        _currentUserService.IsInRole(UserRoles.Admin))
                         break;
                     throw new PermissionDeniedException("Not enough privilages");
                 }
@@ -163,6 +166,7 @@ internal class PostService : IPostService
         return RegionCompoundHelper.RegionSplit(region.Id);
     }
 
+    /// <inheritdoc/>
     public async Task<AddAttachmentsResult> AddAttachments(AddAttachments request, Post post, CancellationToken cancellationToken)
     {
         var results = new AddAttachmentsResult

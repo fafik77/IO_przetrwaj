@@ -16,7 +16,6 @@ using Przetrwaj.Domain.Exceptions;
 using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
 
 namespace Przetrwaj.Presentation.Controllers;
 
@@ -39,21 +38,11 @@ public partial class PostController : Controller
     [SwaggerOperation("Get post with all content. (contains MyVote)")]
     [ProducesResponseType(typeof(PostCompleteDataDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetById(
-        [FromAuthorizationHeader] List<string> Authorizations,
-        [FromRoute] string id,
-        CancellationToken CT)
+    public async Task<IActionResult> GetById([FromRoute] string id, CancellationToken CT)
     {
-        string? userId = null;
         try
         {
-            if (Authorizations.Count == 1)
-            {
-                var helper = new AuthorizationHelper(_jwtOptions);
-                var claims = helper.GetPrincipalClaimsFromTokens(Authorizations);
-                userId = AuthorizationHelper.GetUserId(claims);
-            }
-            var post = await _mediator.Send(new GetPostByIdQuery { Id = id, UserId = userId }, CT);
+            var post = await _mediator.Send(new GetPostByIdQuery { Id = id }, CT);
             return Ok(post);
         }
         catch (BaseException ex)
@@ -135,8 +124,6 @@ public partial class PostController : Controller
         {
             Comment = command.Comment,
             IdPost = id,
-            // Set user from token
-            IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
         };
         try
         {
@@ -158,15 +145,11 @@ public partial class PostController : Controller
     [ProducesResponseType(typeof(VoteDto), StatusCodes.Status409Conflict)] //already voted
     public async Task<IActionResult> VotePositive(string id, CancellationToken CT)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
-
         try
         {
             await _mediator.Send(new VoteOnPostCommand
             {
                 IdPost = id,
-                IdUser = userId,
                 IsUpvote = true
             }, CT);
 
@@ -191,15 +174,11 @@ public partial class PostController : Controller
     [ProducesResponseType(typeof(VoteDto), StatusCodes.Status409Conflict)] //already voted
     public async Task<IActionResult> VoteNegative(string id, CancellationToken CT)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
-
         try
         {
             await _mediator.Send(new VoteOnPostCommand
             {
                 IdPost = id,
-                IdUser = userId,
                 IsUpvote = false
             }, CT);
 
@@ -223,14 +202,9 @@ public partial class PostController : Controller
     [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVote(string id, CancellationToken CT)
     {
-        var requ = new GetUserVoteQuery
-        {
-            PostId = id,
-            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!
-        };
         try
         {
-            var res = await _mediator.Send(requ, CT);
+            var res = await _mediator.Send(new GetUserVoteQuery { PostId = id }, CT);
             return Ok(res);
         }
         catch (BaseException ex)
@@ -252,16 +226,9 @@ public partial class PostController : Controller
     public async Task<IActionResult> AddDanger([FromForm] AddPostCommand newPost, CancellationToken CT)
     {
         if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-        var postI = new AddDangerInternallCommand
-        {
-            AddPostCommand = newPost,
-            // Set user from token
-            IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
-            ClaimsPrincipal = User,
-        };
         try
         {
-            var res = await _mediator.Send(postI, CT);
+            var res = await _mediator.Send(new AddDangerInternallCommand { AddPostCommand = newPost }, CT);
             Uri resourcePath = HttpPathHelper.HttpPath(Request);
             var dto = PostCreatedDto.Map(res, resourcePath);
             return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
@@ -283,16 +250,9 @@ public partial class PostController : Controller
     public async Task<IActionResult> AddResource([FromForm] AddPostCommand newPost, CancellationToken CT)
     {
         if (!ModelState.IsValid) return BadRequest((ExceptionCasting)ModelState);
-        var postI = new AddResourceInternallCommand
-        {
-            AddPostCommand = newPost,
-            // Set user from token
-            IdAutor = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
-            ClaimsPrincipal = User,
-        };
         try
         {
-            var res = await _mediator.Send(postI, CT);
+            var res = await _mediator.Send(new AddResourceInternallCommand { AddPostCommand = newPost }, CT);
             Uri resourcePath = HttpPathHelper.HttpPath(Request);
             var dto = PostCreatedDto.Map(res, resourcePath);
             return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
@@ -336,9 +296,7 @@ public partial class PostController : Controller
         var req = new AddAttachmentsInternal
         {
             IdPost = id,
-            Items = attachments.Items,
-            // Set user from token
-            IdUser = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+            Items = attachments.Items
         };
         try
         {

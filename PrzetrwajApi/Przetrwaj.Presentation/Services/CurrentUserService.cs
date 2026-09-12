@@ -19,9 +19,9 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
         ?? User?.FindFirstValue("email");
     public bool IsAuthenticated =>
         User?.Identity?.IsAuthenticated ?? false;
-    public IReadOnlyList<string> Roles =>
-        User?.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList()
-        ?? (IReadOnlyList<string>)Array.Empty<string>();
+    public IReadOnlyList<Claim> Roles =>
+        User?.FindAll(ClaimTypes.Role).ToList()
+        ?? new();
     public bool IsInRole(string role) =>
         User?.IsInRole(role) ?? false;
     public string? GetClaimValue(string claimType) =>

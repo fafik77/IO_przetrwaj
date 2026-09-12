@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using Przetrwaj.CommonLibrary.Consts;
+using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Models.Posts;
 using Przetrwaj.CommonLibrary.Requests;
 using System;
@@ -27,12 +28,13 @@ public partial class Post
 	private const string CommentApiName = "comment";
 
 	private string PostApiEndpoint => $"{PostsApiPath}/{Id}";
+	private string UpdateCommentApiEndpoint => $"{PostsApiPath}/comment";
 
 	private PostCompleteDataDto? post;
 	private bool isLoading = true;
 	private bool isVoting = false;
 	private string? currentUserId;
-	private bool isAuthor = false;
+	private bool isAuthorOfPost = false;
 
 	private bool showCommentForm = false;
 	private bool isSendingComment = false;
@@ -61,7 +63,7 @@ public partial class Post
 
 			if (post != null && post.Author != null && !string.IsNullOrEmpty(currentUserId))
 			{
-				isAuthor = post.Author.Id == currentUserId;
+				isAuthorOfPost = post.Author.Id == currentUserId;
 			}
 		}
 		catch (Exception ex)
@@ -193,5 +195,45 @@ public partial class Post
 	private void CloseFullScreenImage()
 	{
 		fullScreenImageUrl = null;
+	}
+
+	private void StartEditComment(CommentDto comment)
+	{
+		comment.InEditComment = comment.Comment;
+		comment.IsEditing = true;
+	}
+
+	private void CancelEditComment(CommentDto comment)
+	{
+		comment.InEditComment = null;
+		comment.IsEditing = false;
+	}
+
+	private async Task UpdateComment(CommentDto comment)
+	{
+		if (string.IsNullOrWhiteSpace(comment.InEditComment)) return;
+
+		try
+		{
+			var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+			var updateCmd = new AddCommentCommand { Comment = comment.InEditComment };
+
+			var response = await client.PutAsJsonAsync($"{UpdateCommentApiEndpoint}/{comment.CommentId}", updateCmd);
+
+			if (response.IsSuccessStatusCode)
+			{
+				comment.Comment = comment.InEditComment;
+				comment.InEditComment = null;
+				comment.IsEditing = false;
+			}
+			else
+			{
+				Console.WriteLine("Błąd serwera przy aktualizacji komentarza: " + response.StatusCode);
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine("Błąd aktualizacji komentarza: " + ex.Message);
+		}
 	}
 }

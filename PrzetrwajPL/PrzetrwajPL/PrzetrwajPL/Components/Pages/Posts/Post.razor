@@ -1,4 +1,4 @@
-﻿@page "/posts/{Id}"
+@page "/posts/{Id}"
 
 @rendermode InteractiveServer
 @inject IHttpClientFactory ClientFactory
@@ -24,6 +24,7 @@
 	}
 	else
 	{
+		@* post main info & likes *@
 		<div class="post-header-container">
 			<div class="post-header-left">
 				<h1 class="post-title">@post.Title</h1>
@@ -42,7 +43,7 @@
 				<div class="post-category-line">
 					@post.Category?.Name
 				</div>
-				@if (isAuthor)
+				@if (isAuthorOfPost)
 				{
 					<div class="author-actions mt-2">
 						<a href="/posts/@post.Id/add-attachments" class="white-button-blue-text add-photo-btn-extracted">
@@ -154,10 +155,30 @@
 									}
 								</span>
 								<span class="comment-time">@FormatCommentTime(comment.DateCreated)</span>
+								@if(comment.AuthorId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase))
+								{
+									@if (!comment.IsEditing)
+									{
+										<button type="button" class="btn-edit-comment" @onclick="() => StartEditComment(comment)">edytuj</button>
+									}
+								}
 							</div>
-							<div class="comment-body">
-								@comment.Comment
-							</div>
+							@if (comment.IsEditing)
+							{
+								<div class="comment-edit-actions">
+									<button type="button" class="btn-update-comment" @onclick="() => UpdateComment(comment)">Aktualizuj</button>
+									<button type="button" class="btn-cancel-comment" @onclick="() => CancelEditComment(comment)">Anuluj</button>
+								</div>
+								<div class="comment-body">
+									<textarea @bind="comment.InEditComment" class="form-control comment-edit-textarea" rows="3"></textarea>
+								</div>
+							}
+							else
+							{
+								<div class="comment-body">
+									@comment.Comment
+								</div>
+							}
 						</div>
 					}
 				}
@@ -168,6 +189,7 @@
 			</div>
 		</div>
 
+		@* fullscreen image *@
 		@if (!string.IsNullOrEmpty(fullScreenImageUrl))
 		{
 			<div class="lightbox-overlay" @onclick="CloseFullScreenImage">

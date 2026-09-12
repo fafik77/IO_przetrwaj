@@ -1,4 +1,4 @@
-﻿.container {
+.container {
     display: block;
     margin: 20px auto;
     max-width: 800px;
@@ -339,4 +339,69 @@ button:disabled {
     font-size: 16px;
     color: #444;
     line-height: 1.5;
+}
+
+.btn-edit-comment {
+    background: none;
+    border: none;
+    color: #0094ff;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.btn-edit-comment:hover {
+    color: #007adb;
+}
+
+.comment-edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.btn-update-comment {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-update-comment:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.btn-cancel-comment {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-cancel-comment:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+.comment-edit-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    resize: vertical;
 }

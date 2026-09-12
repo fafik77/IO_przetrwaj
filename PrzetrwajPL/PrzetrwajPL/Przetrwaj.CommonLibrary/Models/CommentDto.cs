@@ -1,4 +1,4 @@
-﻿namespace Przetrwaj.CommonLibrary.Models;
+namespace Przetrwaj.CommonLibrary.Models;
 
 public class CommentDto
 {
@@ -7,4 +7,10 @@ public class CommentDto
     public required string Comment { get; set; }
     public DateTimeOffset DateCreated { get; set; }
     public UserGeneralDtoNoRegion? Author { get; set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool IsEditing { get; set; } = false;
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? InEditComment { get; set; }
 }

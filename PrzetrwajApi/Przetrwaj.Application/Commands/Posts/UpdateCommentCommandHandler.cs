@@ -9,11 +9,13 @@ public class UpdateCommentCommandHandler : ICommandHandler<UpdateCommentInternal
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IPostRepository _postRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateCommentCommandHandler(ICurrentUserService currentUserService, IPostRepository postRepository)
+    public UpdateCommentCommandHandler(ICurrentUserService currentUserService, IPostRepository postRepository, IUnitOfWork unitOfWork)
     {
         _currentUserService = currentUserService;
         _postRepository = postRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task Handle(UpdateCommentInternalCommand request, CancellationToken cancellationToken)
@@ -27,5 +29,6 @@ public class UpdateCommentCommandHandler : ICommandHandler<UpdateCommentInternal
 
         comment.Comment = request.Comment;
         _postRepository.UpdateComment(comment);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

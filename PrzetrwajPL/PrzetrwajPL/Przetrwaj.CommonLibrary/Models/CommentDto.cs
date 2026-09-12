@@ -2,8 +2,9 @@
 
 public class CommentDto
 {
-	//there is no point in including Id, or Post info (as we already know the post)
-	public required string Comment { get; set; }
-	public DateTimeOffset DateCreated { get; set; }
-	public UserGeneralDtoNoRegion? Author { get; set; }
+    public required string CommentId { get; set; }
+    public required string AuthorId { get; set; }
+    public required string Comment { get; set; }
+    public DateTimeOffset DateCreated { get; set; }
+    public UserGeneralDtoNoRegion? Author { get; set; }
 }

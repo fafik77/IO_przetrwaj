@@ -1,4 +1,4 @@
-﻿using Przetrwaj.Domain.Entities;
+using Przetrwaj.Domain.Entities;
 
 namespace Przetrwaj.Domain.Models.Dtos.Posts;
 
@@ -35,6 +35,8 @@ public class PostOverviewDto
 				Id = p.IdCategory,
 				Type = p.IdCategoryNavigation?.Type ?? p.CategoryType,
 				Name = p.CustomCategory,
+				Impediments = p.IdCategoryNavigation?.Impediments ?? 0,
+				IsCustom = true,
 			}
 			: CategoryDto.Map(p.IdCategoryNavigation),
 			Region = RegionOnlyDto.Map(p.RegionNavigation),

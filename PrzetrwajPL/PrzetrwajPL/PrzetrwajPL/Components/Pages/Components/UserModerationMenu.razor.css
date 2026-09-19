@@ -1,0 +1,234 @@
+.user-moderation-wrapper {
+    display: inline-flex;
+    position: relative;
+    align-items: center;
+    margin: 2px 6px;
+}
+
+.user-moderation-normal {
+    display: inline;
+}
+
+.user-moderator-link {
+    color: #0094ff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: inherit;
+    transition: color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+}
+
+.user-moderator-link:hover {
+    color: #007adb;
+    opacity: 0.9;
+}
+
+/* Small dropdown menu */
+.user-moderation-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 998;
+    background: transparent;
+}
+
+.user-moderation-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    background-color: #fbfbfb;
+    border: 2px solid #312f2ff1;
+    border-radius: 5px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
+    z-index: 999;
+    min-width: 180px;
+    padding: 4px 0;
+    overflow: hidden;
+}
+
+.user-moderation-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border: none;
+    background: none;
+    color: #08003b;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.user-moderation-menu-item:hover {
+    background-color: #b6c4d0;
+    font-weight: bolder;
+}
+
+/* Item Modal */
+.ban-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.65);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.ban-modal-content {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: fadeInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.ban-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #fcfcfc;
+}
+
+.ban-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #08003b;
+}
+
+.ban-modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: #888;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: color 0.15s ease;
+}
+
+.ban-modal-close-btn:hover {
+    color: #333;
+}
+
+.ban-modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ban-target-info {
+    font-size: 15px;
+    color: #333;
+    margin: 0;
+}
+
+.ban-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.ban-textarea {
+    width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.ban-textarea:focus {
+    border-color: #dc3545;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+.ban-char-counter {
+    text-align: right;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.ban-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid #f0f0f0;
+    background-color: #fafafa;
+}
+
+.btn-cancel-ban {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-cancel-ban:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+.btn-confirm-ban {
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-confirm-ban:hover:not(:disabled) {
+    background-color: #bd2130;
+}
+
+.btn-confirm-ban:disabled,
+.btn-cancel-ban:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}

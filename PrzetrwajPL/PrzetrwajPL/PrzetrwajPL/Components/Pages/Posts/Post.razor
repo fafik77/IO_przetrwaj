@@ -3,6 +3,7 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject IHttpClientFactory ClientFactory
 @using Microsoft.AspNetCore.Components.Authorization
+@using PrzetrwajPL.Components.Pages.Components
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
@@ -40,7 +41,11 @@
 					<span class="meta-date">@post.DateCreated.ToWarsawTime().ToString("dd.MM.yyyy")</span>
 					@if (post.Author != null)
 					{
-						<span class="meta-author">@post.Author.Name @post.Author.Surname</span>
+						<UserModerationMenu UserId="@post.Author.Id" 
+											UserName="@($"{post.Author.Name} {post.Author.Surname}")" 
+											IsModerator="@isModerator" 
+											OnUserBanned="LoadData" 
+											Class="meta-author" />
 					}
 				</div>
 				<div class="post-category-line">
@@ -196,16 +201,18 @@
 					{
 						<div class="comment-item">
 							<div class="comment-header">
-								<span class="comment-author">
-									@if (string.IsNullOrWhiteSpace(comment.Author?.Id))
-									{
-										<span>Anonymus</span>
-									}
-									else
-									{
-										<span>@comment.Author.Name @comment.Author.Surname</span>
-									}
-								</span>
+								@if (string.IsNullOrWhiteSpace(comment.Author?.Id))
+								{
+									<span class="comment-author">Anonymus</span>
+								}
+								else
+								{
+									<UserModerationMenu UserId="@comment.Author.Id" 
+														UserName="@($"{comment.Author.Name} {comment.Author.Surname}")" 
+														IsModerator="@isModerator" 
+														OnUserBanned="LoadData" 
+														Class="comment-author" />
+								}
 								<span class="comment-time">@FormatCommentTime(comment.DateCreated)</span>
 								@if(comment.AuthorId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase))
 								{

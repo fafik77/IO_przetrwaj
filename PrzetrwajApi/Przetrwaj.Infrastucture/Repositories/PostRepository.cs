@@ -7,10 +7,11 @@ using Przetrwaj.Domain.Models;
 using Przetrwaj.Domain.Models.Dtos;
 using Przetrwaj.Domain.Models.Dtos.Posts;
 using Przetrwaj.Infrastucture.Context;
+using System.Numerics;
 
 namespace Przetrwaj.Infrastucture.Repositories;
 
-internal class PostRepository : IPostRepository
+public class PostRepository : IPostRepository
 {
     private readonly ApplicationDbContext _context;
     private readonly IRegionRepository _regionRepository;
@@ -133,7 +134,7 @@ internal class PostRepository : IPostRepository
     }
 
 
-    private async Task<IEnumerable<PostOverviewDto>> FillInPostDataAfterFetch(IEnumerable<PostOverviewDto> posts, CancellationToken cancellationToken)
+    private async Task<IEnumerable<PostOverviewDto>> FillInPostRegionDataAfterFetch(IEnumerable<PostOverviewDto> posts, CancellationToken cancellationToken)
     {
         foreach (var post in posts)
         {
@@ -190,7 +191,13 @@ internal class PostRepository : IPostRepository
             .Include(p => p.RegionNavigation)
             .Select(p => SelectAsPostOverview(p, p.Votes.LongCount(v => v.IsUpvote), p.Votes.LongCount(v => !v.IsUpvote)))
             .ToListAsync(ct);
-        return await FillInPostDataAfterFetch(posts, ct);
+        var enrichedPosts = (await FillInPostRegionDataAfterFetch(posts, ct)).ToList();
+
+        int filterImpediment = filter.Impediment ?? 0;
+        return enrichedPosts
+            .OrderByDescending(p => p.DateCreated.UtcDateTime.Date)
+            .ThenByDescending(p => filterImpediment == 0 ? 0 : BitOperations.PopCount((uint)((p.Category?.Impediments ?? 0) & filterImpediment)))
+            .ThenByDescending(p => p.DateCreated);
     }
 
 

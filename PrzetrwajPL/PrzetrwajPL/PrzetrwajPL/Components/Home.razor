@@ -1,6 +1,6 @@
 ﻿@page "/"
 
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject IHttpClientFactory ClientFactory
 @inject IJSRuntime JSRuntime
 

@@ -1,6 +1,6 @@
 @page "/posts/{Id}"
 
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject IHttpClientFactory ClientFactory
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IJSRuntime JS

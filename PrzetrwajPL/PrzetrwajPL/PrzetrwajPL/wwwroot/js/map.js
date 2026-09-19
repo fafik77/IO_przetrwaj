@@ -1,4 +1,4 @@
-﻿// wwwroot/js/map.js
+// wwwroot/js/map.js
 
 window.initializePolandMap = (containerId, markersData) => {
 	const mapElement = document.getElementById(containerId);
@@ -116,4 +116,95 @@ window.setLocationOnMap = (containerId, lat, lng) => {
 
 	// center the map on this point
 	map.setView(latlng);
+};
+
+// initialize single post map (static preview or interactive modal)
+window.initializeSinglePostMap = (containerId, lat, lng, title, categoryName, isInteractive) => {
+	const mapElement = document.getElementById(containerId);
+	if (!mapElement) return;
+
+	// Safely clean up previous map on this container if it exists
+	if (window.activeMaps && window.activeMaps[containerId]) {
+		const existing = window.activeMaps[containerId];
+		const mapObj = existing.map || existing;
+		if (mapObj && typeof mapObj.remove === 'function') {
+			mapObj.remove();
+		}
+		delete window.activeMaps[containerId];
+	}
+	if (mapElement._leaflet_id) {
+		delete mapElement._leaflet_id;
+	}
+
+	const zoomLevel = 16;
+	const latlng = [lat, lng];
+
+	const mapOptions = isInteractive ? {
+		zoomControl: true,
+		dragging: true,
+		touchZoom: true,
+		doubleClickZoom: true,
+		scrollWheelZoom: true,
+		boxZoom: true,
+		keyboard: true,
+		attributionControl: true
+	} : {
+		zoomControl: false,
+		dragging: false,
+		touchZoom: false,
+		doubleClickZoom: false,
+		scrollWheelZoom: false,
+		boxZoom: false,
+		keyboard: false,
+		attributionControl: false
+	};
+
+	const map = L.map(containerId, mapOptions).setView(latlng, zoomLevel);
+
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(map);
+
+	const marker = L.marker(latlng).addTo(map);
+
+	if (isInteractive) {
+		const titleHtml = title ? `<h4 style="margin: 0 0 5px 0; color: #333;">${title}</h4>` : '';
+		const catHtml = categoryName ? `<p style="margin: 0; font-size: 12px; color: #666;">Kategoria: ${categoryName}</p>` : '';
+		if (titleHtml || catHtml) {
+			marker.bindPopup(`
+				<div style="font-family: sans-serif;">
+					${titleHtml}
+					${catHtml}
+				</div>
+			`).openPopup();
+		}
+	}
+
+	setTimeout(() => {
+		map.invalidateSize();
+	}, 50);
+
+	window.activeMaps = window.activeMaps || {};
+	window.activeMaps[containerId] = {
+		map: map,
+		getMarker: () => marker,
+		setMarker: (m) => {}
+	};
+};
+
+// destroy map instance cleanly
+window.destroyMap = (containerId) => {
+	if (window.activeMaps && window.activeMaps[containerId]) {
+		const existing = window.activeMaps[containerId];
+		const mapObj = existing.map || existing;
+		if (mapObj && typeof mapObj.remove === 'function') {
+			mapObj.remove();
+		}
+		delete window.activeMaps[containerId];
+	}
+	const el = document.getElementById(containerId);
+	if (el && el._leaflet_id) {
+		delete el._leaflet_id;
+	}
 };

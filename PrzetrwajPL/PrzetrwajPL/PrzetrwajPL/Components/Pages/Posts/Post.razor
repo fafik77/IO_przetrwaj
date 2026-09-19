@@ -184,7 +184,7 @@
 			
 			<AuthorizeView>
 				<Authorized>
-					<button class="add-comment-trigger-btn" @onclick="ToggleCommentForm">
+					<button class="blue-button-white-text add-comment-trigger-btn" @onclick="ToggleCommentForm">
 						@if (showCommentForm)
 						{
 							<span>Anuluj</span>
@@ -201,7 +201,7 @@
 			{
 				<div class="add-comment-box">
 					<textarea @bind="newCommentContent" placeholder="Wpisz treść komentarza..." class="form-control"></textarea>
-					<button class="btn-send" @onclick="SubmitComment" disabled="@isSendingComment">Wyślij</button>
+					<button class="blue-button-white-text btn-send" @onclick="SubmitComment" disabled="@isSendingComment">Wyślij</button>
 				</div>
 			}
 
@@ -236,8 +236,8 @@
 							@if (comment.IsEditing)
 							{
 								<div class="comment-edit-actions">
-									<button type="button" class="btn-update-comment" @onclick="() => UpdateComment(comment)">Aktualizuj</button>
-									<button type="button" class="btn-cancel-comment" @onclick="() => CancelEditComment(comment)">Anuluj</button>
+									<button type="button" class="blue-button-white-text btn-update-comment" @onclick="() => UpdateComment(comment)">Aktualizuj</button>
+									<button type="button" class="darkgrey-button-white-text btn-cancel-comment" @onclick="() => CancelEditComment(comment)">Anuluj</button>
 								</div>
 								<div class="comment-body">
 									<textarea @bind="comment.InEditComment" class="form-control comment-edit-textarea" rows="3"></textarea>

@@ -1,4 +1,4 @@
-﻿button:hover {
+button:hover {
 	opacity: 0.8;
 	border: double;
 }
@@ -104,6 +104,34 @@
 .post-author {
     font-size: 18px;
     color: #999999;
+}
+
+.btn-archive-list-post {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #d35400;
+    background-color: #fef5e7;
+    border: 1px solid #e67e22;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin: 2px 0;
+}
+
+.btn-archive-list-post:hover:not(:disabled) {
+    background-color: #e67e22;
+    color: white;
+    border: 1px solid #e67e22;
+    opacity: 1;
+}
+
+.btn-archive-list-post:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .filters {

@@ -24,6 +24,7 @@ public partial class Post
     private const string CommentApiName = "comment";
 
     private string PostApiEndpoint => $"{PostsApiPath}/{Id}";
+    private string PostMarkInactiveApiEndpoint => $"{PostApiEndpoint}/mark-inactive";
     private string UpdateCommentApiEndpoint => $"{PostsApiPath}/comment";
 
     private PostCompleteDataDto? post;
@@ -53,6 +54,7 @@ public partial class Post
     private bool isMiniMapInitialized = false;
     private bool showBigMapModal = false;
     private bool shouldInitBigMap = false;
+    private bool isArchivingPost = false;
 
     private bool HasVoted => post?.MyVote?.IsUpvoteOrNull != null;
     private bool IsUpvoted => post?.MyVote?.IsUpvoteOrNull == true;
@@ -380,6 +382,38 @@ public partial class Post
         catch
         {
             // ignore if disconnected
+        }
+    }
+
+    private async Task ArchivePost()
+    {
+        if (isArchivingPost || post == null) return;
+
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Czy na pewno chcesz zarchiwizować post \"{post.Title}\"?");
+        if (!confirmed) return;
+
+        isArchivingPost = true;
+        try
+        {
+            var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+            var response = await client.PutAsync(PostMarkInactiveApiEndpoint, null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Nav.NavigateTo("/list");
+            }
+            else
+            {
+                postValidationErrorMessage = $"Błąd podczas archiwizacji posta: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            postValidationErrorMessage = $"Błąd połączenia: {ex.Message}";
+        }
+        finally
+        {
+            isArchivingPost = false;
         }
     }
 

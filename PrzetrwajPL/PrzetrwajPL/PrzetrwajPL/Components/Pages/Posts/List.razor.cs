@@ -1,14 +1,20 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.JSInterop;
 using Przetrwaj.CommonLibrary.Consts;
 using Przetrwaj.CommonLibrary.Models.Posts;
 using PrzetrwajPL.Components.Pages.Components;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PrzetrwajPL.Components.Pages.Posts;
 
 public partial class List
 {
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+
     // Access basic user info from the cookie claims
     [CascadingParameter]
     private Task<AuthenticationState> AuthStateTask { get; set; }
@@ -23,6 +29,7 @@ public partial class List
     private CancellationTokenSource? debounceCts;
     private bool startedLoadingPosts = false;
     private string? errorMsg = null;
+    private HashSet<string> archivingPostIds = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -123,6 +130,42 @@ public partial class List
         catch (Exception)
         {
 
+        }
+    }
+
+    private async Task ArchivePost(string postId, string postTitle)
+    {
+        if (archivingPostIds.Contains(postId)) return;
+
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Czy na pewno chcesz zarchiwizować post \"{postTitle}\"?");
+        if (!confirmed) return;
+
+        archivingPostIds.Add(postId);
+        try
+        {
+            var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+            var response = await client.PutAsync($"/Posts/{postId}/mark-inactive", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                if (posts != null)
+                {
+                    posts = posts.Where(p => p.Id != postId).ToList();
+                    StateHasChanged();
+                }
+            }
+            else
+            {
+                errorMsg = $"Błąd podczas archiwizacji posta {postId}: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMsg = $"Błąd archiwizacji posta: {ex.Message}";
+        }
+        finally
+        {
+            archivingPostIds.Remove(postId);
         }
     }
 }

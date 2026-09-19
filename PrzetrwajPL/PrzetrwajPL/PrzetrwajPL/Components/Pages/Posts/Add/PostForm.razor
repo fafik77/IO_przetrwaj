@@ -1,4 +1,4 @@
-﻿@page "/add-post-{PostType}"
+@page "/add-post-{PostType}"
 @* valid values for API are: (danger, resource) *@
 @rendermode InteractiveServer
 @implements IDisposable
@@ -45,24 +45,27 @@
 	<div class="mb-3 border p-3 rounded bg-light">
 		<label class="fw-bold d-block mb-2">Lokalizacja zgłoszenia</label>
 
-		<div class="d-flex gap-2 mb-3">
+		<div class="d-flex gap-2 mb-2">
 			<button type="button" class="btn btn-outline-secondary btn-sm" @onclick="HandleUseMyLocation">
 				<i class="bi bi-geo-alt"></i> Użyj mojej lokalizacji
 			</button>
-			<button type="button" class="btn btn-outline-secondary btn-sm" @onclick="HandleShowMapPicker">
+			<button type="button" class="btn btn-outline-primary btn-sm" @onclick="HandleShowMapPicker">
 				<i class="bi bi-map"></i> Wybierz lokalizację na mapie
 			</button>
 		</div>
 
 		@if (latLong != null)
 		{
-			<div class="alert alert-info py-2 px-3 m-0 mb-2" style="font-size: 14px;">
-				<strong>Wybrane współrzędne:</strong>
-				Szerokość: @latLong.Lat.ToString("F5")° | Długość: @latLong.Long.ToString("F5")°
+			<div class="alert alert-info py-2 px-3 m-0 mt-2 d-flex justify-content-between align-items-center" style="font-size: 14px;">
+				<div>
+					<strong>Wybrane współrzędne:</strong>
+					Szerokość: @latLong.Lat.ToString("F5")° | Długość: @latLong.Long.ToString("F5")°
+				</div>
+				<button type="button" class="btn btn-link btn-sm text-primary p-0" @onclick="HandleShowMapPicker">
+					Zmień na mapie
+				</button>
 			</div>
 		}
-
-		<div id="@(locationPickerMapId)" style="height: 300px; width: 100%; border-radius: 8px; border: 1px solid #ccc; display: @(showMap ? "block" : "none");"></div>
 	</div>
 
 	@* Moderator only: Post visibility *@
@@ -89,5 +92,50 @@
 @if (!string.IsNullOrEmpty(newPostId))
 {
 	<div class="alert alert-success mt-3">Post został dodany!</div>
+}
+
+@* Popout Map Selector Modal *@
+@if (showMap)
+{
+	<div class="map-modal-overlay" @onclick="CloseMapPicker">
+		<div class="map-modal-content" @onclick:stopPropagation>
+			<div class="map-modal-header">
+				<div>
+					<h5 class="map-modal-title mb-1">
+						<i class="bi bi-geo-alt-fill text-danger me-1"></i> Wybierz lokalizację na mapie
+					</h5>
+					<small class="text-muted">Kliknij w dowolnym miejscu na mapie, aby ustawić punkt zdarzenia.</small>
+				</div>
+				<button type="button" class="map-modal-close-btn" @onclick="CloseMapPicker" aria-label="Zamknij">&times;</button>
+			</div>
+
+			<div class="map-modal-body">
+				<div id="@(locationPickerMapId)" class="modal-map-container"></div>
+			</div>
+
+			<div class="map-modal-footer">
+				<div class="map-modal-status">
+					@if (latLong != null)
+					{
+						<span class="text-success fw-bold">
+							<i class="bi bi-check-circle-fill me-1"></i> Wybrano: @latLong.Lat.ToString("F5")°, @latLong.Long.ToString("F5")°
+						</span>
+					}
+					else
+					{
+						<span class="text-muted">
+							<i class="bi bi-info-circle me-1"></i> Kliknij na mapie, aby wybrać punkt
+						</span>
+					}
+				</div>
+				<div class="d-flex gap-2">
+					<button type="button" class="btn btn-secondary btn-sm" @onclick="CloseMapPicker">Zamknij</button>
+					<button type="button" class="btn btn-primary btn-sm" @onclick="CloseMapPicker" disabled="@(latLong == null)">
+						Zatwierdź lokalizację
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
 }
 

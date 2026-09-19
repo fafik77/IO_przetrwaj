@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using Przetrwaj.CommonLibrary.Consts;
@@ -62,10 +62,18 @@ public partial class PostForm
 	{
 		error = null;
 		showMap = true;
-		//force refresh and delay it till its applied
 		StateHasChanged();
-		await Task.Delay(1); //this delay is crucial, otherwise the map is not displayed in the div
-		await JS.InvokeVoidAsync(initializeLocationPickerMapJsName, locationPickerMapId, objRef);
+		await Task.Delay(50); //this delay is crucial, otherwise the map is not displayed in the div
+        await JS.InvokeVoidAsync(initializeLocationPickerMapJsName, locationPickerMapId, objRef);
+		if (latLong != null && latLong.Lat != 0 && latLong.Long != 0)
+		{
+			await JS.InvokeVoidAsync(setLocationOnMapJsName, locationPickerMapId, latLong.Lat, latLong.Long);
+		}
+	}
+
+	private void CloseMapPicker()
+	{
+		showMap = false;
 	}
 
 	/// <summary>
@@ -79,8 +87,10 @@ public partial class PostForm
 		model.LatLong.Lat = lat;
 		model.LatLong.Long = lng;
 		latLong = model.LatLong;
-		//place the marker on the map
-		await JS.InvokeVoidAsync(setLocationOnMapJsName, locationPickerMapId, lat, lng);
+		if (showMap)
+		{
+			await JS.InvokeVoidAsync(setLocationOnMapJsName, locationPickerMapId, lat, lng);
+		}
 		StateHasChanged();
 	}
 

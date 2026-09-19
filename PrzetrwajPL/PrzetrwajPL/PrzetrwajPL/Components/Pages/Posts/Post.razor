@@ -83,13 +83,13 @@
 						else
 						{
 							<div class="post-edit-actions">
-								<button type="button" class="btn-save-post" @onclick="() => UpdatePost(editPostCommand)" disabled="@isSavingPost">
+								<button type="button" class="blue-button-white-text btn-save-post" @onclick="() => UpdatePost(editPostCommand)" disabled="@isSavingPost">
 									<i class="fa fa-check"></i> Zapisz
 								</button>
 								<button type="button" class="btn-cancel-post" @onclick="CancelEditPost" disabled="@isSavingPost">
 									<i class="fa fa-times"></i> Anuluj
 								</button>
-								<button type="button" class="btn-delete-post" @onclick="DeletePost" disabled="@isSavingPost">
+								<button type="button" class="red-button-white-text btn-delete-post" @onclick="DeletePost" disabled="@isSavingPost">
 									<i class="fa fa-trash"></i> Usuń post
 								</button>
 							</div>

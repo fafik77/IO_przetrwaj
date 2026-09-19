@@ -15,6 +15,14 @@ public partial class List
     [Inject]
     private IJSRuntime JS { get; set; } = default!;
 
+    [Inject]
+    private NavigationManager Nav { get; set; } = default!;
+
+    private void NavigateToPost(string postId)
+    {
+        Nav.NavigateTo($"/posts/{postId}");
+    }
+
     // Access basic user info from the cookie claims
     [CascadingParameter]
     private Task<AuthenticationState> AuthStateTask { get; set; }

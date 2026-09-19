@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Przetrwaj.Application.Quaries.Categories;
 using Przetrwaj.Domain.Models.Dtos;
+using Przetrwaj.Domain.Models.Dtos.Posts;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Przetrwaj.Presentation.Controllers;
@@ -20,6 +21,15 @@ public class CategoriesController(IMediator mediator) : Controller
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
         var list = await _mediator.Send(new GetAllCategoriesQuery(), ct);
+        return Ok(list);
+    }
+
+    [HttpGet("custom")]
+    [SwaggerOperation("List all custom categories used in posts")]
+    [ProducesResponseType(typeof(IEnumerable<PostOverviewDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllCustom(CancellationToken ct)
+    {
+        var list = await _mediator.Send(new GetAllCustomCategoriesQuery(), ct);
         return Ok(list);
     }
 }

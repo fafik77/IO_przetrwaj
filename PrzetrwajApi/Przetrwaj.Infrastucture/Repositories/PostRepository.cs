@@ -61,7 +61,7 @@ internal class PostRepository : IPostRepository
         var posts = await _context.Posts
             .Where(p => p.Active == true && p.IdAutor == idAuthor.ToLower())
             .Include(p => p.IdCategoryNavigation)
-            .Select(p => SelectAsPostOverview(p))
+            .Select(p => SelectAsPostOverview(p, p.Votes.LongCount(v => v.IsUpvote), p.Votes.LongCount(v => !v.IsUpvote)))
             .ToListAsync(cancellationToken);
 #pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
         return posts;
@@ -147,7 +147,7 @@ internal class PostRepository : IPostRepository
     /// </summary>
     /// <param name="p">the post on which DB is running Select</param>
     /// <returns>PostOverviewDto</returns>
-    private static PostOverviewDto SelectAsPostOverview(Post p) => PostOverviewDto.Map(p);
+    private static PostOverviewDto SelectAsPostOverview(Post p, long VotePositive, long VoteNegative) => PostOverviewDto.Map(p, VotePositive, VoteNegative);
 
     /// <summary>
     /// The new optimal metod to get Posts
@@ -188,7 +188,7 @@ internal class PostRepository : IPostRepository
             .Include(p => p.IdCategoryNavigation)
             .Include(p => p.IdAutorNavigation)
             .Include(p => p.RegionNavigation)
-            .Select(p => SelectAsPostOverview(p))
+            .Select(p => SelectAsPostOverview(p, p.Votes.LongCount(v => v.IsUpvote), p.Votes.LongCount(v => !v.IsUpvote)))
             .ToListAsync(ct);
         return await FillInPostDataAfterFetch(posts, ct);
     }
@@ -241,4 +241,14 @@ internal class PostRepository : IPostRepository
             .FirstOrDefaultAsync(ct);
     }
 
+    public async Task<IEnumerable<PostOverviewDto>> GetPostsWithCustomCategoryAsync(CancellationToken cancellationToken)
+    {
+        return await _context.Posts
+            .AsNoTracking()
+            .Where(p => p.Active == true)
+            .Where(p => p.CustomCategory.Length > 0)
+            .Include(p => p.IdCategoryNavigation)
+            .Select(p => SelectAsPostOverview(p, p.Votes.LongCount(v => v.IsUpvote), p.Votes.LongCount(v => !v.IsUpvote)))
+            .ToListAsync(cancellationToken);
+    }
 }

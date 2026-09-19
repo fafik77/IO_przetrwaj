@@ -482,17 +482,15 @@ button:disabled {
     padding: 6px 14px;
     border-radius: 6px;
     border: none;
-    background-color: #28a745;
-    color: white;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
 }
 
-.btn-save-post:hover:not(:disabled) {
-    background-color: #218838;
-}
+    .btn-save-post:hover:not(:disabled) {
+        background-color: #0b68ac;
+    }
 
 .btn-cancel-post {
     display: inline-flex;
@@ -510,7 +508,7 @@ button:disabled {
 }
 
 .btn-cancel-post:hover:not(:disabled) {
-    background-color: #5a6268;
+    background-color: #42494e;
 }
 
 .btn-delete-post {
@@ -520,17 +518,15 @@ button:disabled {
     padding: 6px 14px;
     border-radius: 6px;
     border: none;
-    background-color: #dc3545;
-    color: white;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
 }
 
-.btn-delete-post:hover:not(:disabled) {
-    background-color: #bd2130;
-}
+    .btn-delete-post:hover:not(:disabled) {
+        background-color: #9f190d;
+    }
 
 .post-title-input {
     font-size: 22px;

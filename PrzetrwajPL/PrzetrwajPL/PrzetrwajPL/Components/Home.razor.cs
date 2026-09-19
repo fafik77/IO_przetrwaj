@@ -40,6 +40,7 @@ public partial class Home
     {
         try
         {
+            VersionFront = new AppVersionDateDto(await GetAppVersionCommonHandler.GetVersionAsync());
             var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
             var getStatisticsTask = client.GetAsync(StatisticsEndpoint);
             var getMapPostsTask = client.GetAsync(PostsMapEndpoint);
@@ -75,7 +76,6 @@ public partial class Home
             var getVersionApiResults = await getVersionApiTask;
             if (getVersionApiResults.IsSuccessStatusCode)
                 VersionApi = new AppVersionDateDto(await getVersionApiResults.Content.ReadFromJsonAsync<AppVersionDto>() ?? new() { Version = "Brak" });
-            VersionFront = new AppVersionDateDto(await GetAppVersionCommonHandler.GetVersionAsync());
         }
         catch (Exception)
         {

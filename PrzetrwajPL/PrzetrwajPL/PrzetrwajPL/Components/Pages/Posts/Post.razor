@@ -4,6 +4,7 @@
 @inject IHttpClientFactory ClientFactory
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -52,6 +53,15 @@
 						@post.Category?.Name
 					}
 				</div>
+				@if (post.LatLong != null)
+				{
+					<div class="post-map-preview-wrapper" @onclick="OpenBigMap" title="Kliknij aby otworzyć punkt na mapie">
+						<div id="postMiniMap" class="post-mini-map"></div>
+						<div class="map-overlay-badge">
+							<i class="fa fa-map-marker"></i> Kliknij aby otworzyć punkt na mapie
+						</div>
+					</div>
+				}
 				@if (isAuthorOfPost)
 				{
 					<div class="author-actions mt-2">
@@ -238,6 +248,20 @@
 				<div class="lightbox-content" @onclick:stopPropagation>
 					<img src="@fullScreenImageUrl" alt="Full screen preview" class="lightbox-img" />
 					<button class="lightbox-close-btn" @onclick="CloseFullScreenImage">&times;</button>
+				</div>
+			</div>
+		}
+
+		@* fullscreen interactive map modal *@
+		@if (showBigMapModal && post.LatLong != null)
+		{
+			<div class="map-modal-overlay" @onclick="CloseBigMap">
+				<div class="map-modal-content" @onclick:stopPropagation>
+					<div class="map-modal-header">
+						<h3 class="map-modal-title">Lokalizacja: @post.Title</h3>
+						<button type="button" class="map-modal-close-btn" @onclick="CloseBigMap">&times;</button>
+					</div>
+					<div id="postBigMap" class="map-modal-body"></div>
 				</div>
 			</div>
 		}

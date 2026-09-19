@@ -416,4 +416,5 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-/PrzetrwajPL/settings.VisualStudio.json
+settings.VisualStudio.json
+settings.VisualStudio.json

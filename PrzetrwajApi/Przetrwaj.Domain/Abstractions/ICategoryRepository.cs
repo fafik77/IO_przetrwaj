@@ -5,9 +5,10 @@ namespace Przetrwaj.Domain.Abstractions;
 
 public interface ICategoryRepository : ICUDAsyncRepository<Category>
 {
-	Task<IEnumerable<CategoryDanger>> GetDangersAsync(CancellationToken ct);
-	Task<IEnumerable<CategoryResource>> GetResourcesAsync(CancellationToken ct);
+    Task<IEnumerable<Category>> GetAllCategoriesAsync(CancellationToken ct);
+    Task<IEnumerable<CategoryDanger>> GetDangersAsync(CancellationToken ct);
+    Task<IEnumerable<CategoryResource>> GetResourcesAsync(CancellationToken ct);
 
-	Task<CategoryDanger?> GetDangerByIdAsync(int idCategory, CancellationToken ct);
-	Task<CategoryResource?> GetResourceByIdAsync(int idCategory, CancellationToken ct);
+    Task<CategoryDanger?> GetDangerByIdAsync(int idCategory, CancellationToken ct);
+    Task<CategoryResource?> GetResourceByIdAsync(int idCategory, CancellationToken ct);
 }

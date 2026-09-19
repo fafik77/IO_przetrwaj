@@ -29,7 +29,7 @@ public class PostOverview
             Active = true
         };
 
-        var dto = PostOverviewDto.Map(post);
+        var dto = PostOverviewDto.Map(post, 0, 0);
 
         Assert.NotNull(dto.Category);
         Assert.Equal(post.CustomCategory, dto.Category.Name);

@@ -59,7 +59,7 @@ else
 {
 	@foreach (var post in posts)
 	{
-		<a href="/posts/@post.Id" class="post-card">
+		<div class="post-card" @onclick="() => NavigateToPost(post.Id)">
 			<div class="post-card-content">
 				<div class="post-card-left">
 					<span class="post-title">
@@ -82,10 +82,17 @@ else
 						<span class="divide">/</span>
 						<span class="down-vote">@post.VoteNegative</span>
 					</div>
+					<AuthorizeView Policy="@UserRoles.Moderator">
+						<Authorized>
+							<button type="button" class="btn-archive-list-post" @onclick="() => ArchivePost(post.Id, post.Title)" @onclick:stopPropagation="true" disabled="@archivingPostIds.Contains(post.Id)">
+								<i class="fa fa-archive"></i> Archiwizuj
+							</button>
+						</Authorized>
+					</AuthorizeView>
 					<span class="post-author">@(post.Author?.Name ?? "Anonim")</span>
 				</div>
 			</div>
-		</a>
+		</div>
 	}
 }
 @if (!string.IsNullOrEmpty(errorMsg))

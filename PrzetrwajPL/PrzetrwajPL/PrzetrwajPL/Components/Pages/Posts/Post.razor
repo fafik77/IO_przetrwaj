@@ -4,6 +4,7 @@
 @inject IHttpClientFactory ClientFactory
 @using Microsoft.AspNetCore.Components.Authorization
 @using PrzetrwajPL.Components.Pages.Components
+@using Przetrwaj.CommonLibrary.Consts
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
@@ -94,38 +95,48 @@
 							</div>
 						}
 					</div>
-					@if (!string.IsNullOrEmpty(postValidationErrorMessage))
-					{
-						<div class="alert alert-danger mt-2 py-1 px-2" style="font-size: 14px;">
-							@postValidationErrorMessage
-						</div>
-					}
+				}
+				@if (!string.IsNullOrEmpty(postValidationErrorMessage))
+				{
+					<div class="alert alert-danger mt-2 py-1 px-2" style="font-size: 14px;">
+						@postValidationErrorMessage
+					</div>
 				}
 			</div>
 			
 			<div class="post-header-right">
-				<AuthorizeView>
-					<NotAuthorized>
-						<div class="vote-section">
-							<button class="upVoteButt" disabled title="Potwierdzam">
-								<i class="fa fa-thumbs-up"></i> @post.VotePositive
+				<div class="vote-actions-container">
+					<AuthorizeView>
+						<NotAuthorized>
+							<div class="vote-section">
+								<button class="upVoteButt" disabled>
+									<i class="fa fa-thumbs-up"></i> @post.VotePositive
+								</button>
+								<button class="downVoteButt" disabled>
+									<i class="fa fa-thumbs-down"></i> @post.VoteNegative
+								</button>
+							</div>
+						</NotAuthorized>
+						<Authorized>
+							<div class="vote-section">
+								<button class="upVoteButt" disabled title="Potwierdzam">
+									<i class="fa fa-thumbs-up"></i> @post.VotePositive
+								</button>
+								<button class="downVoteButt" disabled title="Odwołuje">
+									<i class="fa fa-thumbs-down"></i> @post.VoteNegative
+								</button>
+							</div>
+						</Authorized>
+					</AuthorizeView>
+
+					<AuthorizeView Policy="@UserRoles.Moderator">
+						<Authorized>
+							<button type="button" class="btn-archive-post" @onclick="ArchivePost" disabled="@isArchivingPost">
+								<i class="fa fa-archive"></i> Archiwizuj
 							</button>
-							<button class="downVoteButt" disabled title="Odwołuje">
-								<i class="fa fa-thumbs-down"></i> @post.VoteNegative
-							</button>
-						</div>
-					</NotAuthorized>
-					<Authorized>
-						<div class="vote-section">
-							<button class="upVoteButt @(IsUpvoted ? "active" : "")" @onclick="VotePositive" disabled="@(isVoting || HasVoted)" title="Potwierdzam">
-								<i class="fa fa-thumbs-up"></i> @post.VotePositive
-							</button>
-							<button class="downVoteButt @(IsDownvoted ? "active" : "")" @onclick="VoteNegative" disabled="@(isVoting || HasVoted)" title="Odwołuje">
-								<i class="fa fa-thumbs-down"></i> @post.VoteNegative
-							</button>
-						</div>
-					</Authorized>
-				</AuthorizeView>
+						</Authorized>
+					</AuthorizeView>
+				</div>
 			</div>
 		</div>
 

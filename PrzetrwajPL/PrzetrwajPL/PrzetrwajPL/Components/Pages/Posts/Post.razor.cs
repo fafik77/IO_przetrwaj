@@ -32,6 +32,7 @@ public partial class Post
     private bool isVoting = false;
     private string? currentUserId;
     private bool isAuthorOfPost = false;
+    private bool isModerator = false;
 
     private bool showCommentForm = false;
     private bool isSendingComment = false;
@@ -66,6 +67,8 @@ public partial class Post
         var authState = await AuthStateTask;
         var userPrincipal = authState.User;
         currentUserId = userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        isModerator = userPrincipal.Identity?.IsAuthenticated == true &&
+                      (userPrincipal.IsInRole(UserRoles.Moderator) || userPrincipal.IsInRole(UserRoles.Admin));
         await LoadData();
     }
 

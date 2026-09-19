@@ -1,0 +1,205 @@
+@inject IHttpClientFactory ClientFactory
+@using System.Net
+@using Przetrwaj.CommonLibrary.Consts
+@using Przetrwaj.CommonLibrary.Models
+@using Przetrwaj.CommonLibrary.Requests
+
+@if (!IsModerator || string.IsNullOrEmpty(UserId))
+{
+    <span class="user-moderation-normal @Class">@UserName</span>
+}
+else
+{
+    <div class="user-moderation-wrapper @Class">
+        <span class="user-moderator-link" 
+              title="Operacje na użytkowniku" 
+              @onclick="ToggleMenu">
+            @UserName
+        </span>
+
+        @if (isMenuOpen)
+        {
+            <div class="user-moderation-backdrop" @onclick="CloseMenu"></div>
+            <div class="user-moderation-dropdown">
+                <button type="button" class="user-moderation-menu-item" @onclick="OpenBanModal">
+                    <i class="fa fa-ban"></i> Zablokuj użytkownika
+                </button>
+            </div>
+        }
+
+        @if (isBanModalOpen)
+        {
+            <div class="ban-modal-overlay" @onclick="CloseBanModal">
+                <div class="ban-modal-content" @onclick:stopPropagation>
+                    <div class="ban-modal-header">
+                        <h4 class="ban-modal-title">Zablokuj użytkownika</h4>
+                        <button type="button" class="ban-modal-close-btn" @onclick="CloseBanModal" disabled="@isSubmitting">&times;</button>
+                    </div>
+                    <div class="ban-modal-body">
+                        <p class="ban-target-info">
+                            Czy na pewno chcesz zablokować użytkownika <strong>@UserName</strong>?
+                        </p>
+                        
+                        <div class="form-group">
+                            <label for="banReasonInput" class="ban-label">
+                                Powód blokady: <span class="text-danger">*</span>
+                            </label>
+                            <textarea id="banReasonInput" 
+                                      class="form-control ban-textarea" 
+                                      rows="4" 
+                                      maxlength="500" 
+                                      placeholder="Wpisz powód blokady..." 
+                                      @bind="banReason" 
+                                      @bind:event="oninput" 
+                                      disabled="@isSubmitting">
+                            </textarea>
+                            <div class="ban-char-counter @(IsReasonOverLimit ? "text-danger" : "text-muted")">
+                                @(banReason?.Length ?? 0) / 500
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(banErrorMessage))
+                        {
+                            <div class="alert alert-danger mt-2 py-1 px-2" style="font-size: 14px;">
+                                @banErrorMessage
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(banSuccessMessage))
+                        {
+                            <div class="alert alert-success mt-2 py-1 px-2" style="font-size: 14px;">
+                                @banSuccessMessage
+                            </div>
+                        }
+                    </div>
+                    <div class="ban-modal-footer">
+                        <button type="button" class="btn btn-secondary btn-cancel-ban" @onclick="CloseBanModal" disabled="@isSubmitting">
+                            Anuluj
+                        </button>
+                        <button type="button" 
+                                class="btn btn-danger btn-confirm-ban" 
+                                @onclick="SubmitBan" 
+                                disabled="@(isSubmitting || string.IsNullOrWhiteSpace(banReason) || IsReasonOverLimit)">
+                            @if (isSubmitting)
+                            {
+                                <i class="fa fa-spinner fa-spin"></i>
+                            }
+                            Zablokuj
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private const string BanUserApiEndpoint = "/users/ban";
+
+    [Parameter]
+    public required string UserId { get; set; }
+
+    [Parameter]
+    public required string UserName { get; set; }
+
+    [Parameter]
+    public bool IsModerator { get; set; }
+
+    [Parameter]
+    public EventCallback OnUserBanned { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    private bool isMenuOpen = false;
+    private bool isBanModalOpen = false;
+    private string banReason = string.Empty;
+    private bool isSubmitting = false;
+    private string? banErrorMessage;
+    private string? banSuccessMessage;
+
+    private bool IsReasonOverLimit => (banReason?.Trim().Length ?? 0) > 500;
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+    }
+
+    private void CloseMenu()
+    {
+        isMenuOpen = false;
+    }
+
+    private void OpenBanModal()
+    {
+        isMenuOpen = false;
+        banReason = string.Empty;
+        banErrorMessage = null;
+        banSuccessMessage = null;
+        isBanModalOpen = true;
+    }
+
+    private void CloseBanModal()
+    {
+        if (isSubmitting) return;
+        isBanModalOpen = false;
+        banReason = string.Empty;
+        banErrorMessage = null;
+        banSuccessMessage = null;
+    }
+
+    private async Task SubmitBan()
+    {
+        if (string.IsNullOrWhiteSpace(banReason) || IsReasonOverLimit) return;
+
+        isSubmitting = true;
+        banErrorMessage = null;
+        banSuccessMessage = null;
+
+        try
+        {
+            var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
+            var command = new BanUserCommand
+            {
+                UserIdOrEmail = UserId,
+                Reason = banReason.Trim()
+            };
+
+            var response = await client.PostAsJsonAsync(BanUserApiEndpoint, command);
+
+            if (response.IsSuccessStatusCode)
+            {
+                banSuccessMessage = "Użytkownik został pomyślnie zablokowany.";
+                await Task.Delay(1000);
+                CloseBanModal();
+                if (OnUserBanned.HasDelegate)
+                {
+                    await OnUserBanned.InvokeAsync();
+                }
+            }
+            else if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                banErrorMessage = "Posiadasz niewystarczające uprawnienia";
+            }
+            else
+            {
+                try
+                {
+                    var errorResult = await response.Content.ReadFromJsonAsync<ExceptionCasting>();
+                    banErrorMessage = errorResult?.Error?.Message ?? $"Błąd serwera przy blokowaniu użytkownika: {response.StatusCode}";
+                }
+                catch
+                {
+                    banErrorMessage = $"Błąd serwera przy blokowaniu użytkownika: {response.StatusCode}";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            banErrorMessage = $"Błąd połączenia: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

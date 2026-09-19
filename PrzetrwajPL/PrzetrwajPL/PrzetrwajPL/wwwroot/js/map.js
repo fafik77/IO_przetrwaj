@@ -59,10 +59,21 @@ window.initializeLocationPickerMap = (containerId, dotNetHelper) => {
 	const mapElement = document.getElementById(containerId);
 	if (!mapElement) return;
 
-	//if map already exists => exit
-	if (window.activeMaps[containerId]) {
-		setTimeout(() => { window.activeMaps[containerId].map.invalidateSize(); }, 50);
-		return;
+	// if map already exists on the exact same DOM container => invalidate and exit
+	if (window.activeMaps && window.activeMaps[containerId]) {
+		const existing = window.activeMaps[containerId];
+		if (existing.map && existing.map.getContainer() === mapElement) {
+			setTimeout(() => { existing.map.invalidateSize(); }, 50);
+			return;
+		}
+		// Container changed or re-mounted in DOM => safely remove old map
+		if (existing.map && typeof existing.map.remove === 'function') {
+			existing.map.remove();
+		}
+		delete window.activeMaps[containerId];
+	}
+	if (mapElement._leaflet_id) {
+		delete mapElement._leaflet_id;
 	}
 
 	// center the map on Poland (52.0, 19.0) | Zoom = 7

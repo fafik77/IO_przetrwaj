@@ -77,7 +77,7 @@ else
 					<span class="post-meta">@(post.Region?.Name ?? "Brak lokalizacji") @post.DateCreated.ToWarsawTime().ToString("HH:mm dd.MM.yyyy")</span>
 				</div>
 				<div class="post-card-right">
-					<div class="post-votes">
+					<div class="post-votes" title="Ilość potwierdzeń/odwołań">
 						<span class="up-vote">@post.VotePositive</span>
 						<span class="divide">/</span>
 						<span class="down-vote">@post.VoteNegative</span>

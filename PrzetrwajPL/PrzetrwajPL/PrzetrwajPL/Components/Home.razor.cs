@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Przetrwaj.CommonLibrary.Consts;
+using Przetrwaj.CommonLibrary.Handlers;
 using Przetrwaj.CommonLibrary.Models;
 using Przetrwaj.CommonLibrary.Models.Posts;
 using System.Collections.Frozen;
@@ -16,7 +17,10 @@ public partial class Home
     const string CategoriesEndpoint = "/Categories";
     const string StatisticsEndpoint = "/Statistics";
     const string PostsMapEndpoint = "/Posts/map";
+    const string VersionApiEndpoint = "/Version";
     [Inject] public required IJSRuntime JS { get; set; }
+    AppVersionDateDto VersionFront = new();
+    AppVersionDateDto VersionApi = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -39,9 +43,10 @@ public partial class Home
             var client = ClientFactory.CreateClient(Consts.PrzetrwajApiClientName);
             var getStatisticsTask = client.GetAsync(StatisticsEndpoint);
             var getMapPostsTask = client.GetAsync(PostsMapEndpoint);
+            var getVersionApiTask = client.GetAsync(VersionApiEndpoint);
             var getCategoriesTask = client.GetAsync(CategoriesEndpoint);
 
-            await Task.WhenAll(getStatisticsTask, getMapPostsTask, getCategoriesTask);
+            await Task.WhenAll(getStatisticsTask, getMapPostsTask, getCategoriesTask, getVersionApiTask);
 
             var getStatisticsResult = await getStatisticsTask;
             if (getStatisticsResult.IsSuccessStatusCode)
@@ -66,6 +71,11 @@ public partial class Home
                     item.IsResource = categoryDto?.Type == CategoryType.Resource;
                 }
             }
+
+            var getVersionApiResults = await getVersionApiTask;
+            if (getVersionApiResults.IsSuccessStatusCode)
+                VersionApi = new AppVersionDateDto(await getVersionApiResults.Content.ReadFromJsonAsync<AppVersionDto>() ?? new() { Version = "Brak" });
+            VersionFront = new AppVersionDateDto(await GetAppVersionCommonHandler.GetVersionAsync());
         }
         catch (Exception)
         {

@@ -102,20 +102,20 @@
 				<AuthorizeView>
 					<NotAuthorized>
 						<div class="vote-section">
-							<button class="upVoteButt" disabled>
+							<button class="upVoteButt" disabled title="Potwierdzam">
 								<i class="fa fa-thumbs-up"></i> @post.VotePositive
 							</button>
-							<button class="downVoteButt" disabled>
+							<button class="downVoteButt" disabled title="Odwołuje">
 								<i class="fa fa-thumbs-down"></i> @post.VoteNegative
 							</button>
 						</div>
 					</NotAuthorized>
 					<Authorized>
 						<div class="vote-section">
-							<button class="upVoteButt @(IsUpvoted ? "active" : "")" @onclick="VotePositive" disabled="@(isVoting || HasVoted)">
+							<button class="upVoteButt @(IsUpvoted ? "active" : "")" @onclick="VotePositive" disabled="@(isVoting || HasVoted)" title="Potwierdzam">
 								<i class="fa fa-thumbs-up"></i> @post.VotePositive
 							</button>
-							<button class="downVoteButt @(IsDownvoted ? "active" : "")" @onclick="VoteNegative" disabled="@(isVoting || HasVoted)">
+							<button class="downVoteButt @(IsDownvoted ? "active" : "")" @onclick="VoteNegative" disabled="@(isVoting || HasVoted)" title="Odwołuje">
 								<i class="fa fa-thumbs-down"></i> @post.VoteNegative
 							</button>
 						</div>

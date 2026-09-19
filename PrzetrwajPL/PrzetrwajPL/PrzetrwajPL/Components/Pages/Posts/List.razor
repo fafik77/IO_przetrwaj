@@ -1,6 +1,6 @@
 @page "/list"
 
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject IHttpClientFactory ClientFactory
 @using Przetrwaj.CommonLibrary.Consts
 @using Przetrwaj.CommonLibrary.Models

@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Przetrwaj.Domain\Przetrwaj.Domain.csproj" />
     <ProjectReference Include="..\Przetrwaj.Infrastucture\Przetrwaj.Infrastucture.csproj" />
+    <ProjectReference Include="..\Przetrwaj.Presentation\Przetrwaj.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

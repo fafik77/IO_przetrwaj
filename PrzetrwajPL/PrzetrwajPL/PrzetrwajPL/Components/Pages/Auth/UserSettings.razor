@@ -1,16 +1,12 @@
 ﻿@page "/settings"
-@rendermode InteractiveServer
+
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
-@using Przetrwaj.CommonLibrary.Consts
-@using PrzetrwajPL;
 @using PrzetrwajPL.Components.Pages.Components
-@using Microsoft.AspNetCore.Authentication;
-@using Microsoft.AspNetCore.Authentication.Cookies;
 @using Microsoft.AspNetCore.Components;
-@using System.Security.Claims;
 
 <PageTitle>Ustawienia - Przetrwaj PL</PageTitle>
 

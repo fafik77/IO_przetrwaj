@@ -7,5 +7,6 @@ public class BanUserCommand
 	[Required]
 	public required string UserIdOrEmail { get; set; }
 	[Required]
-	public required string Reason { get; set; }
+    [MaxLength(500)]
+    public required string Reason { get; set; }
 }

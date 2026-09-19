@@ -42,7 +42,7 @@ namespace PrzetrwajPL.Components.Pages.Auth.Login
 					// Gather all parameters securely to prevent URL corruption when passing parrameters
 					var queryParams = new Dictionary<string, string?>
 					{
-						{ "token", result.Token },
+						{ "token", result!.Token },
 						{ "refreshToken", result.RefreshToken }
 					};
 

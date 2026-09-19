@@ -17,6 +17,9 @@ button, .button {
 		text-shadow: #808080;
 		font-weight: bold;
 	}
+		.white-button-blue-text:hover:not(:disabled) {
+			color: #007adb;
+		}
 
 	.blue-button-white-text {
 		background-color: #0094ff;
@@ -27,26 +30,48 @@ button, .button {
 		text-shadow: #808080;
 		font-weight: bold;
 	}
+		.blue-button-white-text:hover:not(:disabled) {
+			background-color: #007adb;
+		}
 
-.white-button-red-text {
-	background-color: ghostwhite;
-	color: #ff3421;
-	padding: 14px 20px;
-	border: 3px solid #ff3421;
-	border-radius: 10px;
-	text-shadow: #808080;
-	font-weight: bold;
-}
+	.white-button-red-text {
+		background-color: ghostwhite;
+		color: #ff3421;
+		padding: 14px 20px;
+		border: 3px solid #ff3421;
+		border-radius: 10px;
+		text-shadow: #808080;
+		font-weight: bold;
+	}
+		.white-button-red-text:hover:not(:disabled) {
+			color: #d42110;
+		}
 
-.red-button-white-text {
-	background-color: #d42110;
-	color: ghostwhite;
-	padding: 14px 20px;
-	border: 3px solid ghostwhite;
-	border-radius: 10px;
-	text-shadow: #808080;
-	font-weight: bold;
-}
+		.red-button-white-text {
+			background-color: #d42110;
+			color: ghostwhite;
+			padding: 14px 20px;
+			border: 3px solid ghostwhite;
+			border-radius: 10px;
+			text-shadow: #808080;
+			font-weight: bold;
+		}
+			.red-button-white-text:hover:not(:disabled) {
+				background-color: #891308;
+			}
+
+		.darkgrey-button-white-text {
+			background-color: #393939;
+			color: ghostwhite;
+			padding: 14px 20px;
+			border: 3px solid ghostwhite;
+			border-radius: 10px;
+			text-shadow: #808080;
+			font-weight: bold;
+		}
+			.darkgrey-button-white-text:hover:not(:disabled) {
+				background-color: #211d1d;
+			}
 
 .picker-container {
 	width: 100%;
@@ -65,7 +90,6 @@ button, .button {
 		grid-template-rows: 1fr;
 		margin-bottom: 0.5em;
 	}
-
 /* inner container required for min-height: 0 */
 .picker-inner-content {
 	min-height: 0;
@@ -74,14 +98,11 @@ button, .button {
 	transition: transform 0.35s ease-out, opacity 0.25s ease-out;
 	padding-top: 4px;
 }
-
 /* show the expanded content */
 .picker-slider.expanded .picker-inner-content {
 	transform: translateY(0);
 	opacity: 1;
 }
-
-
 /* Region button showing the picked region */
 .btn-toggle-picker {
 	background-color: #e6f4ff;

@@ -228,6 +228,8 @@ button:disabled {
 }
 
 .add-photo-btn-extracted {
+    padding: 10px 20px;
+    border-radius: 20px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -307,8 +309,6 @@ button:disabled {
 }
 
 .add-comment-trigger-btn {
-    background-color: #0094ff;
-    color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 20px;
@@ -337,8 +337,6 @@ button:disabled {
 }
 
 .btn-send {
-    background-color: #28a745;
-    color: white;
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
@@ -397,8 +395,6 @@ button:disabled {
 }
 
 .btn-update-comment {
-    background-color: #28a745;
-    color: white;
     border: none;
     padding: 5px 12px;
     border-radius: 4px;
@@ -406,15 +402,9 @@ button:disabled {
     font-size: 14px;
     font-weight: 500;
     transition: background 0.2s;
-}
-
-.btn-update-comment:hover:not(:disabled) {
-    background-color: #218838;
 }
 
 .btn-cancel-comment {
-    background-color: #6c757d;
-    color: white;
     border: none;
     padding: 5px 12px;
     border-radius: 4px;
@@ -422,10 +412,6 @@ button:disabled {
     font-size: 14px;
     font-weight: 500;
     transition: background 0.2s;
-}
-
-.btn-cancel-comment:hover:not(:disabled) {
-    background-color: #5a6268;
 }
 
 .comment-edit-textarea {

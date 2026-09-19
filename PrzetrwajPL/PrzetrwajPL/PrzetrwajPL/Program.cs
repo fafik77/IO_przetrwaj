@@ -1,9 +1,15 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Globalization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Przetrwaj.CommonLibrary.Consts;
 using PrzetrwajPL.Components;
 using PrzetrwajPL.Handlers;
 using PrzetrwajPL.Handlers.Security;
+
+var polishCulture = new CultureInfo("pl-PL");
+CultureInfo.DefaultThreadCurrentCulture = polishCulture;
+CultureInfo.DefaultThreadCurrentUICulture = polishCulture;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,6 +81,14 @@ else
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
+
+var supportedCultures = new[] { polishCulture };
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+	DefaultRequestCulture = new RequestCulture(polishCulture),
+	SupportedCultures = supportedCultures,
+	SupportedUICultures = supportedCultures
+});
 
 app.UseHttpsRedirection();
 

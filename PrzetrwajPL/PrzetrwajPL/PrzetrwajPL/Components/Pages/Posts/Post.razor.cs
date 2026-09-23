@@ -72,6 +72,24 @@ public partial class Post
         await LoadData();
     }
 
+    private string GetDownVoteButtonTitle()
+    {
+        if (!HasVoted)
+            return "Odwołaj";
+        if (IsDownvoted)
+            return "Odwołałeś";
+        return "Odwołań";
+    }
+
+    private string GetUpVoteButtonTitle()
+    {
+        if (!HasVoted)
+            return "Potwierdź";
+        if (IsUpvoted)
+            return "Potwierdziłeś";
+        return "Potwierdzeń";
+    }
+
     private async Task LoadData()
     {
         isLoading = true;

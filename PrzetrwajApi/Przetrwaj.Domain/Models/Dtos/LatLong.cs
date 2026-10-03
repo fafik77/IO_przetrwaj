@@ -1,12 +1,14 @@
-﻿namespace Przetrwaj.Domain.Models.Dtos;
+﻿using System.ComponentModel.DataAnnotations;
 
-public record LatLong(double Lat, double Long)
+namespace Przetrwaj.Domain.Models.Dtos;
+
+public record LatLong(
+    [Range(-90.0, 90.0, ErrorMessage = "Latitude must be between -90 and 90.")]
+    double Lat,
+
+    [Range(-180.0, 180.0, ErrorMessage = "Longitude must be between -180 and 180.")]
+    double Long
+)
 {
-	public double Lat { get; set; } = Lat;
-	public double Long { get; set; } = Long;
-
-	public override string ToString()
-	{
-		return $"(lat={Lat}, long={Long})";
-	}
+    public override string ToString() => $"(lat={Lat}, long={Long})";
 }

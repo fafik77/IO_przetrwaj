@@ -177,6 +177,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddApplication();
 builder.Services.AddPresentation();
 
+// Add Health Check services
+builder.Services.AddHealthChecks();
 
 
 var app = builder.Build();
@@ -202,6 +204,10 @@ app.UseStaticFiles(new StaticFileOptions     //Allow serving <Image> in requests
 
 app.UseRouting(); // Added this explicitly beffore UseCors (New .Net thing)
 app.UseCors(AllowPrzetrwajOrigins);
+
+// Health check endpoint (allowed anonymously for Docker and CI/CD verification)
+app.MapHealthChecks("/health").AllowAnonymous();
+
 app.UsePresentation();
 
 

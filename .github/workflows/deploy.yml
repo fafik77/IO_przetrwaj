@@ -1,0 +1,57 @@
+name: Build and Deploy (Local Builder)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    name: Build & Deploy via Docker Compose
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Environment Secrets (.env)
+        run: |
+          if [ ! -f .env ]; then
+            echo "Checking for host .env or injecting secrets..."
+            # If you prefer storing secrets in GitHub Secrets:
+            # echo "${{ secrets.PROD_ENV_FILE }}" > .env
+            # Or if .env is pre-created on the host:
+            if [ -f ../.env ]; then
+              cp ../.env .env
+            else
+              echo "ERROR: .env file missing on host builder!" && exit 1
+            fi
+          fi
+
+      - name: Build and Start Containers
+        run: |
+          docker compose down --remove-orphans
+          docker compose build
+          docker compose up -d
+
+      - name: Verify API Health Check
+        run: |
+          echo "Waiting for API service to become healthy..."
+          for i in {1..15}; do
+            STATUS=$(docker inspect --format='{{json .State.Health.Status}}' przetrwaj_api || echo "starting")
+            echo "Current status: $STATUS"
+            if [ "$STATUS" = "\"healthy\"" ]; then
+              echo "API is healthy!"
+              exit 0
+            fi
+            sleep 4
+          done
+          echo "Health check timed out!"
+          docker logs przetrwaj_api
+          exit 1
+
+      - name: Clean Up Dangling Images
+        if: always()
+        run: |
+          docker image prune -f

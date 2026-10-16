@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: przetrwaj_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-przetrwaj}
+      POSTGRES_USER: ${POSTGRES_USER:-przetrwaj_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/db-init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-przetrwaj_user} -d ${POSTGRES_DB:-przetrwaj}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./PrzetrwajApi
+      dockerfile: Dockerfile
+    container_name: przetrwaj_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__Database=Host=db;Port=5432;Database=${POSTGRES_DB:-przetrwaj};Username=${POSTGRES_USER:-przetrwaj_user};Password=${POSTGRES_PASSWORD};
+      - PostGis__schema=postgis
+    volumes:
+      - api_attachments:/app/Attachments
+    ports:
+      - "7072:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  front:
+    build:
+      context: ./PrzetrwajPL/PrzetrwajPL
+      dockerfile: Dockerfile
+    container_name: przetrwaj_front
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - PrzetrwajApiUri=http://api:8080/
+    ports:
+      - "7173:80"
+
+volumes:
+  postgres_data:
+  api_attachments:

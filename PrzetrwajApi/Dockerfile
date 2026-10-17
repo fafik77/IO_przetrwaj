@@ -2,6 +2,8 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+RUN apt-get -qq update
+RUN apt-get -qq -y install curl
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080

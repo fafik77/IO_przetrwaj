@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Configuration;
 using Przetrwaj.CommonLibrary.Consts;
 using PrzetrwajPL.Components;
 using PrzetrwajPL.Handlers;
@@ -90,7 +91,10 @@ app.UseRequestLocalization(new RequestLocalizationOptions
 	SupportedUICultures = supportedCultures
 });
 
-app.UseHttpsRedirection();
+if (app.Configuration.GetValue<bool>("ASPNETCORE:UseSSL"))
+{
+	app.UseHttpsRedirection();
+}
 
 
 app.UseAntiforgery();

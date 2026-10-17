@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
@@ -65,7 +66,10 @@ public static class Extensions
 			app.UseSwaggerUI();
 		}
 
-		app.UseHttpsRedirection();
+		if (app.Configuration.GetValue<bool>("ASPNETCORE:UseSSL"))
+		{
+			app.UseHttpsRedirection();
+		}
 
 		//the order matters
 		app.UseAuthentication();

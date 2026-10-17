@@ -29,11 +29,86 @@ jobs:
             fi
           fi
 
-      - name: Build and Start Containers
+      - name: Ensure Database is Running
         run: |
-          docker compose down --remove-orphans
-          docker compose build
-          docker compose up -d
+          # 1. Build db image only if it does not exist locally or docker/ changed
+          REBUILD_DB=false
+          if ! docker image inspect przetrwaj-postgres:18 >/dev/null 2>&1; then
+            echo "Image przetrwaj-postgres:18 not found locally."
+            REBUILD_DB=true
+          elif git rev-parse --verify HEAD~1 >/dev/null 2>&1 && git diff --name-only HEAD~1 HEAD | grep -q '^docker/'; then
+            echo "Changes detected in docker/ directory."
+            REBUILD_DB=true
+          fi
+
+          if [ "$REBUILD_DB" = "true" ]; then
+            echo "Building custom postgres:18 + PostGIS image..."
+            docker compose build db
+          else
+            echo "Reusing existing local przetrwaj-postgres:18 image (skipping rebuild)."
+          fi
+
+          # 2. Start PostgreSQL service
+          echo "Starting database service..."
+          docker compose up -d db
+
+          # 3. Wait for PostgreSQL to become healthy
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..20}; do
+            STATUS=$(docker inspect --format='{{json .State.Health.Status}}' przetrwaj_db || echo "starting")
+            echo "Database status: $STATUS"
+            if [ "$STATUS" = "\"healthy\"" ]; then
+              echo "Database is ready!"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Database health check timed out!"
+          docker logs przetrwaj_db
+          exit 1
+
+      - name: Apply EF Core Migrations
+        run: |
+          echo "Applying database migrations..."
+          export PATH="$PATH:$HOME/.dotnet:$HOME/.dotnet/tools"
+
+          # Load environment secrets
+          set -a
+          [ -f .env ] && . ./.env
+          set +a
+
+          export ConnectionStrings__Database="Host=localhost;Port=5432;Database=${POSTGRES_DB:-przetrwaj};Username=${POSTGRES_USER:-przetrwaj_user};Password=${POSTGRES_PASSWORD};"
+          export PostGis__schema="${PostGis__schema:-postgis}"
+
+          # Run migration natively if dotnet is installed, or fallback to .NET SDK container
+          if command -v dotnet >/dev/null 2>&1; then
+            if ! command -v dotnet-ef >/dev/null 2>&1; then
+              echo "Installing dotnet-ef tool..."
+              dotnet tool install --global dotnet-ef || true
+            fi
+            cd PrzetrwajApi
+            dotnet ef database update --startup-project Przetrwaj.Api --project Przetrwaj.Infrastucture
+          else
+            echo "dotnet not found on host, running migrations via .NET 9 SDK container..."
+            docker run --rm \
+              --network host \
+              -v "$PWD/PrzetrwajApi:/src" \
+              -w /src \
+              -e ConnectionStrings__Database="$ConnectionStrings__Database" \
+              -e PostGis__schema="$PostGis__schema" \
+              -e Jwt__Key="$Jwt__Key" \
+              mcr.microsoft.com/dotnet/sdk:9.0 \
+              sh -c "dotnet tool install --global dotnet-ef && export PATH=\"\$PATH:/root/.dotnet/tools\" && dotnet ef database update --startup-project Przetrwaj.Api --project Przetrwaj.Infrastucture"
+          fi
+
+      - name: Build and Start Application Containers
+        run: |
+          # 1. Build application containers with latest code changes
+          echo "Building api and front..."
+          docker compose build api front
+
+          # 2. Start/update containers (recreates updated containers, keeps db running)
+          docker compose up -d --remove-orphans
 
       - name: Verify API Health Check
         run: |

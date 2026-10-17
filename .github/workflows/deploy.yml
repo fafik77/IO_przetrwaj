@@ -96,8 +96,9 @@ jobs:
             dotnet tool install --global dotnet-ef || true
           fi
 
-          # 3. Apply migrations
+          # 3. Restore solution dependencies and apply migrations
           cd PrzetrwajApi
+          dotnet restore
           dotnet ef database update --startup-project Przetrwaj.Api --project Przetrwaj.Infrastucture
 
       - name: Build and Start Application Containers

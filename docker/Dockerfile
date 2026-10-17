@@ -8,3 +8,5 @@ RUN apt-get update \
         postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
         postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts \
     && rm -rf /var/lib/apt/lists/*
+
+COPY db-init/init-db.sql /docker-entrypoint-initdb.d/

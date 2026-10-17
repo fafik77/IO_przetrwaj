@@ -50,6 +50,7 @@ jobs:
 
           # 2. Start PostgreSQL service
           echo "Starting database service..."
+          docker compose down db
           docker compose up -d db
 
           # 3. Wait for PostgreSQL to become healthy
@@ -106,6 +107,7 @@ jobs:
           # 1. Build application containers with latest code changes
           echo "Building api and front..."
           docker compose build api front
+          docker compose down api front
 
           # 2. Start/update containers (recreates updated containers, keeps db running)
           docker compose up -d --remove-orphans

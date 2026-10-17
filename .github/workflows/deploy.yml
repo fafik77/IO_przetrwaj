@@ -81,26 +81,24 @@ jobs:
           export ConnectionStrings__Database="Host=localhost;Port=5432;Database=${POSTGRES_DB:-przetrwaj};Username=${POSTGRES_USER:-przetrwaj_user};Password=${POSTGRES_PASSWORD};"
           export PostGis__schema="${PostGis__schema:-postgis}"
 
-          # Run migration natively if dotnet is installed, or fallback to .NET SDK container
-          if command -v dotnet >/dev/null 2>&1; then
-            if ! command -v dotnet-ef >/dev/null 2>&1; then
-              echo "Installing dotnet-ef tool..."
-              dotnet tool install --global dotnet-ef || true
-            fi
-            cd PrzetrwajApi
-            dotnet ef database update --startup-project Przetrwaj.Api --project Przetrwaj.Infrastucture
-          else
-            echo "dotnet not found on host, running migrations via .NET 9 SDK container..."
-            docker run --rm \
-              --network host \
-              -v "$PWD/PrzetrwajApi:/src" \
-              -w /src \
-              -e ConnectionStrings__Database="$ConnectionStrings__Database" \
-              -e PostGis__schema="$PostGis__schema" \
-              -e Jwt__Key="$Jwt__Key" \
-              mcr.microsoft.com/dotnet/sdk:9.0 \
-              sh -c "dotnet tool install --global dotnet-ef && export PATH=\"\$PATH:/root/.dotnet/tools\" && dotnet ef database update --startup-project Przetrwaj.Api --project Przetrwaj.Infrastucture"
+          export PATH="$HOME/.dotnet:$HOME/.dotnet/tools:/usr/share/dotnet:$PATH"
+          export DOTNET_ROOT="$HOME/.dotnet"
+
+          # 1. If dotnet is not installed on the runner host, install .NET 9 in user space (no root/sudo required)
+          if ! command -v dotnet >/dev/null 2>&1; then
+            echo "Installing .NET 9 SDK in $HOME/.dotnet (non-root)..."
+            curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 9.0 --install-dir "$HOME/.dotnet"
           fi
+
+          # 2. Ensure dotnet-ef tool is installed
+          if ! command -v dotnet-ef >/dev/null 2>&1; then
+            echo "Installing dotnet-ef tool..."
+            dotnet tool install --global dotnet-ef || true
+          fi
+
+          # 3. Apply migrations
+          cd PrzetrwajApi
+          dotnet ef database update --startup-project Przetrwaj.Api --project Przetrwaj.Infrastucture
 
       - name: Build and Start Application Containers
         run: |

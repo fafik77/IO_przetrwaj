@@ -29,4 +29,7 @@ RUN dotnet publish "./Przetrwaj.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER root
+RUN mkdir -p /app/Attachments && chown -R $APP_UID:$APP_UID /app/Attachments
+USER $APP_UID
 ENTRYPOINT ["dotnet", "Przetrwaj.Api.dll"]

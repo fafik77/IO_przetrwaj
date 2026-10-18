@@ -1,10 +1,12 @@
 ﻿@page "/login"
-@* @rendermode InteractiveServer *@
+@rendermode InteractiveServer
 
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager NavigationManager
 @using PrzetrwajPL;
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
+@inject IConfiguration Configuration
 
 <PageTitle>Logowanie</PageTitle>
 
@@ -48,9 +50,11 @@
 	<div class="inContainer">
 		<h2 style="text-align:center; font-weight:bold;">Szybkie logowanie</h2>
 		<p>Użyj konta do zalogowania:</p><br />
-		<a href="@GoogleLoginUrl" class="button btn google-btn">
+		<!-- Google -->
+		<button class="button btn google-btn" onclick="@(triggerGoogleSignIn)()">
 			<i class="fa fa-google"></i> Google
-		</a><br /><br />
+		</button>
+		<br /><br />
 		<button type="button" class="facebook invisible">Facebook</button><br /><br />
 		<button type="button" class="github invisible">GitHub</button><br /><br />
 		<button type="button" class="microsoft invisible">Microsoft</button><br /><br />

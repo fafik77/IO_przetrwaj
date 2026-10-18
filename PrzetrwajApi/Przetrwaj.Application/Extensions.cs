@@ -18,6 +18,7 @@ public static class Extensions
 		services.AddTransient<EmailCustomSmtpService>();
 		services.AddTransient<IEmailSender, EmailProviderService>();
 		services.AddTransient<IEmailSenderMultiple, EmailProviderService>();
+		services.AddTransient<ISignInWithGoogleService, SignInWithGoogleService>();
 
 		var ExecutingAssembly = Assembly.GetExecutingAssembly();
 		services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(ExecutingAssembly));

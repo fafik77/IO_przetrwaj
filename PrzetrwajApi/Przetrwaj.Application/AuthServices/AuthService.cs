@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain.Abstractions;
@@ -13,36 +12,22 @@ using Przetrwaj.Domain.Models.Dtos;
 
 namespace Przetrwaj.Application.AuthServices;
 
-public class AuthService : IAuthService
+public class AuthService(UserManager<AppUser> userManager,
+    SignInManager<AppUser> signInManager,
+    IEmailSender emailSender,
+    IHttpContextAccessor httpContextAccessor,
+    IUserRepository userRepository,
+    IOptions<FrontEndSettings> frontEndSettings,
+    IRegionRepository regionRepository) : IAuthService
 {
-    private readonly UserManager<AppUser> _userManager;
-    private readonly IUserRepository _userRepository;
-    private readonly SignInManager<AppUser> _signInManager;
-    private readonly IEmailSender _emailSender;
-    private readonly IUrlHelper _urlHelper;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly FrontEndSettings _frontEndSettings;
-    private readonly IRegionRepository _regionRepository;
-
-    public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender, IUrlHelper urlHelper, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IOptions<FrontEndSettings> frontEndSettings, IRegionRepository regionRepository)
-    {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _emailSender = emailSender;
-        _urlHelper = urlHelper;
-        _httpContextAccessor = httpContextAccessor;
-        _userRepository = userRepository;
-        _frontEndSettings = frontEndSettings.Value;
-        _regionRepository = regionRepository;
-    }
-
+    private readonly FrontEndSettings _frontEndSettings = frontEndSettings.Value;
 
     public async Task<AppUser> ConfirmEmailAsync(string userId, string code)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId);
         if (user == null)
             throw new InvalidConfirmationException("User not found.");
-        var result = await _userManager.ConfirmEmailAsync(user, code);
+        var result = await userManager.ConfirmEmailAsync(user, code);
 
         if (result.Succeeded)
             return user;
@@ -53,11 +38,11 @@ public class AuthService : IAuthService
     public async Task GenerateChangeEmailTokenAsync(AppUser user, string newEmail, string? returnUrl)
     {
         // 1. Generate the Code
-        var ChangeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+        var ChangeEmailToken = await userManager.GenerateChangeEmailTokenAsync(user, newEmail);
         ConfirmEmailChangeInfo values = new() { UserId = user.Id, Code = ChangeEmailToken, NewEmail = newEmail };
         string absoluteUrlString = GenerateEmailConfirmationUrl(action: "confirm-email-change", values, returnUrl);
         // send the email
-        await _emailSender.SendEmailAsync(newEmail, subject: "Potwierdź zmianę adresu e-mail - Przetrwaj.pl",
+        await emailSender.SendEmailAsync(newEmail, subject: "Potwierdź zmianę adresu e-mail - Przetrwaj.pl",
         $@"<h2>Witaj {user.Name}!</h2>
 		<p>Otrzymaliśmy prośbę o zmianę adresu e-mail na: <strong>{newEmail}</strong>.</p>
 		<div style='margin: 30px 0;'>
@@ -73,9 +58,9 @@ public class AuthService : IAuthService
     {
         AppUser? user;
         if (userIdEmail.Contains('@'))
-            user = await _userRepository.GetByEmailAsync(userIdEmail);
+            user = await userRepository.GetByEmailAsync(userIdEmail);
         else
-            user = await _userRepository.GetByIdAsync(userIdEmail);
+            user = await userRepository.GetByIdAsync(userIdEmail);
         if (user is null) throw new UserNotFoundException(userIdEmail);
         return user;
     }
@@ -83,24 +68,24 @@ public class AuthService : IAuthService
     public async Task<AppUser> LoginUserByEmailAsync(string email, string password)
     {
         //var user = await _userManager.FindByEmailAsync(email);
-        var user = await _userRepository.GetByEmailAsync(email);
+        var user = await userRepository.GetByEmailAsync(email);
         if (user == null || user.EmailConfirmed == false)
             throw new InvalidLoginException("Bad login attempt");
 
-        if (await _userManager.IsLockedOutAsync(user))
+        if (await userManager.IsLockedOutAsync(user))
             throw new InvalidLoginException("Bad login attempt");
 
-        if (false == await _userManager.CheckPasswordAsync(user, password))
+        if (false == await userManager.CheckPasswordAsync(user, password))
             throw new InvalidLoginException("Bad login attempt");
 
         if (user.BanDate != null)    //user is banned
         {
-            var bannedBy = await _userRepository.GetByIdAsync(user.BannedById ?? string.Empty);
+            var bannedBy = await userRepository.GetByIdAsync(user.BannedById ?? string.Empty);
             UserWithPersonalDataDto dto = (UserWithPersonalDataDto)user;
             if (dto.BanInfo != null) dto.BanInfo.BannedBy = UserGeneralDto.Map(bannedBy);
             throw new UserBannedException("User is banned", dto.BanInfo!);
         }
-        var signedIn = await _signInManager.PasswordSignInAsync(user, password, true, true);
+        var signedIn = await signInManager.PasswordSignInAsync(user, password, true, true);
         if (signedIn.Succeeded)
             return user;
         throw new InvalidLoginException("Bad login attempt");
@@ -109,7 +94,7 @@ public class AuthService : IAuthService
     public async Task<AppUser> RegisterUserByEmailAsync(RegisterEmailInfo register, string? returnUrl)
     {
         var (Woj, Pow, Gmi) = RegionCompoundHelper.RegionSplit(register.IdRegion);
-        var GmiExists = await _regionRepository.GetByIdAsync(Gmi);
+        var GmiExists = await regionRepository.GetByIdAsync(Gmi);
         var user = new AppUser
         {
             Email = register.Email,
@@ -121,7 +106,7 @@ public class AuthService : IAuthService
             ModeratorRolePending = register.ModeratorRole,
         };
 
-        var result = await _userManager.CreateAsync(user, register.Password);
+        var result = await userManager.CreateAsync(user, register.Password);
         if (!result.Succeeded)
         {   // do not expose too much info
             string errors = string.Join("\n", result.Errors
@@ -134,11 +119,11 @@ public class AuthService : IAuthService
         }
 
         // 1. Generate the Code
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
         ConfirmEmailInfo values = new() { UserId = user.Id, Code = code };
         string absoluteUrlString = GenerateEmailConfirmationUrl(action: "confirm-email", values, returnUrl);
         // send the email
-        await _emailSender.SendEmailAsync(register.Email, subject: "Potwierdź swój adres e-mail. Przetrwaj.pl",
+        await emailSender.SendEmailAsync(register.Email, subject: "Potwierdź swój adres e-mail. Przetrwaj.pl",
             $"<h2>{register.Name} witaj w serwisie Przetrwaj.pl</h2><br>" +
             $@"<p>Potwierdź swoje konto, klikając w poniższy przycisk:</p>
 <div style='text-align: center; margin: 30px 0;'>
@@ -182,7 +167,7 @@ public class AuthService : IAuthService
         if (string.IsNullOrEmpty(returnUrl))
         {
             // we could not fetch any frontend Url. hadle it with backend only
-            var request = _httpContextAccessor.HttpContext?.Request;
+            var request = httpContextAccessor.HttpContext?.Request;
             var scheme = request?.Scheme;
             var host = request?.Host.Value;
             // the absolute URL string

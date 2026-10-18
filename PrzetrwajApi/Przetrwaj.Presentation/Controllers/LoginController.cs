@@ -49,7 +49,7 @@ public class LoginController : Controller
     }
 
     [HttpGet("google")]
-    [SwaggerOperation("Login using Google gmail")]
+    [SwaggerOperation("[Deprecated]. Login using Google gmail")]
     [ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status302Found)]
     [ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BanInfo), StatusCodes.Status418ImATeapot)]
@@ -72,7 +72,7 @@ public class LoginController : Controller
     }
 
     [HttpGet("google-response")]
-    [SwaggerOperation("Login using Google gmail. Redirects back to frontend /login-callback")]
+    [SwaggerOperation("[Deprecated]. Login using Google gmail. Redirects back to frontend /login-callback")]
     [ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status302Found)]
     public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
     {
@@ -98,6 +98,31 @@ public class LoginController : Controller
         catch (BaseException ex)
         {
             return Redirect($"{returnUrl}login-error/failed?msg={Uri.EscapeDataString(ex.Message)}");
+        }
+    }
+
+    [HttpPost("google")]
+    [SwaggerOperation("Login/Register using Google ID Token from frontend")]
+    [ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ExceptionCasting), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BanInfo), StatusCodes.Status418ImATeapot)]
+    public async Task<IActionResult> GoogleTokenLogin([FromBody] GoogleLoginRequest model)
+    {
+        if (string.IsNullOrWhiteSpace(model.IdToken))
+            return BadRequest(new { Message = "IdToken is required." });
+
+        try
+        {
+            var result = await _mediator.Send(new GoogleLoginWithTokenCommand(model.IdToken));
+            return Ok(result);
+        }
+        catch (UserBannedException ex)
+        {
+            return StatusCode(StatusCodes.Status418ImATeapot, ex.BanInfo);
+        }
+        catch (BaseException ex)
+        {
+            return StatusCode((int)ex.HttpStatusCode, (ExceptionCasting)ex);
         }
     }
 

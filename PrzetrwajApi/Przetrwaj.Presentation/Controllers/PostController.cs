@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
 using Przetrwaj.Application.Dtos;
-using Przetrwaj.Application.Helpers;
 using Przetrwaj.Application.Quaries.Posts;
 using Przetrwaj.Application.Queries.Posts;
 using Przetrwaj.Application.Settings;
@@ -254,8 +253,7 @@ public partial class PostController : Controller
         try
         {
             var res = await _mediator.Send(new AddDangerInternallCommand { AddPostCommand = newPost }, CT);
-            Uri resourcePath = HttpPathHelper.HttpPath(Request);
-            var dto = PostCreatedDto.Map(res, resourcePath);
+            var dto = PostCreatedDto.Map(res);
             return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
         }
         catch (BaseException ex)
@@ -278,8 +276,7 @@ public partial class PostController : Controller
         try
         {
             var res = await _mediator.Send(new AddResourceInternallCommand { AddPostCommand = newPost }, CT);
-            Uri resourcePath = HttpPathHelper.HttpPath(Request);
-            var dto = PostCreatedDto.Map(res, resourcePath);
+            var dto = PostCreatedDto.Map(res);
             return CreatedAtAction(nameof(GetById), new { id = dto.Post.Id }, dto);
         }
         catch (BaseException ex)

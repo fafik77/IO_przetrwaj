@@ -153,20 +153,20 @@
 
 		@* Horizontal scrolling images *@
 		<div class="attachments-scroll-wrapper">
-			@if (post.Attachments != null && post.Attachments.Any(a => a != null && !string.IsNullOrEmpty(a.FileURL)))
+			@if (post.Attachments != null && post.Attachments.Any(a => a != null && !string.IsNullOrEmpty(a.ExposedFileURL)))
 			{
 				@foreach (var attachment in post.Attachments)
 				{
-					if (attachment != null && !string.IsNullOrEmpty(attachment.FileURL))
+					if (attachment != null && !string.IsNullOrEmpty(attachment.ExposedFileURL))
 					{
 						<div class="attachment-col">
-							<img src="@attachment.FileURL" 
+							<img src="@attachment.ExposedFileURL" 
 								 alt="@attachment.AlternateDescription" 
 								 class="thumbnail-img" 
-								 @onclick="() => ShowFullScreenImage(attachment.FileURL)" />
+								 @onclick="() => ShowFullScreenImage(attachment.ExposedFileURL)" />
 							
 							<span class="attachment-desc">
-								@(string.IsNullOrWhiteSpace(attachment.AlternateDescription) ? "Opis zdjęcia..." : attachment.AlternateDescription)
+								@(string.IsNullOrWhiteSpace(attachment.AlternateDescription) ? "" : attachment.AlternateDescription)
 							</span>
 						</div>
 					}

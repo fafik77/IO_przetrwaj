@@ -22,6 +22,14 @@ services:
       timeout: 5s
       retries: 5
 
+  init-attachments:
+    image: mcr.microsoft.com/dotnet/aspnet:9.0
+    user: root
+    command: chown -R app:app /app/Attachments
+    volumes:
+      - api_attachments:/app/Attachments
+    restart: "no"
+
   api:
     build:
       context: ./PrzetrwajApi
@@ -31,6 +39,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      init-attachments:
+        condition: service_completed_successfully
     env_file:
       - .env
     environment:

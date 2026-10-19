@@ -1,12 +1,11 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.Extensions.Configuration;
 using Przetrwaj.CommonLibrary.Consts;
 using PrzetrwajPL.Components;
 using PrzetrwajPL.Handlers;
 using PrzetrwajPL.Handlers.Security;
+using System.Globalization;
 
 var polishCulture = new CultureInfo("pl-PL");
 CultureInfo.DefaultThreadCurrentCulture = polishCulture;
@@ -16,34 +15,34 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-	.AddInteractiveServerComponents()
-	.AddInteractiveWebAssemblyComponents();
+    .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents();
 
 #region Auth
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-	.AddCookie(options =>
-	{
-		options.Cookie.Name = Consts.PrzetrwajAuthCookie;
-		options.LoginPath = "/login";
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = Consts.PrzetrwajAuthCookie;
+        options.LoginPath = "/login";
 
-		options.Events = new CookieAuthenticationEvents
-		{
-			OnValidatePrincipal = RefreshJwtTokenOnValidatePrincipal.OnValidatePrincipal
-		};
-	});
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnValidatePrincipal = RefreshJwtTokenOnValidatePrincipal.OnValidatePrincipal
+        };
+    });
 builder.Services.AddAuthorization(opt =>
 {
-	// User+ : Requires any role
-	opt.AddPolicy(UserRoles.User, policy =>
-		policy.RequireAuthenticatedUser()); //any registered user with any role that is able to log in
+    // User+ : Requires any role
+    opt.AddPolicy(UserRoles.User, policy =>
+        policy.RequireAuthenticatedUser()); //any registered user with any role that is able to log in
 
-	// Moderator+ : Requires either Moderator or Admin
-	opt.AddPolicy(UserRoles.Moderator, policy =>
-		policy.RequireRole(UserRoles.Moderator, UserRoles.Admin));
+    // Moderator+ : Requires either Moderator or Admin
+    opt.AddPolicy(UserRoles.Moderator, policy =>
+        policy.RequireRole(UserRoles.Moderator, UserRoles.Admin));
 
-	// Admin only
-	opt.AddPolicy(UserRoles.Admin, policy =>
-		policy.RequireRole(UserRoles.Admin));
+    // Admin only
+    opt.AddPolicy(UserRoles.Admin, policy =>
+        policy.RequireRole(UserRoles.Admin));
 });
 builder.Services.AddCascadingAuthenticationState();
 #endregion //Auth
@@ -53,11 +52,16 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<JwtAuthorizationHandler>();
 builder.Services.AddTransient<TokenRefreshHandler>();
 
-string PrzetrwajApiUri = builder.Configuration.GetValue<string>("PrzetrwajApiUri") ?? "https://localhost:7072/";
+// save EnvVars
+string PrzetrwajApiUri = builder.Configuration.GetValue<string>("PrzetrwajApiUri");
+if (string.IsNullOrWhiteSpace(PrzetrwajApiUri)) PrzetrwajApiUri = "https://localhost:7072/";
+string PrzetrwajApiExternalUri = builder.Configuration.GetValue<string>("PrzetrwajApiExternalUri");
+if (string.IsNullOrWhiteSpace(PrzetrwajApiExternalUri)) PrzetrwajApiExternalUri = PrzetrwajApiUri;
+ApiPaths.PrzetrwajApiExternalUri = PrzetrwajApiExternalUri;
 //those settings are to this client alone
 builder.Services.AddHttpClient(Consts.PrzetrwajApiClientName, client =>
 {
-	client.BaseAddress = new Uri(PrzetrwajApiUri);
+    client.BaseAddress = new Uri(PrzetrwajApiUri);
 })
 .AddHttpMessageHandler<JwtAuthorizationHandler>()   // include JWT in AuthHeader
 .AddHttpMessageHandler<TokenRefreshHandler>();      // retry login with RefreshToken
@@ -65,7 +69,7 @@ builder.Services.AddHttpClient(Consts.PrzetrwajApiClientName, client =>
 //make the same client (same Uri) for RefreshToken (do not include the TokenRefreshHandler | JwtAuthorizationHandler as they make in infinite loop)
 builder.Services.AddHttpClient(Consts.PrzetrwajApiRefreshClientName, client =>
 {
-	client.BaseAddress = new Uri(PrzetrwajApiUri);
+    client.BaseAddress = new Uri(PrzetrwajApiUri);
 });
 
 
@@ -74,26 +78,26 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-	app.UseWebAssemblyDebugging();
+    app.UseWebAssemblyDebugging();
 }
 else
 {
-	app.UseExceptionHandler("/Error", createScopeForErrors: true);
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-	app.UseHsts();
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
 var supportedCultures = new[] { polishCulture };
 app.UseRequestLocalization(new RequestLocalizationOptions
 {
-	DefaultRequestCulture = new RequestCulture(polishCulture),
-	SupportedCultures = supportedCultures,
-	SupportedUICultures = supportedCultures
+    DefaultRequestCulture = new RequestCulture(polishCulture),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
 });
 
 if (app.Configuration.GetValue<bool>("ASPNETCORE:UseSSL"))
 {
-	app.UseHttpsRedirection();
+    app.UseHttpsRedirection();
 }
 
 
@@ -104,9 +108,9 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
-	.AddInteractiveServerRenderMode()
-	.AddInteractiveWebAssemblyRenderMode()
-	.AddAdditionalAssemblies(typeof(PrzetrwajPL.Client._Imports).Assembly);
+    .AddInteractiveServerRenderMode()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(PrzetrwajPL.Client._Imports).Assembly);
 
 app.MapControllers();
 

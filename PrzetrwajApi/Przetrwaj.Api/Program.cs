@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Przetrwaj.Application;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
+using Przetrwaj.Domain.Consts;
 using Przetrwaj.Domain.Entities;
 using Przetrwaj.Infrastucture;
 using Przetrwaj.Infrastucture.Context;
@@ -188,7 +189,7 @@ app.UseExceptionHandler();
 
 #region Attachments
 // Define the physical folder (outside the project root for safety)
-string attachmentsPath = Path.Combine(builder.Environment.ContentRootPath, "Attachments");
+string attachmentsPath = Path.Combine(builder.Environment.ContentRootPath, FileConsts.AttachmentsDirectory);
 // Ensure the directory exists
 if (!Directory.Exists(attachmentsPath))
 {
@@ -198,7 +199,7 @@ if (!Directory.Exists(attachmentsPath))
 app.UseStaticFiles(new StaticFileOptions     //Allow serving <Image> in requests
 {
     FileProvider = new PhysicalFileProvider(attachmentsPath),
-    RequestPath = "/Attachments" // The URL prefix
+    RequestPath = $"/{FileConsts.AttachmentsDirectory}" // The URL prefix
 });
 #endregion //Attachments
 

@@ -28,7 +28,7 @@ public class PostCompleteDataDto
 	public virtual IEnumerable<AttachmentDto> Attachments { get; set; } = [];
 
 
-	public static PostCompleteDataDto? Map(Post? post, Uri baseUrl)
+	public static PostCompleteDataDto? Map(Post? post)
 	{
 		if (post is null) return null;
 		return post is null ? null : new PostCompleteDataDto
@@ -43,7 +43,7 @@ public class PostCompleteDataDto
 			LatLong = post.Lat is null ? null : new LatLong((double)post.Lat, (double)post.Long!),
 			Author = UserGeneralDtoNoRegion.Map(post.IdAutorNavigation),
 			DateCreated = post.DateCreated,
-			Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, baseUrl)!).ToList(),
+			Attachments = post.Attachments.Select(a => AttachmentDto.Map(a)!).ToList(),
 			Comments = post.Comments.Select(c => CommentDto.Map(c)).ToList(),
 		};
 	}

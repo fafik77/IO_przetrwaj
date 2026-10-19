@@ -105,7 +105,7 @@ public class PostRepository : IPostRepository
             // Map attachments (add URL later)
             Attachments = p.Attachments
             .OrderBy(x => x.OrderInList)    //sort by OrderInList asc
-            .Select(a => AttachmentDto.Map(a, null)!)
+            .Select(a => AttachmentDto.Map(a)!)
             .ToList()
         })
         .FirstOrDefaultAsync(cancellationToken: cancellationToken);

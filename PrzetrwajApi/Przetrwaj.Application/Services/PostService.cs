@@ -4,7 +4,6 @@ using Przetrwaj.Application.Commands.Posts;
 using Przetrwaj.Application.Commands.Posts.Attachments;
 using Przetrwaj.Application.Common.Interfaces;
 using Przetrwaj.Application.Dtos;
-using Przetrwaj.Application.Helpers;
 using Przetrwaj.Application.Settings;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
@@ -42,31 +41,19 @@ public interface IPostService
     public Task<AddAttachmentsResult> AddAttachments(AddAttachments addAttachmentsRequest, Post post, CancellationToken cancellationToken);
 }
 
-internal class PostService : IPostService
+internal class PostService(
+    IPostRepository postRepository,
+    IUnitOfWork unitOfWork,
+    IRegionRepository regionRepository,
+    IAttachmentRepository attachmentRepository,
+    IOptions<AttachmentSettings> options,
+    ICurrentUserService currentUserService) : IPostService
 {
     private static readonly Regex InneCategoryRegex = new Regex(
         @"^(inne|inna)(\s+\w+)?$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase
     );
-
-    private readonly IPostRepository _postRepository;
-    private readonly IRegionRepository _regionRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IAttachmentRepository _attachmentRepository;
-    private readonly AttachmentSettings _attachmentSettings;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ICurrentUserService _currentUserService;
-
-    public PostService(IPostRepository postRepository, IUnitOfWork unitOfWork, IRegionRepository regionRepository, IAttachmentRepository attachmentRepository, IOptions<AttachmentSettings> options, IHttpContextAccessor contextAccessor, ICurrentUserService currentUserService)
-    {
-        _postRepository = postRepository;
-        _unitOfWork = unitOfWork;
-        _regionRepository = regionRepository;
-        _attachmentRepository = attachmentRepository;
-        _attachmentSettings = options.Value;
-        _httpContextAccessor = contextAccessor;
-        _currentUserService = currentUserService;
-    }
+    private readonly AttachmentSettings _attachmentSettings = options.Value;
 
 
     /// <inheritdoc/>
@@ -79,8 +66,8 @@ internal class PostService : IPostService
             case RegionPrecision.WOJ:
             case RegionPrecision.POW:
                 {
-                    if (_currentUserService.IsInRole(UserRoles.Moderator) ||
-                        _currentUserService.IsInRole(UserRoles.Admin))
+                    if (currentUserService.IsInRole(UserRoles.Moderator) ||
+                        currentUserService.IsInRole(UserRoles.Admin))
                         break;
                     throw new PermissionDeniedException("Not enough privilages");
                 }
@@ -141,8 +128,8 @@ internal class PostService : IPostService
 
         try
         {
-            await _postRepository.AddAsync(post, ct);
-            await _unitOfWork.SaveChangesAsync(ct);
+            await postRepository.AddAsync(post, ct);
+            await unitOfWork.SaveChangesAsync(ct);
         }
         catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
         {
@@ -160,7 +147,7 @@ internal class PostService : IPostService
 
     private async Task<(short Woj, short Pow, int Gmi)> RegionFromLocationAsync(LatLong latLong, RegionPrecision regionPrecision, CancellationToken ct)
     {
-        var region = await _regionRepository.RegionFromLocationAsync(latLong, ct);
+        var region = await regionRepository.RegionFromLocationAsync(latLong, ct);
         if (region is null)
             throw new LocationNotInPolandException(latLong);
         return RegionCompoundHelper.RegionSplit(region.Id);
@@ -177,13 +164,11 @@ internal class PostService : IPostService
             Timestamp = DateTimeOffset.UtcNow,
         };
 
-
         int attCount = post.Attachments.Count;
-        var resourcePath = HttpPathHelper.HttpPath(_httpContextAccessor);
         if (request.Items is null || request.Items.Count == 0)
         {
             results = (AddAttachmentsResult)new NothingChangedException("No Attachments");
-            results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, resourcePath)!).ToList();
+            results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a)!).ToList();
             return results;
         }
         int addedFiles = 0;
@@ -231,13 +216,13 @@ internal class PostService : IPostService
                 if (alreadyExists != null)
                 {
                     var item = (AddAttachmentResult)new InvalidFileException($"Re-encoded \"{file.FileName}\" is too big. Max size is {_attachmentSettings.MaxFileSizeInMB} MiB");
-                    item.AttachmentDto = AttachmentDto.Map(alreadyExists, resourcePath);
+                    item.AttachmentDto = AttachmentDto.Map(alreadyExists);
                     results.Results.Add(item);
                     continue; //already exists
                 }
                 //store attached images as WEBP format (they are web based)
                 string fileName = $"{proccessedAtt.Hash}.webp";
-                if (false == await _attachmentRepository.SaveAttachmentAsync(WebpData, fileName, cancellationToken))
+                if (false == await attachmentRepository.SaveAttachmentAsync(WebpData, fileName, cancellationToken))
                 {
                     var item = (AddAttachmentResult)new InvalidFileException($"Could not save \"{file.FileName}\" as \"{fileName}\"");
                     results.Results.Add(item);
@@ -258,7 +243,7 @@ internal class PostService : IPostService
                     Status = "success",
                     StatusCodeEnum = System.Net.HttpStatusCode.Created,
                     Timestamp = DateTimeOffset.UtcNow,
-                    AttachmentDto = AttachmentDto.Map(attInDB, resourcePath)
+                    AttachmentDto = AttachmentDto.Map(attInDB)
                 };
                 results.Results.Add(attAdded);
             }
@@ -281,13 +266,13 @@ internal class PostService : IPostService
         try
         {
             //saves the tracked Post item
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
         catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
         {
             throw new BadUpdateCommand(ex.InnerException.Message);
         }
-        results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a, resourcePath)!).ToList();
+        results.Attachments = post.Attachments.Select(a => AttachmentDto.Map(a)!).ToList();
         results.Timestamp = DateTimeOffset.UtcNow;
         return results;
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Przetrwaj.Application.Configuration.Commands;
 using Przetrwaj.Domain;
 using Przetrwaj.Domain.Abstractions;
@@ -13,18 +14,21 @@ public class BanUserCommandHandler(
     IUnitOfWork unitOfWork,
     UserManager<AppUser> userManager,
     IUserJwtRefreshRepository userJwtRefreshRepository,
+    IHttpContextAccessor httpContextAccessor,
     IBanCache banCache) : ICommandHandler<BanUserInternallCommand, UserWithPersonalDataDto>
 {
     public async Task<UserWithPersonalDataDto> Handle(BanUserInternallCommand request, CancellationToken cancellationToken)
     {
         AppUser? user;
-        // 1. Get the ID of the currently logged-in user
-        // The ClaimTypes.NameIdentifier holds the user's Id from the Identity system.
         if (request.UserIdOrEmail.Contains('@')) //email
             user = await userRepository.GetByEmailAsync(request.UserIdOrEmail, cancellationToken);
         else //id
             user = await userRepository.GetByIdAsync(request.UserIdOrEmail, cancellationToken);
         if (user is null) throw new UserNotFoundException(request.UserIdOrEmail);
+        // check if user is trying to ban himself
+        if (request.ModeratorId != null && user.Id == request.ModeratorId)
+            throw new PermissionDeniedException("You can't ban yourself!");
+
         if (user.BannedById != null) //user was already banned
         {
             AppUser? moderatorOld = await userRepository.GetByIdAsync(user.BannedById ?? string.Empty, cancellationToken);
